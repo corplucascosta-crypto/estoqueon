@@ -1,0 +1,3122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque-On | Sistema Gerencial de Controle de Estoque</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">	
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Nova paleta de cores profissional e vibrante */
+            --primary-dark: #1a237e;
+            --primary-main: #283593;
+            --primary-light: #303f9f;
+            --primary-accent: #3f51b5;
+            
+            --secondary-dark: #00695c;
+            --secondary-main: #00796b;
+            --secondary-light: #00897b;
+            --secondary-accent: #009688;
+            
+            --accent-warning: #ff9800;
+            --accent-success: #4caf50;
+            --accent-danger: #f44336;
+            --accent-info: #00bcd4;
+            
+            --neutral-dark: #263238;
+            --neutral-main: #37474f;
+            --neutral-light: #455a64;
+            --neutral-bg: #f5f7fa;
+            
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --text-light: #bdbdbd;
+            
+            --gradient-primary: linear-gradient(135deg, var(--primary-main) 0%, var(--primary-dark) 100%);
+            --gradient-secondary: linear-gradient(135deg, var(--secondary-main) 0%, var(--secondary-dark) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--accent-info) 0%, var(--primary-accent) 100%);
+        }
+        
+        * {
+            transition: all 0.3s ease;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-primary);
+        }
+        
+        /* Navbar Profissional */
+        .navbar {
+            background: var(--gradient-primary);
+            box-shadow: 0 4px 20px rgba(26, 35, 126, 0.15);
+            padding: 0.8rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            color: white !important;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin-right: 10px;
+        }
+        
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin: 0 2px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        
+        .navbar-nav .nav-link i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+        
+        /* Cards Modernos */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            overflow: hidden;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Botões com Gradiente */
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(40, 53, 147, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(40, 53, 147, 0.4);
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-main) 100%);
+        }
+        
+        .btn-success {
+            background: var(--gradient-secondary);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 121, 107, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 121, 107, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-danger) 0%, #d32f2f 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(244, 67, 54, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--accent-warning) 0%, #f57c00 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+            color: white;
+        }
+        
+        /* Formulários Estilizados */
+        .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-main);
+            box-shadow: 0 0 0 0.2rem rgba(40, 53, 147, 0.15);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--neutral-main);
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-group-text {
+            background: var(--neutral-bg);
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        /* Tela de Login Redesign */
+        .login-container {
+            max-width: 440px;
+            margin: 80px auto;
+            padding: 0;
+        }
+        
+        .login-container .card {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .login-container .card-header {
+            text-align: center;
+            padding: 2rem;
+            background: var(--gradient-accent);
+        }
+        
+        .login-container .card-body {
+            padding: 2.5rem;
+        }
+        
+        /* Tela de Contagem Aprimorada */
+        .count-screen {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            margin: 0 auto;
+        }
+        
+        .item-description {
+            background: var(--neutral-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            min-height: 70px;
+            border-left: 4px solid var(--primary-main);
+        }
+        
+        /* Animações e Estados */
+        .auto-focus {
+            animation: pulse-focus 0.6s ease-in-out;
+            box-shadow: 0 0 0 3px rgba(40, 53, 147, 0.3);
+        }
+        
+        @keyframes pulse-focus {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 53, 147, 0.7); }
+            70% { transform: scale(1.01); box-shadow: 0 0 0 10px rgba(40, 53, 147, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 53, 147, 0); }
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-main);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Dashboard e KPIs */
+        .kpi-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            background: white;
+            border-top: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .kpi-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            color: var(--primary-main);
+        }
+        
+        .kpi-positive {
+            border-top-color: var(--accent-success);
+        }
+        
+        .kpi-negative {
+            border-top-color: var(--accent-danger);
+        }
+        
+        .kpi-neutral {
+            border-top-color: var(--accent-info);
+        }
+        
+        /* Gráficos Personalizados */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        
+        /* Tabelas Estilizadas */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+        
+        .table thead th {
+            background: var(--neutral-bg);
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--neutral-main);
+            border-bottom: 2px solid var(--primary-light);
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(40, 53, 147, 0.03);
+        }
+        
+        .table-striped tbody tr:nth-of-type(odd) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        
+        /* Badges Modernos */
+        .badge {
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .badge.bg-primary {
+            background: var(--gradient-primary) !important;
+        }
+        
+        .badge.bg-success {
+            background: var(--gradient-secondary) !important;
+        }
+        
+        .badge.bg-danger {
+            background: linear-gradient(135deg, var(--accent-danger) 0%, #d32f2f 100%) !important;
+        }
+        
+        .badge.bg-warning {
+            background: linear-gradient(135deg, var(--accent-warning) 0%, #f57c00 100%) !important;
+        }
+        
+        /* Itens Críticos */
+        .critical-item {
+            background: rgba(244, 67, 54, 0.05);
+            border-left: 4px solid var(--accent-danger);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .critical-item:hover {
+            transform: translateX(5px);
+            background: rgba(244, 67, 54, 0.08);
+        }
+        
+        /* Progress Bars */
+        .progress {
+            height: 10px;
+            border-radius: 10px;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            border-radius: 10px;
+        }
+        
+        /* Modais Estilizados */
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 1.5rem;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+        }
+        
+        .modal-footer {
+            border: none;
+            padding: 1.5rem;
+            background: var(--neutral-bg);
+        }
+        
+        /* Navegação entre Telas */
+        .view-container {
+            display: none;
+            flex: 1;
+        }
+        
+        .view-container.active {
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Seção de Títulos */
+        .section-title {
+            border-bottom: 3px solid var(--primary-main);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            color: var(--neutral-dark);
+            font-weight: 700;
+            display: inline-block;
+        }
+        
+        /* Efeito de Destaque para Números */
+        .dashboard-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Diferenciação de Valores */
+        .positive-diff {
+            color: var(--accent-success);
+            font-weight: 600;
+        }
+        
+        .negative-diff {
+            color: var(--accent-danger);
+            font-weight: 600;
+        }
+        
+        /* Indicador de Campo Obrigatório */
+        .required-field::after {
+            content: " *";
+            color: var(--accent-danger);
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+            
+            .card-body {
+                padding: 1.25rem;
+            }
+            
+            .kpi-value {
+                font-size: 1.8rem;
+            }
+            
+            .login-container {
+                margin: 40px auto;
+                padding: 0 15px;
+            }
+            
+            .count-screen {
+                padding: 15px;
+            }
+        }
+/* Indicadores de status - estilo online/offline */
+/* ✅ STATUS INDICATORS - CORRIGIDO */
+.status-indicator {
+    display: inline-block !important;
+    margin-left: 8px !important;
+    font-size: 0.6rem !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+.status-indicator.online {
+    color: var(--accent-success) !important;
+}
+
+.status-indicator.offline {
+    color: var(--accent-danger) !important;
+}
+
+.status-indicator .fas.fa-circle {
+    background: none !important;
+    border: none !important;
+    -webkit-text-fill-color: initial !important;
+    background-image: none !important;
+}
+
+#permanentBaseCard {
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#permanentBaseCard .card-header {
+    padding: 0.5rem 1rem;
+    background: var(--gradient-primary);
+}
+
+#permanentBaseCard .card-body {
+    padding: 0.75rem;
+}
+
+#permanentBaseCard .btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.3rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .kpi-value {
+        font-size: 1.8rem;
+    }
+    
+    .login-container {
+        margin: 40px auto;
+        padding: 0 15px;
+    }
+    
+    .count-screen {
+        padding: 15px;
+    }
+}
+
+/* ✅ ADICIONE AQUI - BOTÃO ÚNICO - Base Permanente */
+#permanentBaseCard .col-12 .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+#permanentBaseCard .col-12 .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+</style>
+    </style>
+</head>
+<body>
+    <!-- Navbar Profissional -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+    <i class="fas fa-tasks text-white" style="background: rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 10px; margin-right: 10px;"></i>
+    <span>Estoque-On</span>
+</a>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active view-switch" data-view="counting" href="#">
+                            <i class="fas fa-clipboard-check"></i> Contagem
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link view-switch admin-only" data-view="history" href="#">
+                            <i class="fas fa-history"></i> Histórico
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link view-switch" data-view="dashboard" href="#">
+                            <i class="fas fa-chart-line"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link view-switch" data-view="query" href="#">
+                            <i class="fas fa-search"></i> Consulta
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link admin-only" href="#" data-bs-toggle="modal" data-bs-target="#importModal">
+                            <i class="fas fa-database"></i> Base de Dados
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutBtn" style="display: none;">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="loginBtn">
+                            <i class="fas fa-user-shield"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tela de Login Redesenhada -->
+    <div id="loginView" class="view-container active">
+        <div class="login-container">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-lock me-2"></i>Acesso Administrativo</h4>
+                    <p class="mb-0 mt-1 opacity-75">Sistema Gerencial de Controle de Estoque</p>
+                </div>
+                <div class="card-body">
+                    <form id="loginForm">
+                        <div class="mb-4">
+                            <label for="username" class="form-label">Usuário</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="username" required placeholder="Digite seu usuário">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Senha</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                <input type="password" class="form-control" id="password" required placeholder="Digite sua senha">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>Acessar Sistema
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Tela de Contagem Redesenhada -->
+        <div id="countingView" class="view-container">
+            <div class="count-screen">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        <span>Registrar Item Contado</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="inventoryForm">
+                            <div class="mb-4">
+                                <label for="itemCode" class="form-label required-field">Código do Item</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                    <input type="text" class="form-control" id="itemCode" required 
+                                           placeholder="Digite o código (DUN/EAN/PLU)" autocomplete="off"
+                                           autofocus>
+                                    <span class="input-group-text" id="loadingIndicator">
+                                        <div class="loading-spinner" id="codeLoading"></div>
+                                    </span>
+                                </div>
+                                <div class="form-text text-muted mt-1">Digite o código DUN (14 dígitos), EAN (13 ou 8 dígitos) ou código interno</div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Descrição do Item</label>
+                                <div class="item-description" id="itemDescriptionDisplay">
+                                    <span class="text-muted">A descrição aparecerá aqui ao inserir o código</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="countedQuantity" class="form-label required-field">Quantidade Contada</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-boxes"></i></span>
+                                    <input type="number" class="form-control" id="countedQuantity" required min="0" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitButton" disabled>
+                                    <i class="fas fa-save me-2"></i>Registrar Contagem
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary" id="resetButton">
+                                    <i class="fas fa-undo me-2"></i>Limpar Campos
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Card de Resumo da Sessão REMOVIDO conforme solicitado -->
+            </div>
+        </div>
+
+        <!-- Tela de Histórico -->
+        <div id="historyView" class="view-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title">Contagem de Inventário</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-list me-2"></i>Itens Contados
+                            </h5>
+                            <div>
+                                <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="Buscar...">
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Descrição</th>
+                                            <th>Sistema</th>
+                                            <th>Contado</th>
+                                            <th>Diferença</th>
+                                            <th>Valor Unit.</th>
+                                            <th>Valor Total</th>
+                                            <th>Contagens</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="inventoryTable">
+                                        <tr>
+                                            <td colspan="9" class="text-center text-muted py-4">
+                                                <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
+                                                Nenhum item contado ainda
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between mt-3">
+                                <button class="btn btn-success" id="exportBtn">
+                                    <i class="fas fa-file-export me-1"></i>Exportar XLSX
+                                </button>
+                                <button class="btn btn-danger" id="clearAllBtn">
+                                    <i class="fas fa-trash me-1"></i>Limpar Tudo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <h2 class="section-title">Dashboard</h2>
+                    
+                    <div class="row">
+                        <div class="col-6 col-md-12 col-lg-6 mb-3">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <i class="fas fa-boxes fs-1 mb-2 text-primary"></i>
+                                    <h6>Total de Itens</h6>
+                                    <div class="dashboard-number" id="totalItems">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-12 col-lg-6 mb-3">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <i class="fas fa-check-circle fs-1 mb-2 text-success"></i>
+                                    <h6>Itens Conferentes</h6>
+                                    <div class="dashboard-number" id="matchingItems">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-12 col-lg-6 mb-3">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <i class="fas fa-exclamation-triangle fs-1 mb-2 text-warning"></i>
+                                    <h6>Divergências Positivas</h6>
+                                    <div class="dashboard-number" id="positiveDiffItems">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-12 col-lg-6 mb-3">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <i class="fas fa-times-circle fs-1 mb-2 text-danger"></i>
+                                    <h6>Divergências Negativas</h6>
+                                    <div class="dashboard-number" id="negativeDiffItems">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-money-bill-wave me-2"></i>Resumo de Valores
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Valor Total em Sistema:</span>
+                                <strong id="totalSystemValue">R$ 0,00</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Valor Total Contado:</span>
+                                <strong id="totalCountedValue">R$ 0,00</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Diferença de Valor:</span>
+                                <strong id="totalDifferenceValue">R$ 0,00</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Dashboard Analítico -->
+        <div id="dashboardView" class="view-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title">Dashboard Analítico</h2>
+                <div class="dashboard-controls">
+                    <button class="btn btn-primary" id="refreshDashboard">
+                        <i class="fas fa-sync-alt me-1"></i>Atualizar
+                    </button>
+                    <button class="btn btn-success" id="exportDashboard">
+                        <i class="fas fa-file-export me-1"></i>Exportar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- KPIs Principais -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-neutral">
+                        <i class="fas fa-boxes"></i>
+                        <h6>Total de Itens Contados</h6>
+                        <div class="kpi-value" id="kpiTotalItems">0</div>
+                        <small>Itens únicos no inventário</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-positive">
+                        <i class="fas fa-percentage"></i>
+                        <h6>Precisão da Contagem</h6>
+                        <div class="kpi-value" id="kpiAccuracy">0%</div>
+                        <small>Itens sem divergência</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-negative">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h6>Valor das Divergências</h6>
+                        <div class="kpi-value" id="kpiDivergenceValue">R$ 0,00</div>
+                        <small>Impacto financeiro</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-neutral">
+                        <i class="fas fa-chart-line"></i>
+                        <h6>Progresso da Contagem</h6>
+                        <div class="kpi-value" id="kpiProgress">0%</div>
+                        <small>Em relação ao total</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gráficos -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-chart-bar me-2"></i>Divergências por Quantidade
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="quantityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-chart-pie me-2"></i>Distribuição de Itens
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-chart-line me-2"></i>Evolução das Contagens
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="timelineChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-exclamation-circle me-2"></i>Itens Mais Críticos Top3
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="criticalItemsList">
+                                <p class="text-muted">Nenhum item crítico identificado.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabela de Análise Detalhada -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 d-flex align-items-center">
+                        <i class="fas fa-table me-2"></i>Análise Detalhada
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Sistema</th>
+                                    <th>Contado</th>
+                                    <th>Diferença</th>
+                                    <th>Valor Unit.</th>
+                                    <th>Valor Total Dif.</th>
+                                    <th>Impacto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analysisTable">
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">Nenhum dado disponível para análise.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Consulta de Embalagens -->
+        <div id="queryView" class="view-container">
+            <div class="count-screen">
+                <div class="card mb-4">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="fas fa-search me-2"></i>
+                        <span>Consulta de Embalagens</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="queryForm">
+                            <div class="mb-4">
+                                <label for="queryCode" class="form-label required-field">Código do Item</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                    <input type="text" class="form-control" id="queryCode" required 
+                                           placeholder="Digite o código (DUN/EAN/PLU)" autocomplete="off">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100 py-2">
+                                <i class="fas fa-search me-1"></i>Consultar
+                            </button>
+                        </form>
+                        
+                        <div id="packagingResult" class="packaging-info mt-4" style="display: none;">
+                            <h5 class="d-flex align-items-center">
+                                <i class="fas fa-box me-2"></i>Informações de Embalagem
+                            </h5>
+                            <div id="packagingDetails"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Importação de Base de Dados -->
+    <div class="modal fade" id="importModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+    <h5 class="modal-title d-flex align-items-center">
+        <i class="fas fa-database me-2"></i>Importar Base Local (Opcional)
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>O sistema já está usando a base online.</strong> Esta importação é opcional para ter uma cópia local de backup.
+    </div>
+<!-- ✅ BASE DE PRODUTOS PERMANENTE - APENAS NA TELA BASE DE DADOS -->
+<div id="permanentBaseCard" class="card mb-4">
+    <div class="card-header py-2">
+        <h6 class="mb-0">
+            <i class="fas fa-database me-2"></i>Base Permanente (Supabase)
+        </h6>
+    </div>
+    <div class="card-body py-2">
+        <div class="row g-2">
+            <div class="col-12">
+                <button class="btn btn-success btn-sm w-100" onclick="migrateToPermanentBase()">
+                    <i class="fas fa-upload me-1"></i>Migrar para Online
+                </button>
+                <small class="text-muted d-block mt-1">Envia dados locais para a base online</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+                
+    <div class="mb-3">
+        <label for="excelFile" class="form-label">Selecionar arquivo Excel (.xlsx) - Opcional</label>
+        <input class="form-control" type="file" id="excelFile" accept=".xlsx, .xls">
+    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estrutura esperada da planilha:</label>
+                        <div class="alert alert-info">
+                            <small>
+                                A planilha deve conter as colunas: <strong>CODIGO, DESCRICAO, QUANTIDADE, VALOR, DUN, EAN, EMBALAGEM</strong><br>
+                                Exemplo:<br>
+                                | CODIGO | DESCRICAO          | QUANTIDADE | VALOR | DUN           | EAN           | EMBALAGEM |<br>
+                                | 260    | AGUA SANITARIA... | 100        | 25.90 | 12345678901234| 7891234567890 | CX12      |
+                                | P002   | Produto Exemplo  | 50         | 13.75 | 98765432109876| 7899876543210 | CX6       |
+                            </small>
+                        </div>
+                    </div>
+                    <div class="import-preview">
+                        <h6>Pré-visualização:</h6>
+                        <table class="table table-sm table-striped" id="previewTable">
+                            <thead>
+                                <tr>
+                                    <th>CODIGO</th>
+                                    <th>DESCRICAO</th>
+                                    <th>QUANTIDADE</th>
+                                    <th>VALOR</th>
+                                    <th>DUN</th>
+                                    <th>EAN</th>
+                                    <th>EMBALAGEM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Preview será preenchido aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmImport">Importar Dados</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmação -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmClear">Limpar Tudo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de item já contado -->
+    <div class="modal fade" id="itemAlreadyCountedModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Item Já Contado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Este item já foi contado anteriormente. Deseja adicionar uma nova contagem ou substituir a contagem existente?</p>
+                    <div class="count-history" id="existingCountsInfo">
+                        <!-- Informações das contagens existentes serão inseridas aqui -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="addCountBtn">Adicionar Nova Contagem</button>
+                    <button type="button" class="btn btn-warning" id="replaceCountBtn">Substituir Contagem</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Dados iniciais
+        // NOVO CÓDIGO - CONFIGURAÇÃO SUPABASE
+const supabaseUrl = "https://uqmwegqpulqhwculfytr.supabase.co"; 
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbXdlZ3FwdWxxaHdjdWxmeXRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTk4NjI4MSwiZXhwIjoyMDc1NTYyMjgxfQ.ySQeZhEekxI9UxSD7Ndqax6e7ruC8KgVoZMalSMcL68"; 
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+console.log('Supabase configurado:', !!supabase);
+
+// Verificar se tudo carregou
+if (!supabase) {
+    console.error('Supabase não carregou corretamente!');
+}
+
+// TESTE DE CONEXÃO - VERSÃO CORRIGIDA
+async function testSupabaseConnection() {
+    try {
+        console.log('Testando conexão Supabase...');
+        
+        // Usar NULL para user_id (permite teste sem usuário real)
+        const { data, error } = await supabase
+            .from('inventory_items')
+            .insert({
+                user_id: null, 
+                code: 'TESTE_CONEXAO',
+                description: 'Item de teste de conexão',
+                system_quantity: 10,
+                counted_quantity: 15,
+                unit_value: 25.50,
+                counts: 1,
+                history: [{date: new Date().toISOString(), quantity: 15}]
+            })
+            .select();
+            
+        if (error) {
+            console.error('Erro no teste:', error);
+            showNotification('Erro na conexão: ' + error.message, 'error');
+        } else {
+            console.log('Teste bem-sucedido!', data);
+            showNotification('Conexão Supabase OK! Dados salvos!', 'success');
+        }
+    } catch (error) {
+        console.error('Erro no teste:', error);
+    }
+}
+
+// Executar teste após carregamento
+setTimeout(testSupabaseConnection, 2000);
+// NOVAS VARIÁVEIS
+let inventoryItems = [];
+let itemDatabase = [];
+let isAdmin = false;
+let currentUser = null;
+
+// CREDENCIAIS ADMIN (manter para login local temporário)
+const adminCredentials = {
+    username: 'admin', 
+    password: 'admin123'
+};        
+        // Variáveis para controle de contagem repetida
+let currentItemCode = '';
+let currentCountedQuantity = 0;
+let existingItemIndex = -1;
+
+// FUNÇÕES SUPABASE - ADICIONAR ESTE BLOCO COMPLETO
+async function loginWithSupabase(email, password) {
+    try {
+        showNotification('Conectando...', 'info');
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+        
+        if (error) throw error;
+        
+        currentUser = data.user;
+        isAdmin = true;
+        await loadUserData();
+        showNotification('Login realizado com sucesso!', 'success');
+        return true;
+    } catch (error) {
+        console.error('Erro login:', error);
+        showNotification('Erro no login: ' + error.message, 'error');
+        return false;
+    }
+}
+
+async function signUpWithSupabase(email, password) {
+    try {
+        showNotification('Criando conta...', 'info');
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+        
+        if (error) throw error;
+        showNotification('Conta criada! Verifique seu email.', 'success');
+        return true;
+    } catch (error) {
+        console.error('Erro cadastro:', error);
+        showNotification('Erro no cadastro: ' + error.message, 'error');
+        return false;
+    }
+}
+
+async function loadUserData() {
+    try {
+        // Carregar itens do inventário
+        const { data: inventoryData, error: inventoryError } = await supabase
+            .from('inventory_items')
+            .select('*')
+            .eq('user_id', currentUser.id);
+        
+        if (inventoryError) throw inventoryError;
+        inventoryItems = inventoryData || [];
+        
+        // Carregar base de dados
+        const { data: databaseData, error: databaseError } = await supabase
+            .from('item_database')
+            .select('*')
+            .eq('user_id', currentUser.id);
+        
+        if (databaseError) throw databaseError;
+        itemDatabase = databaseData || [];
+        
+        console.log('Dados carregados:', inventoryItems.length, 'itens');
+    } catch (error) {
+        console.error('Erro carregar dados:', error);
+        showNotification('Erro ao carregar dados', 'error');
+    }
+}
+
+async function logoutSupabase() {
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        
+        currentUser = null;
+        isAdmin = false;
+        inventoryItems = [];
+        itemDatabase = [];
+        showNotification('Logout realizado', 'info');
+    } catch (error) {
+        console.error('Erro logout:', error);
+    }
+}
+        
+async function saveItemDatabase() {
+    if (!currentUser) {
+        // Fallback para localStorage
+        localStorage.setItem('itemDatabase', JSON.stringify(itemDatabase));
+        return;
+    }
+
+    try {
+        // Limpar base anterior e inserir nova
+        const { error: deleteError } = await supabase
+            .from('item_database')
+            .delete()
+            .eq('user_id', currentUser.id);
+        
+        if (deleteError) throw deleteError;
+
+        // Inserir todos os itens
+        const itemsToInsert = itemDatabase.map(item => ({
+            user_id: currentUser.id,
+            CODIGO: item.CODIGO,
+            DESCRICAO: item.DESCRICAO,
+            QUANTIDADE: item.QUANTIDADE,
+            VALOR: item.VALOR,
+            DUN: item.DUN,
+            EAN: item.EAN,
+            EMBALAGEM: item.EMBALAGEM
+        }));
+
+        const { error: insertError } = await supabase
+            .from('item_database')
+            .insert(itemsToInsert);
+        
+        if (insertError) throw insertError;
+        
+        showNotification('Base de dados salva online!', 'success');
+    } catch (error) {
+        console.error('Erro salvar base:', error);
+        showNotification('Erro ao salvar base online', 'error');
+    }
+}
+
+        // Função para formatar valores em Real Brasileiro
+function formatarReal(valor) {
+    if (isNaN(valor) || valor === null || valor === undefined) {
+        return 'R$ 0,00';
+    }
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(valor);
+}
+        // Elementos do DOM
+        const inventoryForm = document.getElementById('inventoryForm');
+        const inventoryTable = document.getElementById('inventoryTable');
+        const itemCodeInput = document.getElementById('itemCode');
+        const itemDescriptionDisplay = document.getElementById('itemDescriptionDisplay');
+        const countedQuantityInput = document.getElementById('countedQuantity');
+        const totalItemsEl = document.getElementById('totalItems');
+        const matchingItemsEl = document.getElementById('matchingItems');
+        const positiveDiffItemsEl = document.getElementById('positiveDiffItems');
+        const negativeDiffItemsEl = document.getElementById('negativeDiffItems');
+        const totalSystemValueEl = document.getElementById('totalSystemValue');
+        const totalCountedValueEl = document.getElementById('totalCountedValue');
+        const totalDifferenceValueEl = document.getElementById('totalDifferenceValue');
+        const searchInput = document.getElementById('searchInput');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const confirmClearBtn = document.getElementById('confirmClear');
+        const excelFileInput = document.getElementById('excelFile');
+        const confirmImportBtn = document.getElementById('confirmImport');
+        const previewTable = document.querySelector('#previewTable tbody');
+        const loginView = document.getElementById('loginView');
+        const countingView = document.getElementById('countingView');
+        const historyView = document.getElementById('historyView');
+        const dashboardView = document.getElementById('dashboardView');
+        const queryView = document.getElementById('queryView');
+        const viewSwitches = document.querySelectorAll('.view-switch');
+        const adminOnlyElements = document.querySelectorAll('.admin-only');
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const queryForm = document.getElementById('queryForm');
+        const queryCodeInput = document.getElementById('queryCode');
+        const packagingResult = document.getElementById('packagingResult');
+        const packagingDetails = document.getElementById('packagingDetails');
+        const codeLoading = document.getElementById('codeLoading');
+        const submitButton = document.getElementById('submitButton');
+        const addCountBtn = document.getElementById('addCountBtn');
+        const replaceCountBtn = document.getElementById('replaceCountBtn');
+        const resetButton = document.getElementById('resetButton');
+        
+        // Elementos do Dashboard
+        const kpiTotalItems = document.getElementById('kpiTotalItems');
+        const kpiAccuracy = document.getElementById('kpiAccuracy');
+        const kpiDivergenceValue = document.getElementById('kpiDivergenceValue');
+        const kpiProgress = document.getElementById('kpiProgress');
+        const criticalItemsList = document.getElementById('criticalItemsList');
+        const analysisTable = document.getElementById('analysisTable');
+        const refreshDashboard = document.getElementById('refreshDashboard');
+        const exportDashboard = document.getElementById('exportDashboard');
+        
+        // Gráficos
+        let quantityChart, distributionChart, timelineChart;
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+            renderInventoryTable();
+            updateSummary();
+            setupEventListeners();
+            checkAdminStatus();
+            initializeCharts();
+            updateDashboard();
+            
+            // Focar automaticamente no campo de código ao carregar a página
+            if (itemCodeInput) {
+                setTimeout(() => {
+                    itemCodeInput.focus();
+                }, 500);
+            }
+        });
+        
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Navegação entre telas
+            viewSwitches.forEach(switchEl => {
+                switchEl.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetView = this.getAttribute('data-view');
+                    switchView(targetView);
+                });
+            });
+            
+            // ✅ LOGIN CORRIGIDO - Apenas admin local
+loginForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    // ✅ APENAS admin local - REMOVER Supabase
+    if (username === adminCredentials.username && password === adminCredentials.password) {
+        isAdmin = true;
+        currentUser = null;
+        localStorage.setItem('isAdmin', 'true');
+        checkAdminStatus();
+        switchView('counting');
+        showNotification('✅ Login admin local realizado com sucesso!', 'success');
+    } else {
+        showNotification('❌ Credenciais inválidas! Use: admin / admin123', 'error');
+    }
+});
+            
+            // Logout atualizado
+logoutBtn.addEventListener('click', async function(e) {
+    e.preventDefault();
+    if (currentUser) {
+        await logoutSupabase();
+    } else {
+        isAdmin = false;
+        localStorage.setItem('isAdmin', 'false');
+    }
+    checkAdminStatus();
+    switchView('counting');
+});
+            
+            // Login button
+            loginBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (isAdmin) {
+                    // Já está logado, mostrar menu de logout
+                    logoutBtn.style.display = 'block';
+                } else {
+                    switchView('login');
+                }
+            });
+            
+            // Formulário de contagem
+            inventoryForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    await processInventoryItem();
+});
+            
+            // Formulário de consulta
+            queryForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                queryPackagingInfo();
+            });
+            
+            // Busca na tabela
+            searchInput.addEventListener('input', function() {
+                filterInventoryTable(this.value);
+            });
+            
+            // Botões de ação
+            exportBtn.addEventListener('click', exportToExcel);
+            clearAllBtn.addEventListener('click', function() {
+                new bootstrap.Modal(document.getElementById('confirmModal')).show();
+            });
+            
+            confirmClearBtn.addEventListener('click', clearAllData);
+            
+            // Importação de dados
+            excelFileInput.addEventListener('change', previewExcelFile);
+            confirmImportBtn.addEventListener('click', importExcelData);
+            
+            // Detecção de código de item
+            itemCodeInput.addEventListener('input', function() {
+    const code = this.value.trim();
+    if (code.length >= 3) {
+        codeLoading.style.display = 'inline-block';
+        
+        // ✅ BUSCA NA BASE PERMANENTE
+        setTimeout(async () => {
+            let codeType = '';
+            
+            // Determinar tipo de código
+            if (/^\d{14}$/.test(code)) {
+                codeType = 'DUN';
+            } else if (/^\d{13}$/.test(code) || /^\d{8}$/.test(code)) {
+                codeType = 'EAN';
+            } else {
+                codeType = 'INTERNO';
+            }
+            
+            try {
+                // Buscar na base permanente
+                const item = await findItemByCode(code, codeType);
+                
+                if (item) {
+                    displayItemInfo(item);
+                    moveFocusToQuantity();
+                } else {
+                    displayItemNotFound(code);
+                }
+            } catch (error) {
+                displayItemNotFound(code);
+            }
+            
+            codeLoading.style.display = 'none';
+        }, 500);
+    } else {
+        resetItemForm();
+    }
+});
+            
+            // Permitir pressionar ENTER no campo de código para avançar
+            itemCodeInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const code = this.value.trim();
+                    if (code.length >= 3) {
+                        detectCodeTypeAndFetchItem(code);
+                    }
+                }
+            });
+            
+            // Permitir pressionar ENTER no campo de quantidade para submeter
+            countedQuantityInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!submitButton.disabled) {
+                        inventoryForm.dispatchEvent(new Event('submit'));
+                    }
+                }
+            });
+            
+            // Botão de reset
+            resetButton.addEventListener('click', function() {
+                resetItemForm();
+                itemCodeInput.focus();
+            });
+            
+            // Botões do modal de item já contado
+            addCountBtn.addEventListener('click', function() {
+                addNewCount();
+                bootstrap.Modal.getInstance(document.getElementById('itemAlreadyCountedModal')).hide();
+            });
+            
+            replaceCountBtn.addEventListener('click', function() {
+                replaceExistingCount();
+                bootstrap.Modal.getInstance(document.getElementById('itemAlreadyCountedModal')).hide();
+            });
+            
+            // Botões do Dashboard
+refreshDashboard.addEventListener('click', function() {
+    updateDashboard();
+    // Efeito visual de atualização
+    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Atualizando...';
+    setTimeout(() => {
+        this.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Atualizar';
+        showNotification('Dashboard atualizado com sucesso!', 'success');
+    }, 800);
+});
+// Botão Base de Dados - Verificar permissões
+document.querySelector('[data-bs-target="#importModal"]').addEventListener('click', function(e) {
+    if (!isAdmin) {
+        e.preventDefault();
+        showNotification('🔒 Acesso restrito para administradores', 'warning');
+        switchView('login');
+    } else {
+        // ✅ Admin logado - mostrar modal normalmente
+        // O quadro já está dentro do modal e será visível
+    }
+});
+exportDashboard.addEventListener('click', exportDashboardData);
+        }
+        
+        // Alternar entre telas
+        function switchView(viewName) {
+            // Esconder todas as telas
+            document.querySelectorAll('.view-container').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // Atualizar a navegação
+            document.querySelectorAll('.view-switch').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Mostrar a tela selecionada
+            if (viewName === 'login') {
+                loginView.classList.add('active');
+            } else if (viewName === 'counting') {
+                countingView.classList.add('active');
+                // Focar no campo de código quando a tela de contagem for ativada
+                setTimeout(() => {
+                    itemCodeInput.focus();
+                }, 100);
+            } else if (viewName === 'history') {
+                historyView.classList.add('active');
+                renderInventoryTable();
+                updateSummary();
+            } else if (viewName === 'dashboard') {
+                dashboardView.classList.add('active');
+                updateDashboard();
+            } else if (viewName === 'query') {
+                queryView.classList.add('active');
+            }
+            
+            // Ativar o link correspondente
+            const activeLink = document.querySelector(`.view-switch[data-view="${viewName}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+        
+        // Verificar status de admin e atualizar UI
+function checkAdminStatus() {
+    if (isAdmin) {
+        adminOnlyElements.forEach(el => {
+            el.style.display = 'block';
+        });
+        loginBtn.textContent = 'Admin';
+        logoutBtn.style.display = 'block';
+        loginView.classList.remove('active');
+    } else {
+        adminOnlyElements.forEach(el => {
+            el.style.display = 'none';
+        });
+        loginBtn.textContent = 'Admin';
+        logoutBtn.style.display = 'none';
+    }
+}
+        
+        // Detectar tipo de código e buscar item
+        function detectCodeTypeAndFetchItem(code) {
+            let codeType = '';
+            
+            // Determinar tipo de código
+            if (/^\d{14}$/.test(code)) {
+                codeType = 'DUN';
+            } else if (/^\d{13}$/.test(code) || /^\d{8}$/.test(code)) {
+                codeType = 'EAN';
+            } else {
+                codeType = 'INTERNO';
+            }
+            
+            // Buscar item no banco de dados
+            const item = findItemByCode(code, codeType);
+            
+            // SUBSTITUIR POR:
+if (item) {
+    displayItemInfo(item);  //     // Mover foco automaticamente para o campo de quantidade
+    moveFocusToQuantity();
+} else {
+    displayItemNotFound(code);  // 
+}
+            
+            codeLoading.style.display = 'none';
+        }
+        
+        // Mover foco para o campo de quantidade
+        function moveFocusToQuantity() {
+            if (!countedQuantityInput.disabled) {
+                // Adicionar efeito visual de foco
+                countedQuantityInput.classList.add('auto-focus');
+                countedQuantityInput.focus();
+                countedQuantityInput.select();
+                
+                // Remover a classe de animação após a animação terminar
+                setTimeout(() => {
+                    countedQuantityInput.classList.remove('auto-focus');
+                }, 1000);
+            }
+        }
+        
+        // ✅ BUSCA CORRIGIDA - Trata múltiplos resultados
+async function findItemByCode(code, codeType) {
+    try {
+        console.log('🔍 Buscando:', code, 'Tipo:', codeType);
+        
+        if (!navigator.onLine) {
+            console.log('🌐 Offline - não é possível buscar');
+            showNotification('🌐 Sem conexão - não é possível buscar itens', 'warning');
+            return null;
+        }
+        
+        // ✅ CORREÇÃO: Usar .maybeSingle() ou pegar primeiro resultado
+        const { data, error } = await supabase
+            .from('products_base')
+            .select('*')
+            .or(`codigo.eq.${code},dun.eq.${code},ean.eq.${code}`)
+            .limit(1);  // ✅ MUDADO: limit em vez de single
+            
+        if (error) {
+            console.log('📭 Erro na busca:', error.message);
+            return null;
+        }
+        
+        if (!data || data.length === 0) {
+            console.log('📭 Item não encontrado na base online');
+            return null;
+        }
+        
+        console.log('✅ Item encontrado:', data[0].descricao);
+        return data[0];  // ✅ Retorna primeiro resultado
+        
+    } catch (error) {
+        console.log('⚠️ Erro na busca:', error);
+        return null;
+    }
+}
+        
+        // Exibir informações do item
+function displayItemInfo(item, codeType) {
+    // ✅ CORREÇÃO: Usar colunas em minúsculo (codigo, descricao, etc.)
+    const codigo = item.codigo || item.CODIGO;
+    const descricao = item.descricao || item.DESCRICAO;
+    const quantidade = item.quantidade || item.QUANTIDADE || 0;
+    const valor = item.valor || item.VALOR || 0;
+    const embalagem = item.embalagem || item.EMBALAGEM || 'N/A';
+    
+    itemDescriptionDisplay.innerHTML = `
+        <strong>${descricao}</strong>
+        <span class="status-indicator online" title="Código válido">
+            <i class="fas fa-circle"></i>
+        </span>
+        <br>
+        <small class="text-muted">
+            Sistema: ${quantidade} unidades | 
+            Valor: R$ ${valor.toFixed(2)} |
+            Embalagem: ${embalagem}
+        </small>
+    `;
+    
+    countedQuantityInput.disabled = false;
+    submitButton.disabled = false;
+    
+    // Verificar se o item já foi contado
+    existingItemIndex = inventoryItems.findIndex(invItem => invItem.code === codigo);
+    if (existingItemIndex !== -1) {
+        const existingItem = inventoryItems[existingItemIndex];
+        itemDescriptionDisplay.innerHTML += `
+            <div class="count-history">
+                <small>Já contado: ${existingItem.countedQuantity} unidades (${existingItem.counts} vez(es))</small>
+            </div>
+        `;
+    }
+    
+    currentItemCode = codigo;
+}
+        
+        // Exibir mensagem de item não encontrado
+function displayItemNotFound(code, codeType) {
+    itemDescriptionDisplay.innerHTML = `
+        <span class="text-danger">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            Item não encontrado na base online
+        </span>
+        <span class="status-indicator offline" title="Código não encontrado">
+            <i class="fas fa-circle"></i>
+        </span>
+        <br>
+        <small class="text-muted">Código: ${code}</small>
+        <br>
+        <small class="text-warning">
+            <i class="fas fa-info-circle me-1"></i>
+            Este código não está cadastrado no sistema
+        </small>
+    `;
+    
+    countedQuantityInput.disabled = true;
+    submitButton.disabled = true;
+    currentItemCode = '';
+}
+        
+        // Resetar formulário de item
+        function resetItemForm() {
+            itemDescriptionDisplay.innerHTML = '<span class="text-muted">A descrição aparecerá aqui ao inserir o código</span>';
+            countedQuantityInput.value = '';
+            countedQuantityInput.disabled = true;
+            submitButton.disabled = true;
+            currentItemCode = '';
+            existingItemIndex = -1;
+            codeLoading.style.display = 'none';
+        }
+        
+        // Processar item do inventário
+        async function processInventoryItem() {
+            const countedQuantity = parseInt(countedQuantityInput.value);
+            
+            if (!currentItemCode || isNaN(countedQuantity) || countedQuantity < 0) {
+                alert('Por favor, insira um código válido e uma quantidade contada.');
+                return;
+            }
+            
+            // Verificar se o item já foi contado
+            if (existingItemIndex !== -1) {
+                currentCountedQuantity = countedQuantity;
+                showItemAlreadyCountedModal();
+                return;
+            }
+            
+            // Adicionar novo item ao inventário
+            addNewInventoryItem(countedQuantity);
+        }
+        
+        // Mostrar modal de item já contado
+function showItemAlreadyCountedModal() {
+    const existingItem = inventoryItems[existingItemIndex];
+    const existingCountsInfoEl = document.getElementById('existingCountsInfo');
+    
+    existingCountsInfoEl.innerHTML = `
+        <div class="count-history-item">
+            <strong>Contagem atual:</strong> ${existingItem.countedQuantity} unidades
+            <br><small>Contado ${existingItem.counts} vez(es)</small>
+        </div>
+        <div class="count-history-item">
+            <strong>Nova contagem:</strong> ${currentCountedQuantity} unidades
+        </div>
+        <div class="count-history-item bg-light p-2 rounded mt-2">
+            <strong>Resultado se SOMAR:</strong> ${existingItem.countedQuantity + currentCountedQuantity} unidades
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('itemAlreadyCountedModal')).show();
+}
+        
+        // Adicionar nova contagem (SOMANDO as quantidades)
+async function addNewCount() {
+    const existingItem = inventoryItems[existingItemIndex];
+    
+    // CORREÇÃO: Somar a quantidade existente com a nova
+    const totalCounted = existingItem.countedQuantity + currentCountedQuantity;
+    
+    // Atualizar item existente com a soma das quantidades
+    inventoryItems[existingItemIndex] = {
+        ...existingItem,
+        countedQuantity: totalCounted, // ← CORREÇÃO: Usar a SOMA, não a média
+        counts: existingItem.counts + 1,
+        history: [
+            ...(existingItem.history || []),
+            {
+                date: new Date().toISOString(),
+                quantity: currentCountedQuantity
+            }
+        ]
+    };
+    
+    await saveInventoryData();
+    resetFormAfterSubmission();
+    renderInventoryTable();
+    updateSummary();
+    showNotification('Nova contagem adicionada com sucesso! Total: ' + totalCounted + ' unidades', 'success');
+}
+        
+        // Substituir contagem existente
+        async function replaceExistingCount() {
+            // Substituir a contagem existente
+            inventoryItems[existingItemIndex] = {
+                ...inventoryItems[existingItemIndex],
+                countedQuantity: currentCountedQuantity,
+                counts: 1,
+                history: [
+                    {
+                        date: new Date().toISOString(),
+                        quantity: currentCountedQuantity
+                    }
+                ]
+            };
+            
+            await saveInventoryData();
+            resetFormAfterSubmission();
+            renderInventoryTable();
+            updateSummary();
+            showNotification('Contagem substituída com sucesso!', 'success');
+        }
+        
+        // Adicionar novo item ao inventário
+async function addNewInventoryItem(countedQuantity) {
+    // ✅ NÃO PRECISA MAIS BUSCAR NO itemDatabase
+    // O item já foi validado pela findItemByCode
+    
+    // Buscar a descrição do display (já que não temos mais base local)
+    const descriptionElement = itemDescriptionDisplay.querySelector('strong');
+    const description = descriptionElement ? descriptionElement.textContent : 'Item não identificado';
+    
+    const newItem = {
+        code: currentItemCode,
+        description: description,
+        systemQuantity: 0, // ✅ Não temos mais quantidade do sistema
+        countedQuantity: countedQuantity,
+        unitValue: 0, // ✅ Valor pode ser 0 já que não temos mais a base local
+        counts: 1,
+        date: new Date().toISOString(),
+        history: [
+            {
+                date: new Date().toISOString(),
+                quantity: countedQuantity
+            }
+        ]
+    };
+    
+    inventoryItems.push(newItem);
+    await saveInventoryData();
+    resetFormAfterSubmission();
+    renderInventoryTable();
+    updateSummary();
+    
+    showNotification('Item registrado com sucesso!', 'success');
+}	
+        
+        // Resetar formulário após submissão (nova função)
+        function resetFormAfterSubmission() {
+            // Limpar o campo de código
+            itemCodeInput.value = '';
+            
+            // Resetar o restante do formulário
+            resetItemForm();
+            
+            // Focar no campo de código para próxima contagem
+            setTimeout(() => {
+                itemCodeInput.focus();
+            }, 100);
+        }
+        
+        // Renderizar tabela de inventário
+        function renderInventoryTable() {
+            inventoryTable.innerHTML = '';
+            
+            if (inventoryItems.length === 0) {
+                inventoryTable.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">
+                            <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
+                            Nenhum item contado ainda
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            inventoryItems.forEach((item, index) => {
+                const difference = item.countedQuantity - item.systemQuantity;
+                const differenceClass = difference === 0 ? '' : 
+                                      difference > 0 ? 'positive-diff' : 'negative-diff';
+                
+                const totalValue = item.countedQuantity * item.unitValue;
+                const differenceValue = difference * item.unitValue;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.code}</td>
+                    <td>${item.description}</td>
+                    <td>${item.systemQuantity}</td>
+                    <td>${item.countedQuantity}</td>
+                    <td class="${differenceClass}">${difference > 0 ? '+' : ''}${difference}</td>
+                    <td>R$ ${item.unitValue.toFixed(2)}</td>
+                    <td>R$ ${totalValue.toFixed(2)}</td>
+                    <td>${item.counts}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary view-history" data-index="${index}" title="Ver histórico">
+                            <i class="fas fa-history"></i>
+                        </button>
+                        ${isAdmin ? `
+                            <button class="btn btn-sm btn-outline-danger delete-item" data-index="${index}" title="Excluir">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </td>
+                `;
+                
+                inventoryTable.appendChild(row);
+            });
+            
+            // Adicionar event listeners para os botões
+            document.querySelectorAll('.view-history').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    viewItemHistory(index);
+                });
+            });
+            
+            document.querySelectorAll('.delete-item').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deleteInventoryItem(index);
+                });
+            });
+        }
+        
+        // Filtrar tabela de inventário
+        function filterInventoryTable(searchTerm) {
+            const rows = inventoryTable.getElementsByTagName('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let found = false;
+                
+                for (let j = 0; j < cells.length; j++) {
+                    const cellText = cells[j].textContent || cells[j].innerText;
+                    if (cellText.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+                
+                rows[i].style.display = found ? '' : 'none';
+            }
+        }
+        
+        // Ver histórico do item
+        function viewItemHistory(index) {
+            const item = inventoryItems[index];
+            let historyHTML = '';
+            
+            if (item.history && item.history.length > 0) {
+                historyHTML = '<ul class="list-unstyled">';
+                item.history.forEach(record => {
+                    const date = new Date(record.date).toLocaleString('pt-BR');
+                    historyHTML += `<li><small>${date}: ${record.quantity} unidades</small></li>`;
+                });
+                historyHTML += '</ul>';
+            } else {
+                historyHTML = '<p class="text-muted">Nenhum histórico disponível.</p>';
+            }
+            
+            alert(`
+                Histórico de contagens para ${item.description} (${item.code}):
+                
+                Quantidade no sistema: ${item.systemQuantity}
+                Quantidade contada: ${item.countedQuantity}
+                Diferença: ${item.countedQuantity - item.systemQuantity}
+                
+                Histórico de contagens:
+                ${historyHTML.replace(/<[^>]*>/g, '')}
+            `);
+        }
+        
+        // Excluir item do inventário
+        async function deleteInventoryItem(index) {
+            if (confirm('Tem certeza que deseja excluir este item do inventário?')) {
+                inventoryItems.splice(index, 1);
+                await saveInventoryData();
+                renderInventoryTable();
+                updateSummary();
+            }
+        }
+        
+        // Atualizar resumo
+        function updateSummary() {
+            const totalItems = inventoryItems.length;
+            const matchingItems = inventoryItems.filter(item => item.countedQuantity === item.systemQuantity).length;
+            const positiveDiffItems = inventoryItems.filter(item => item.countedQuantity > item.systemQuantity).length;
+            const negativeDiffItems = inventoryItems.filter(item => item.countedQuantity < item.systemQuantity).length;
+            
+            let totalSystemValue = 0;
+            let totalCountedValue = 0;
+            
+            inventoryItems.forEach(item => {
+                totalSystemValue += item.systemQuantity * item.unitValue;
+                totalCountedValue += item.countedQuantity * item.unitValue;
+            });
+            
+            const totalDifferenceValue = totalCountedValue - totalSystemValue;
+            
+            totalItemsEl.textContent = totalItems;
+            matchingItemsEl.textContent = matchingItems;
+            positiveDiffItemsEl.textContent = positiveDiffItems;
+            negativeDiffItemsEl.textContent = negativeDiffItems;
+            
+            totalSystemValueEl.textContent = `R$ ${totalSystemValue.toFixed(2)}`;
+totalCountedValueEl.textContent = `R$ ${totalCountedValue.toFixed(2)}`;
+            
+            const differenceClass = totalDifferenceValue === 0 ? '' : 
+                                  totalDifferenceValue > 0 ? 'positive-diff' : 'negative-diff';
+            totalDifferenceValueEl.innerHTML = `<span class="${differenceClass}">R$ ${totalDifferenceValue.toFixed(2)}</span>`;
+        }
+        
+        // Consultar informações de embalagem
+        function queryPackagingInfo() {
+            const code = queryCodeInput.value.trim();
+            
+            if (!code) {
+                alert('Por favor, insira um código para consulta.');
+                return;
+            }
+            
+            // Buscar item no banco de dados
+            const item = itemDatabase.find(item => 
+                item.CODIGO === code || 
+                item.DUN === code || 
+                item.EAN === code || 
+                item.EAN13 === code
+            );
+            
+            if (item) {
+                packagingDetails.innerHTML = `
+                    <p><strong>Código:</strong> ${item.CODIGO}</p>
+                    <p><strong>Descrição:</strong> ${item.DESCRICAO}</p>
+                    <p><strong>Embalagem:</strong> ${item.EMBALAGEM || 'N/A'}</p>
+                    <p><strong>Quantidade no sistema:</strong> ${item.QUANTIDADE || 0}</p>
+                    <p><strong>Valor unitário:</strong> R$ ${(item.VALOR || 0).toFixed(2)}</p>
+                    <p><strong>Código DUN:</strong> ${item.DUN || 'N/A'}</p>
+                    <p><strong>Código EAN:</strong> ${item.EAN || item.EAN13 || 'N/A'}</p>
+                `;
+                packagingResult.style.display = 'block';
+            } else {
+                packagingDetails.innerHTML = '<p class="text-danger">Item não encontrado no banco de dados.</p>';
+                packagingResult.style.display = 'block';
+            }
+        }
+        
+        // Exportar para Excel
+        function exportToExcel() {
+            if (inventoryItems.length === 0) {
+                alert('Não há dados para exportar.');
+                return;
+            }
+            
+            const data = [
+                ['Código', 'Descrição', 'Quantidade Sistema', 'Quantidade Contada', 'Diferença', 'Valor Unitário', 'Valor Total', 'Contagens', 'Data']
+            ];
+            
+            inventoryItems.forEach(item => {
+                const difference = item.countedQuantity - item.systemQuantity;
+                const totalValue = item.countedQuantity * item.unitValue;
+                const date = new Date(item.date).toLocaleDateString('pt-BR');
+                
+                data.push([
+                    item.code,
+                    item.description,
+                    item.systemQuantity,
+                    item.countedQuantity,
+                    difference,
+                    item.unitValue,
+                    totalValue,
+                    item.counts,
+                    date
+                ]);
+            });
+            
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Inventário');
+            XLSX.writeFile(wb, 'inventario.xlsx');
+        }
+        
+        // Limpar todos os dados
+async function clearAllData() {
+    if (currentUser) {
+        try {
+            // Limpar no Supabase
+            const { error } = await supabase
+                .from('inventory_items')
+                .delete()
+                .eq('user_id', currentUser.id);
+            
+            if (error) throw error;
+        } catch (error) {
+            console.error('Erro limpar dados online:', error);
+            showNotification('Erro ao limpar dados online', 'error');
+            return;
+        }
+    }
+    
+    inventoryItems = [];
+    await saveInventoryData(); // Isso vai salvar o array vazio
+    renderInventoryTable();
+    updateSummary();
+    bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+    
+    showNotification('Todos os dados foram limpos!', 'success');
+}
+        
+        // Pré-visualizar arquivo Excel
+        function previewExcelFile() {
+            const file = excelFileInput.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                previewTable.innerHTML = '';
+                
+                // Mostrar as primeiras 5 linhas
+                const maxRows = Math.min(5, jsonData.length);
+                for (let i = 0; i < maxRows; i++) {
+                    const row = document.createElement('tr');
+                    for (let j = 0; j < jsonData[i].length; j++) {
+                        const cell = document.createElement('td');
+                        cell.textContent = jsonData[i][j] || '';
+                        row.appendChild(cell);
+                    }
+                    previewTable.appendChild(row);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // Importar dados do Excel
+        async function importExcelData() {
+            const file = excelFileInput.files[0];
+            if (!file) {
+        showNotification('Por favor, selecione um arquivo Excel.', 'warning');
+        return;
+    }
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    // Mapear colunas (case insensitive)
+                    const mappedData = jsonData.map(row => {
+                        const mappedRow = {};
+                        for (const key in row) {
+                            const normalizedKey = key.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                            
+                            if (normalizedKey.includes('CODIGO') || normalizedKey.includes('COD')) {
+                                mappedRow.CODIGO = row[key]?.toString() || '';
+                            } else if (normalizedKey.includes('DESCRICAO') || normalizedKey.includes('DESC')) {
+                                mappedRow.DESCRICAO = row[key]?.toString() || '';
+                            } else if (normalizedKey.includes('QUANTIDADE') || normalizedKey.includes('QTD')) {
+                                mappedRow.QUANTIDADE = parseFloat(row[key]) || 0;
+                            } else if (normalizedKey.includes('VALOR') || normalizedKey.includes('PRECO')) {
+                                mappedRow.VALOR = parseFloat(row[key]) || 0;
+                            } else if (normalizedKey.includes('DUN')) {
+                                mappedRow.DUN = row[key]?.toString() || '';
+                            } else if (normalizedKey.includes('EAN')) {
+                                mappedRow.EAN = row[key]?.toString() || '';
+                            } else if (normalizedKey.includes('EMBALAGEM') || normalizedKey.includes('EMB')) {
+                                mappedRow.EMBALAGEM = row[key]?.toString() || '';
+                            }
+                        }
+                        return mappedRow;
+                    });
+                    
+                    itemDatabase = mappedData.filter(item => item.CODIGO && item.DESCRICAO);
+            await saveItemDatabase();
+
+bootstrap.Modal.getInstance(document.getElementById('importModal')).hide();
+            showNotification(`Base de dados importada com sucesso! ${itemDatabase.length} itens carregados.`, 'success');
+        } catch (error) {
+            console.error('Erro ao importar arquivo:', error);
+            showNotification('Erro ao importar arquivo. Verifique o formato.', 'error');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+        
+        // Salvar dados do inventário
+         async function saveInventoryData() {
+    console.log('💾 Salvando dados (modo otimizado)...');
+    
+    // ✅ SALVAR LOCAL PRIMEIRO (instantâneo)
+    localStorage.setItem('inventoryItems', JSON.stringify(inventoryItems));
+    
+    // ✅ SINCRONIZAR COM SUPABASE EM SEGUNDO PLANO (não bloqueante)
+    setTimeout(async () => {
+        try {
+            if (!navigator.onLine) {
+                console.log('🌐 Offline - sincronização adiada');
+                return;
+            }
+            
+            console.log('🔄 Sincronizando com nuvem...');
+            
+            // Separar itens novos e existentes
+            const itemsToUpdate = [];
+            const itemsToInsert = [];
+            
+            for (const item of inventoryItems) {
+                if (item.id) {
+                    itemsToUpdate.push({
+                        id: item.id,
+                        code: item.code,
+                        description: item.description,
+                        system_quantity: item.systemQuantity,
+                        counted_quantity: item.countedQuantity,
+                        unit_value: item.unitValue,
+                        counts: item.counts,
+                        history: item.history,
+                        updated_at: new Date()
+                    });
+                } else {
+                    itemsToInsert.push({
+                        user_id: null,
+                        code: item.code,
+                        description: item.description,
+                        system_quantity: item.systemQuantity,
+                        counted_quantity: item.countedQuantity,
+                        unit_value: item.unitValue,
+                        counts: item.counts,
+                        history: item.history
+                    });
+                }
+            }
+            
+            // Executar operações em paralelo com timeout
+            const promises = [];
+            
+            if (itemsToUpdate.length > 0) {
+                for (const item of itemsToUpdate) {
+                    promises.push(
+                        Promise.race([
+                            supabase
+                                .from('inventory_items')
+                                .update(item)
+                                .eq('id', item.id),
+                            new Promise((_, reject) => 
+                                setTimeout(() => reject(new Error('Timeout')), 3000)
+                            )
+                        ]).catch(error => {
+                            console.log('⚠️ Update falhou:', error.message);
+                            return null;
+                        })
+                    );
+                }
+            }
+            
+            if (itemsToInsert.length > 0) {
+                promises.push(
+                    Promise.race([
+                        supabase
+                            .from('inventory_items')
+                            .insert(itemsToInsert)
+                            .select(),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Timeout')), 3000)
+                        )
+                    ]).catch(error => {
+                        console.log('⚠️ Insert falhou:', error.message);
+                        return null;
+                    })
+                );
+            }
+            
+            if (promises.length > 0) {
+                const results = await Promise.allSettled(promises);
+                console.log('✅ Sincronização concluída');
+                
+                // Atualizar IDs dos novos itens se inserção foi bem-sucedida
+                const insertResult = results.find(result => 
+                    result.status === 'fulfilled' && 
+                    result.value && 
+                    result.value.data
+                );
+                
+                if (insertResult && insertResult.value.data) {
+                    insertResult.value.data.forEach((newItem, index) => {
+                        const originalItemIndex = inventoryItems.findIndex(
+                            item => !item.id && item.code === newItem.code
+                        );
+                        if (originalItemIndex !== -1) {
+                            inventoryItems[originalItemIndex].id = newItem.id;
+                            // Atualizar localStorage com IDs
+                            localStorage.setItem('inventoryItems', JSON.stringify(inventoryItems));
+                        }
+                    });
+                }
+            }
+            
+        } catch (error) {
+            console.log('⚠️ Erro sincronização:', error.message);
+            // Não mostrar erro para o usuário - dados já salvos localmente
+        }
+    }, 100); // 0.1 segundos de delay
+}
+        
+        // Atualizar UI
+        function updateUI() {
+            checkAdminStatus();
+        }
+        
+        // Inicializar gráficos
+        function initializeCharts() {
+            // Gráfico de quantidade
+            const quantityCtx = document.getElementById('quantityChart').getContext('2d');
+            quantityChart = new Chart(quantityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Sistema', 'Contado', 'Diferença'],
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(40, 53, 147, 0.7)',
+                            'rgba(0, 121, 107, 0.7)',
+                            'rgba(255, 152, 0, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(40, 53, 147, 1)',
+                            'rgba(0, 121, 107, 1)',
+                            'rgba(255, 152, 0, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de distribuição
+            const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+            distributionChart = new Chart(distributionCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Conferentes', 'Divergências Positivas', 'Divergências Negativas'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(76, 175, 80, 0.7)',
+                            'rgba(255, 152, 0, 0.7)',
+                            'rgba(244, 67, 54, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(76, 175, 80, 1)',
+                            'rgba(255, 152, 0, 1)',
+                            'rgba(244, 67, 54, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            // Gráfico de linha (timeline)
+            const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+            timelineChart = new Chart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Itens Contados',
+                            data: [],
+                            borderColor: 'rgba(40, 53, 147, 1)',
+                            backgroundColor: 'rgba(40, 53, 147, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Divergências',
+                            data: [],
+                            borderColor: 'rgba(244, 67, 54, 1)',
+                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Atualizar dashboard
+        function updateDashboard() {
+            if (inventoryItems.length === 0) {
+                // Dashboard vazio
+                kpiTotalItems.textContent = '0';
+                kpiAccuracy.textContent = '0%';
+                kpiDivergenceValue.textContent = 'R$ 0,00';
+                kpiProgress.textContent = '0%';
+                
+                // Atualizar gráficos com dados vazios
+                quantityChart.data.datasets[0].data = [0, 0, 0];
+                quantityChart.update();
+                
+                distributionChart.data.datasets[0].data = [0, 0, 0];
+                distributionChart.update();
+                
+                timelineChart.data.labels = [];
+                timelineChart.data.datasets[0].data = [];
+                timelineChart.data.datasets[1].data = [];
+                timelineChart.update();
+                
+                criticalItemsList.innerHTML = '<p class="text-muted">Nenhum item crítico identificado.</p>';
+                analysisTable.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Nenhum dado disponível para análise.</td></tr>';
+                
+                return;
+            }
+            
+            // Calcular métricas
+            const totalItems = inventoryItems.length;
+            const matchingItems = inventoryItems.filter(item => item.countedQuantity === item.systemQuantity).length;
+            const positiveDiffItems = inventoryItems.filter(item => item.countedQuantity > item.systemQuantity).length;
+            const negativeDiffItems = inventoryItems.filter(item => item.countedQuantity < item.systemQuantity).length;
+            
+            let totalSystemQuantity = 0;
+            let totalCountedQuantity = 0;
+            let totalSystemValue = 0;
+            let totalCountedValue = 0;
+            
+            inventoryItems.forEach(item => {
+                totalSystemQuantity += item.systemQuantity;
+                totalCountedQuantity += item.countedQuantity;
+                totalSystemValue += item.systemQuantity * item.unitValue;
+                totalCountedValue += item.countedQuantity * item.unitValue;
+            });
+            
+            const totalDifferenceValue = totalCountedValue - totalSystemValue;
+            const accuracy = totalItems > 0 ? (matchingItems / totalItems * 100).toFixed(1) : 0;
+            
+            // Atualizar KPIs
+            kpiTotalItems.textContent = totalItems;
+            kpiAccuracy.textContent = `${accuracy}%`;
+            kpiDivergenceValue.textContent = `R$ ${Math.abs(totalDifferenceValue).toFixed(2)}`;
+            
+            // Calcular progresso (em relação ao total de itens no banco de dados)
+            const progress = itemDatabase.length > 0 ? (totalItems / itemDatabase.length * 100).toFixed(1) : 0;
+            kpiProgress.textContent = `${progress}%`;
+            
+            // Atualizar gráfico de quantidade
+            quantityChart.data.datasets[0].data = [
+                totalSystemQuantity,
+                totalCountedQuantity,
+                totalCountedQuantity - totalSystemQuantity
+            ];
+            quantityChart.update();
+            
+            // Atualizar gráfico de distribuição
+            distributionChart.data.datasets[0].data = [
+                matchingItems,
+                positiveDiffItems,
+                negativeDiffItems
+            ];
+            distributionChart.update();
+            
+            // Atualizar gráfico de timeline (agrupar por data)
+            const timelineData = {};
+            inventoryItems.forEach(item => {
+                const date = new Date(item.date).toLocaleDateString('pt-BR');
+                if (!timelineData[date]) {
+                    timelineData[date] = { items: 0, divergences: 0 };
+                }
+                timelineData[date].items += 1;
+                if (item.countedQuantity !== item.systemQuantity) {
+                    timelineData[date].divergences += 1;
+                }
+            });
+            
+            const dates = Object.keys(timelineData).sort((a, b) => new Date(a) - new Date(b));
+            const itemsData = dates.map(date => timelineData[date].items);
+            const divergencesData = dates.map(date => timelineData[date].divergences);
+            
+            timelineChart.data.labels = dates;
+            timelineChart.data.datasets[0].data = itemsData;
+            timelineChart.data.datasets[1].data = divergencesData;
+            timelineChart.update();
+            
+           // Identificar itens críticos - TOP 5 por impacto financeiro
+const criticalItems = [...inventoryItems]
+    .filter(item => item.countedQuantity !== item.systemQuantity) // Apenas itens com divergência
+    .map(item => {
+        const difference = item.countedQuantity - item.systemQuantity;
+        const differenceValue = Math.abs(difference * item.unitValue);
+        const differencePercent = item.systemQuantity > 0 ? 
+            (Math.abs(difference) / item.systemQuantity * 100).toFixed(1) : '0';
+        
+        return {
+            ...item,
+            difference: difference,
+            differenceValue: differenceValue,
+            differencePercent: differencePercent,
+            impactLevel: differenceValue > 100 ? 'Alto' : differenceValue > 50 ? 'Médio' : 'Baixo'
+        };
+    })
+    .sort((a, b) => b.differenceValue - a.differenceValue) // Ordenar por maior impacto financeiro
+    .slice(0, 3); // Manter apenas TOP 3
+
+// Atualizar lista de itens críticos
+criticalItemsList.innerHTML = '';
+
+if (criticalItems.length > 0) {
+    criticalItems.forEach((item, index) => {
+        const criticalItemEl = document.createElement('div');
+        criticalItemEl.className = 'critical-item';
+        criticalItemEl.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="mb-0">${item.description}</h6>
+                <span class="badge ${item.difference > 0 ? 'bg-warning' : 'bg-danger'}">
+                    ${index + 1}º
+                </span>
+            </div>
+            <p class="mb-1"><small><strong>Código:</strong> ${item.code}</small></p>
+            <p class="mb-1"><strong>Diferença:</strong> 
+                <span class="${item.difference > 0 ? 'positive-diff' : 'negative-diff'}">
+                    ${item.difference > 0 ? '+' : ''}${item.difference} un
+                </span>
+                <small class="text-muted"> (${item.differencePercent}%)</small>
+            </p>
+            <p class="mb-2"><strong>Impacto:</strong> 
+                <span class="fw-bold">R$ ${item.differenceValue.toFixed(2)}</span>
+                <span class="badge ${item.impactLevel === 'Alto' ? 'bg-danger' : item.impactLevel === 'Médio' ? 'bg-warning' : 'bg-success'} ms-1">
+                    ${item.impactLevel}
+                </span>
+            </p>
+            <div class="progress" style="height: 6px;">
+                <div class="progress-bar ${item.difference > 0 ? 'bg-warning' : 'bg-danger'}" 
+                     style="width: ${Math.min(parseFloat(item.differencePercent), 100)}%">
+                </div>
+            </div>
+        `;
+        criticalItemsList.appendChild(criticalItemEl);
+    });
+    
+    // Adicionar contador se houver mais itens críticos
+    const totalCriticalItems = inventoryItems.filter(item => item.countedQuantity !== item.systemQuantity).length;
+    if (totalCriticalItems > 5) {
+        const moreItemsEl = document.createElement('div');
+        moreItemsEl.className = 'text-center mt-2';
+        moreItemsEl.innerHTML = `<small class="text-muted">+${totalCriticalItems - 5} itens críticos não exibidos</small>`;
+        criticalItemsList.appendChild(moreItemsEl);
+    }
+} else {
+    criticalItemsList.innerHTML = `
+        <div class="text-center text-muted py-3">
+            <i class="fas fa-check-circle fa-2x mb-2 d-block"></i>
+            <p class="mb-0">Nenhuma divergência crítica</p>
+            <small>Todos os itens estão dentro do esperado</small>
+        </div>
+    `;
+}
+            
+            // Atualizar tabela de análise detalhada
+            analysisTable.innerHTML = '';
+            const sortedItems = [...inventoryItems].sort((a, b) => {
+                const diffValueA = Math.abs((a.countedQuantity - a.systemQuantity) * a.unitValue);
+                const diffValueB = Math.abs((b.countedQuantity - b.systemQuantity) * b.unitValue);
+                return diffValueB - diffValueA;
+            });
+            
+            sortedItems.forEach(item => {
+                const difference = item.countedQuantity - item.systemQuantity;
+                const differenceValue = difference * item.unitValue;
+                const differencePercent = item.systemQuantity > 0 ? 
+                    (Math.abs(difference) / item.systemQuantity * 100).toFixed(1) : 'N/A';
+                
+                let impactLevel = 'Baixo';
+                if (Math.abs(differenceValue) > 100) impactLevel = 'Alto';
+                else if (Math.abs(differenceValue) > 10) impactLevel = 'Médio';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.code}</td>
+                    <td>${item.description}</td>
+                    <td>${item.systemQuantity}</td>
+                    <td>${item.countedQuantity}</td>
+                    <td class="${difference === 0 ? '' : difference > 0 ? 'positive-diff' : 'negative-diff'}">
+                        ${difference > 0 ? '+' : ''}${difference}
+                    </td>
+                    <td>R$ ${item.unitValue.toFixed(2)}</td>
+                    <td>R$ ${Math.abs(differenceValue).toFixed(2)}</td>
+                    <td>
+                        <span class="badge ${impactLevel === 'Alto' ? 'bg-danger' : impactLevel === 'Médio' ? 'bg-warning' : 'bg-success'}">
+                            ${impactLevel}
+                        </span>
+                    </td>
+                `;
+                analysisTable.appendChild(row);
+            });
+        }
+        
+        // Exportar dados do dashboard
+        function exportDashboardData() {
+            if (inventoryItems.length === 0) {
+                showNotification('Não há dados para exportar.', 'warning');
+                return;
+            }
+            
+            // Criar dados para exportação
+            const data = [
+                ['Dashboard Analítico - Relatório de Contagem de Estoque'],
+                ['Data de geração:', new Date().toLocaleDateString('pt-BR')],
+                [''],
+                ['MÉTRICAS PRINCIPAIS'],
+                ['Total de Itens Contados:', inventoryItems.length],
+                ['Precisão da Contagem:', `${((inventoryItems.filter(item => item.countedQuantity === item.systemQuantity).length / inventoryItems.length) * 100).toFixed(1)}%`],
+                ['Valor das Divergências:', `R$ ${Math.abs(inventoryItems.reduce((sum, item) => sum + (item.countedQuantity - item.systemQuantity) * item.unitValue, 0)).toFixed(2)}`],
+                ['Progresso da Contagem:', `${itemDatabase.length > 0 ? (inventoryItems.length / itemDatabase.length * 100).toFixed(1) : 0}%`],
+                [''],
+                ['ANÁLISE DETALHADA'],
+                ['Código', 'Descrição', 'Sistema', 'Contado', 'Diferença', 'Valor Unit.', 'Valor Total Dif.', 'Impacto']
+            ];
+            
+            // Ordenar por impacto (maior diferença em valor)
+            const sortedItems = [...inventoryItems].sort((a, b) => {
+                const diffValueA = Math.abs((a.countedQuantity - a.systemQuantity) * a.unitValue);
+                const diffValueB = Math.abs((b.countedQuantity - b.systemQuantity) * b.unitValue);
+                return diffValueB - diffValueA;
+            });
+            
+            sortedItems.forEach(item => {
+                const difference = item.countedQuantity - item.systemQuantity;
+                const differenceValue = difference * item.unitValue;
+                
+                let impactLevel = 'Baixo';
+                if (Math.abs(differenceValue) > 100) impactLevel = 'Alto';
+                else if (Math.abs(differenceValue) > 10) impactLevel = 'Médio';
+                
+                data.push([
+                    item.code,
+                    item.description,
+                    item.systemQuantity,
+                    item.countedQuantity,
+                    difference,
+                    item.unitValue,
+                    Math.abs(differenceValue),
+                    impactLevel
+                ]);
+            });
+            
+            // Criar e baixar arquivo Excel
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Dashboard Analítico');
+            XLSX.writeFile(wb, 'dashboard_analitico.xlsx');
+        }
+// Função para mostrar notificações
+function showNotification(message, type = 'info') {
+    // Criar elemento de notificação
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+        top: 20px; 
+        right: 20px; 
+        z-index: 9999; 
+        min-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Adicionar ao body
+    document.body.appendChild(notification);
+    
+    // Remover automaticamente após 3 segundos
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+}
+// Função para mostrar notificações rápidas (1 segundo)
+function showNotification(message, type = 'info') {
+    // Mapear tipos para classes Bootstrap
+    const typeMap = {
+        'success': 'alert-success',
+        'error': 'alert-danger', 
+        'warning': 'alert-warning',
+        'info': 'alert-info'
+    };
+    
+    // Criar elemento de notificação
+    const notification = document.createElement('div');
+    notification.className = `alert ${typeMap[type] || 'alert-info'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+        top: 20px; 
+        right: 20px; 
+        z-index: 9999; 
+        min-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    // Ícone baseado no tipo
+    const icons = {
+        'success': 'fa-check-circle',
+        'error': 'fa-exclamation-circle',
+        'warning': 'fa-exclamation-triangle',
+        'info': 'fa-info-circle'
+    };
+    
+    notification.innerHTML = `
+        <i class="fas ${icons[type] || 'fa-info-circle'} me-2"></i>
+        ${message}
+    `;
+    
+    // Adicionar ao body
+    document.body.appendChild(notification);
+    
+    // Focar automaticamente no campo de código após notificação
+    setTimeout(() => {
+        if (itemCodeInput) {
+            itemCodeInput.focus();
+            itemCodeInput.select();
+        }
+    }, 100);
+    
+    // Remover automaticamente após 1 segundo
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 1000);
+}
+
+
+
+// ✅ MIGRAÇÃO CORRIGIDA - Mantém TODAS as duplicatas com códigos únicos
+async function migrateToPermanentBase() {
+    // Verificar se há dados
+    if (!itemDatabase || itemDatabase.length === 0) {
+        showNotification('📭 Não há dados no Excel para migrar', 'warning');
+        return;
+    }
+    
+    // Verificar conexão
+    if (!navigator.onLine) {
+        showNotification('🌐 Sem conexão com a internet', 'error');
+        return;
+    }
+    
+    const button = event.target;
+    const originalText = button.innerHTML;
+    
+    try {
+        // Mostrar loading
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Migrando...';
+        button.disabled = true;
+        
+        showNotification('🔄 Iniciando migração para base permanente...', 'info');
+        
+        // 🔄 VERIFICAR SE TABELA TEM ESTRUTURA
+        console.log('🔍 Verificando estrutura da tabela...');
+        const { data: tableStructure, error: structureError } = await supabase
+            .from('products_base')
+            .select('*')
+            .limit(1);
+        
+        let availableColumns = [];
+        
+        if (structureError) {
+            console.error('❌ Erro ao acessar tabela:', structureError);
+            throw new Error(`Tabela inacessível: ${structureError.message}`);
+        } else if (tableStructure && tableStructure.length > 0) {
+            // Tabela tem dados - pegar colunas do primeiro registro
+            availableColumns = Object.keys(tableStructure[0]);
+            console.log('📊 Colunas detectadas:', availableColumns);
+        } else {
+            // Tabela vazia - usar estrutura padrão esperada
+            console.log('📭 Tabela vazia - usando estrutura padrão');
+            availableColumns = ['codigo', 'descricao', 'quantidade', 'valor', 'dun', 'ean', 'embalagem'];
+        }
+        
+        // Se não detectou colunas, usar padrão
+        if (availableColumns.length === 0) {
+            availableColumns = ['codigo', 'descricao', 'quantidade', 'valor', 'dun', 'ean', 'embalagem'];
+            console.log('⚙️ Usando estrutura padrão:', availableColumns);
+        }
+        
+        // Determinar a coluna de conflito (case sensitive)
+        const conflictColumn = availableColumns.includes('CODIGO') ? 'CODIGO' : 
+                              availableColumns.includes('codigo') ? 'codigo' : 'codigo';
+        
+        console.log('🎯 Coluna de conflito:', conflictColumn);
+        
+        // 🔄 PROCESSAR DUPLICATAS - Criar códigos únicos para CADA item
+        console.log('🔍 Processando itens e criando códigos únicos...');
+        const itemsToUpsert = [];
+        let duplicateCount = 0;
+        
+        // Usar Map para controlar duplicatas por código base
+        const codeCounter = new Map();
+        
+        itemDatabase.forEach((item, index) => {
+            const codigoBase = item.CODIGO?.toString().trim();
+            
+            if (!codigoBase) {
+                console.log('Item sem código ignorado na posição', index);
+                return;
+            }
+            
+            // Contar quantas vezes este código apareceu
+            const count = (codeCounter.get(codigoBase) || 0) + 1;
+            codeCounter.set(codigoBase, count);
+            
+            // Criar código único (adicionar sufixo apenas para duplicatas)
+            const codigoUnico = count > 1 ? `${codigoBase}_DUP${count}` : codigoBase;
+            
+            if (count > 1) {
+                duplicateCount++;
+                console.log(`🔄 Duplicata ${count} para código ${codigoBase} → ${codigoUnico}`);
+            }
+            
+            const mappedItem = {};
+            
+            // Mapear para colunas disponíveis (case sensitive)
+            availableColumns.forEach(col => {
+                const upperCol = col.toUpperCase();
+                
+                if (upperCol === 'CODIGO') {
+                    mappedItem[col] = codigoUnico; // ✅ Código único para cada item
+                } else if (upperCol === 'DESCRICAO') {
+                    // Adicionar indicador de duplicata na descrição
+                    const descricaoBase = item.DESCRICAO?.toString().trim() || '';
+                    mappedItem[col] = count > 1 ? 
+                        `${descricaoBase} [DUPLICATA ${count}]` : 
+                        descricaoBase;
+                } else if (upperCol === 'QUANTIDADE') {
+                    mappedItem[col] = Number(item.QUANTIDADE) || 0;
+                } else if (upperCol === 'VALOR') {
+                    mappedItem[col] = Number(item.VALOR) || 0;
+                } else if (upperCol === 'DUN') {
+                    mappedItem[col] = item.DUN?.toString().trim() || null;
+                } else if (upperCol === 'EAN') {
+                    mappedItem[col] = item.EAN?.toString().trim() || null;
+                } else if (upperCol === 'EMBALAGEM') {
+                    mappedItem[col] = item.EMBALAGEM?.toString().trim() || null;
+                }
+            });
+            
+            // Validar item mínimo
+            const descricao = mappedItem.DESCRICAO || mappedItem.descricao;
+            
+            if (!descricao) {
+                console.log('Item sem descrição ignorado na posição', index);
+                return;
+            }
+            
+            itemsToUpsert.push(mappedItem);
+        });
+        
+        console.log('📊 Estatísticas finais:');
+        console.log(`   - Itens totais na base: ${itemDatabase.length}`);
+        console.log(`   - Itens processados: ${itemsToUpsert.length}`);
+        console.log(`   - Duplicatas identificadas: ${duplicateCount}`);
+        console.log(`   - Códigos base únicos: ${codeCounter.size}`);
+        
+        if (itemsToUpsert.length === 0) {
+            showNotification('❌ Nenhum item válido para migrar', 'error');
+            return;
+        }
+        
+        // 📤 Fazer migração em lotes - SEM REMOVER DUPLICATAS
+        const BATCH_SIZE = 100;
+        let successfulMigrations = 0;
+        
+        for (let i = 0; i < itemsToUpsert.length; i += BATCH_SIZE) {
+            const batch = itemsToUpsert.slice(i, i + BATCH_SIZE);
+            
+            console.log(`📤 Enviando lote ${Math.floor(i/BATCH_SIZE) + 1}... (${batch.length} itens)`);
+            
+            const { data, error } = await supabase
+                .from('products_base')
+                .upsert(batch, {
+                    onConflict: conflictColumn
+                });
+                
+            if (error) {
+                console.error(`❌ Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}:`, error);
+                throw new Error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}: ${error.message}`);
+            }
+            
+            successfulMigrations += batch.length;
+            
+            // Atualizar progresso a cada 1000 itens
+            if (i % 1000 === 0) {
+                showNotification(`📊 Migrando... ${successfulMigrations}/${itemsToUpsert.length}`, 'info');
+            }
+        }
+        
+        // Mostrar resumo final
+        let message = `✅ Migração concluída! ${successfulMigrations} produtos`;
+        if (duplicateCount > 0) {
+            message += ` (${duplicateCount} duplicatas preservadas)`;
+        }
+        
+        showNotification(message, 'success');
+        console.log('🎉 Migração finalizada com sucesso!');
+        
+    } catch (error) {
+        console.error('❌ Erro na migração:', error);
+        showNotification('Erro na migração: ' + error.message, 'error');
+    } finally {
+        // Restaurar botão
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }
+}
+
+// ✅ VER BASE NO SUPABASE - URL CORRIGIDA
+function viewPermanentBase() {
+    if (!navigator.onLine) {
+        showNotification('🌐 Sem conexão com a internet', 'error');
+        return;
+    }
+    
+    // ✅ URL CORRETA para acessar a tabela no Supabase
+    const supabaseUrl = 'https://uqmwegqpulqhwculfytr.supabase.co';
+    const tableUrl = `${supabaseUrl}/project/uqmwegqpulqhwculfytr/editor/29115`;
+    
+    console.log('🔗 Abrindo tabela no Supabase:', tableUrl);
+    showNotification('🔗 Abrindo base online no Supabase...', 'info');
+    
+    // Abrir em nova aba
+    window.open(tableUrl, '_blank');
+    
+    // Focar novamente no campo de código
+    setTimeout(() => {
+        if (itemCodeInput) {
+            itemCodeInput.focus();
+        }
+    }, 500);
+}
+
+// ✅ FUNÇÃO DE TESTE - Verificar se tabela existe
+async function testTableConnection() {
+    try {
+        console.log('🔍 Testando conexão com products_base...');
+        
+        const { data, error } = await supabase
+            .from('products_base')
+            .select('CODIGO')
+            .limit(1);
+            
+        if (error) {
+            console.error('❌ Tabela não acessível:', error);
+            showNotification('❌ Erro na tabela: ' + error.message, 'error');
+            return false;
+        }
+        
+        console.log('✅ Tabela products_base está acessível');
+        showNotification('✅ Conexão com a tabela OK!', 'success');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erro ao testar tabela:', error);
+        showNotification('❌ Erro ao testar tabela: ' + error.message, 'error');
+        return false;
+    }
+}
+
+// ✅ BOTÃO DE TESTE - Adicionar no HTML depois se quiser testar
+// <button class="btn btn-info w-100 mb-2" onclick="testTableConnection()">
+//     <i class="fas fa-test me-2"></i>Testar Conexão
+// </button>
+
+</script>
+    </script>
+</body>
+</html>

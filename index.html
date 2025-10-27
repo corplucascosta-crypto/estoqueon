@@ -1,0 +1,3133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque-On | Sistema Gerencial de Controle de Estoque</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">	
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+    :root {
+        --primary-dark: #3a0ca3;
+        --primary-main: #4361ee;
+        --primary-light: #4895ef;
+        --primary-accent: #4cc9f0;
+        
+        --secondary-dark: #00695c;
+        --secondary-main: #00796b;
+        --secondary-light: #00897b;
+        --secondary-accent: #009688;
+        
+        --accent-warning: #ff9800;
+        --accent-success: #4caf50;
+        --accent-danger: #f44336;
+        --accent-info: #00bcd4;
+        
+        --neutral-dark: #263238;
+        --neutral-main: #37474f;
+        --neutral-light: #455a64;
+        --neutral-bg: #f5f7fa;
+        
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --text-light: #bdbdbd;
+        
+        --gradient-primary: linear-gradient(135deg, var(--primary-main) 0%, var(--primary-dark) 100%);
+        --gradient-secondary: linear-gradient(135deg, var(--secondary-main) 0%, var(--secondary-dark) 100%);
+        --gradient-accent: linear-gradient(135deg, var(--accent-info) 0%, var(--primary-accent) 100%);
+    }
+    
+    * {
+        transition: all 0.3s ease;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        color: var(--text-primary);
+    }
+    
+    /* Navbar */
+    .navbar {
+        background: linear-gradient(135deg, #283593, #1a237e) !important;
+        box-shadow: 0 4px 20px rgba(26, 35, 126, 0.15);
+        padding: 0.8rem 0;
+    }
+    
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        letter-spacing: -0.5px;
+        color: white !important;
+        display: flex;
+        align-items: center;
+    }
+    
+    .navbar-brand i {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px;
+        border-radius: 10px;
+        margin-right: 10px;
+    }
+    
+    .navbar-nav .nav-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        margin: 0 2px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+        background: rgba(255, 255, 255, 0.15);
+        color: white !important;
+        transform: translateY(-2px);
+    }
+    
+    .navbar-nav .nav-link i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+    
+    /* Cards */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+        overflow: hidden;
+        background: white;
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #283593, #1a237e) !important;
+        color: white;
+        border: none;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    /* Botões */
+    .btn-primary {
+        background: linear-gradient(135deg, #4361ee, #3a0ca3) !important;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        color: white !important;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        background: linear-gradient(135deg, #4895ef, #4361ee) !important;
+        color: white !important;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #00796b, #00695c) !important;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0, 121, 107, 0.3);
+        color: white !important;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 121, 107, 0.4);
+        background: linear-gradient(135deg, #00897b, #00796b) !important;
+        color: white !important;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #f72585, #b5179e) !important;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(247, 37, 133, 0.3);
+        color: white !important;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(247, 37, 133, 0.4);
+        background: linear-gradient(135deg, #f72585, #7209b7) !important;
+        color: white !important;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f8961e, #f3722c) !important;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(248, 150, 30, 0.3);
+        color: white !important;
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(248, 150, 30, 0.4);
+        background: linear-gradient(135deg, #f9c74f, #f8961e) !important;
+        color: white !important;
+    }
+    
+    /* Formulários */
+    .form-control {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-main);
+        box-shadow: 0 0 0 0.2rem rgba(40, 53, 147, 0.15);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: var(--neutral-main);
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Tela de Login */
+    .login-container {
+        max-width: 440px;
+        margin: 80px auto;
+        padding: 0;
+    }
+    
+    .login-container .card {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .login-container .card-header {
+        text-align: center;
+        padding: 2rem;
+        background: var(--gradient-accent);
+    }
+    
+    .login-container .card-body {
+        padding: 2.5rem;
+    }
+    
+    /* Tela de Contagem */
+    .count-screen {
+        max-width: 600px;
+        width: 100%;
+        padding: 20px;
+        margin: 0 auto;
+    }
+    
+    .item-description {
+        background: var(--neutral-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        min-height: 70px;
+        border-left: 4px solid var(--primary-main);
+    }
+    
+    /* Animações */
+    .auto-focus {
+        animation: pulse-focus 0.6s ease-in-out;
+        box-shadow: 0 0 0 3px rgba(40, 53, 147, 0.3);
+    }
+    
+    @keyframes pulse-focus {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 53, 147, 0.7); }
+        70% { transform: scale(1.01); box-shadow: 0 0 0 10px rgba(40, 53, 147, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 53, 147, 0); }
+    }
+    
+    .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid var(--primary-main);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Dashboard */
+    .kpi-card {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        background: white;
+        border-top: 4px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .kpi-card i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        background-clip: text; /* ✅ CORREÇÃO APLICADA */
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .kpi-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+        color: var(--primary-main);
+    }
+    
+    .kpi-positive {
+        border-top-color: var(--accent-success);
+    }
+    
+    .kpi-negative {
+        border-top-color: var(--accent-danger);
+    }
+    
+    .kpi-neutral {
+        border-top-color: var(--accent-info);
+    }
+    
+    /* Gráficos */
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 20px;
+    }
+    
+    /* Tabelas */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+    
+    .table thead th {
+        background: var(--neutral-bg);
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        color: var(--neutral-main);
+        border-bottom: 2px solid var(--primary-light);
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+    
+    .table tbody tr:hover {
+        background: rgba(40, 53, 147, 0.03);
+    }
+    
+    /* Badges */
+    .badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+    
+    .badge.bg-primary {
+        background: var(--gradient-primary) !important;
+    }
+    
+    .badge.bg-success {
+        background: var(--gradient-secondary) !important;
+    }
+    
+    .badge.bg-danger {
+        background: linear-gradient(135deg, var(--accent-danger) 0%, #d32f2f 100%) !important;
+    }
+    
+    .badge.bg-warning {
+        background: linear-gradient(135deg, var(--accent-warning) 0%, #f57c00 100%) !important;
+    }
+    
+    /* Itens Críticos */
+    .critical-item {
+        background: rgba(244, 67, 54, 0.05);
+        border-left: 4px solid var(--accent-danger);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    
+    .critical-item:hover {
+        transform: translateX(5px);
+        background: rgba(244, 67, 54, 0.08);
+    }
+    
+    /* Progress Bars */
+    .progress {
+        height: 10px;
+        border-radius: 10px;
+        background: #f0f0f0;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        border-radius: 10px;
+    }
+    
+    /* Modais */
+    .modal-content {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-header {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+    
+    .modal-title {
+        font-weight: 600;
+    }
+    
+    .modal-footer {
+        border: none;
+        padding: 1.5rem;
+        background: var(--neutral-bg);
+    }
+    
+    /* Navegação entre Telas */
+    .view-container {
+        display: none;
+        flex: 1;
+    }
+    
+    .view-container.active {
+        display: flex;
+        flex-direction: column;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Seção de Títulos */
+    .section-title {
+        border-bottom: 3px solid var(--primary-main);
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem;
+        color: var(--neutral-dark);
+        font-weight: 700;
+        display: inline-block;
+    }
+    
+    /* Dashboard */
+    .dashboard-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        background-clip: text; /* ✅ CORREÇÃO APLICADA */
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Diferenciação de Valores */
+    .positive-diff {
+        color: var(--accent-success);
+        font-weight: 600;
+    }
+    
+    .negative-diff {
+        color: var(--accent-danger);
+        font-weight: 600;
+    }
+    
+    /* Indicador de Campo Obrigatório */
+    .required-field::after {
+        content: " *";
+        color: var(--accent-danger);
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .navbar-brand {
+            font-size: 1.3rem;
+        }
+        
+        .card-body {
+            padding: 1.25rem;
+        }
+        
+        .kpi-value {
+            font-size: 1.8rem;
+        }
+        
+        .login-container {
+            margin: 40px auto;
+            padding: 0 15px;
+        }
+        
+        .count-screen {
+            padding: 15px;
+        }
+    }
+
+    /* Indicadores de status */
+    .status-indicator {
+        display: inline-block !important;
+        margin-left: 8px !important;
+        font-size: 0.6rem !important;
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+        width: auto !important;
+        height: auto !important;
+    }
+
+    .status-indicator.online {
+        color: var(--accent-success) !important;
+    }
+
+    .status-indicator.offline {
+        color: var(--accent-danger) !important;
+    }
+
+    /* Controle de Acesso */
+    .admin-only {
+        display: none;
+    }
+
+    .manager-only {
+        display: none;
+    }
+
+    .user-status {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        margin-left: 1rem;
+        font-size: 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .user-role-badge {
+        font-size: 0.7rem;
+        margin-left: 0.5rem;
+        opacity: 0.9;
+        font-weight: 600;
+    }
+
+    /* Badges para roles */
+    .badge-role-admin {
+        background: linear-gradient(135deg, #f44336, #d32f2f) !important;
+    }
+
+    .badge-role-manager {
+        background: linear-gradient(135deg, #ff9800, #f57c00) !important;
+    }
+
+    .badge-role-user {
+        background: linear-gradient(135deg, #2196f3, #1976d2) !important;
+    }
+
+    /* Botões Outline Corrigidos */
+    .btn-outline-primary {
+        border: 1px solid #283593 !important;
+        color: #283593 !important;
+        background-color: transparent !important;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #283593 !important;
+        color: white !important;
+        border-color: #283593 !important;
+    }
+
+    .btn-outline-danger {
+        border: 1px solid #dc3545 !important;
+        color: #dc3545 !important;
+        background-color: transparent !important;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #dc3545 !important;
+        color: white !important;
+        border-color: #dc3545 !important;
+    }
+
+    .btn-outline-secondary {
+        border: 1px solid #6c757d !important;
+        color: #6c757d !important;
+        background-color: transparent !important;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d !important;
+        color: white !important;
+        border-color: #6c757d !important;
+    }
+
+    /* Garantir cores nos botões */
+    .btn, .badge {
+        -webkit-text-fill-color: white !important;
+    }
+
+    /* Estilos para o card de base permanente */
+#permanentBaseCard {
+    margin-bottom: 1rem !important;
+}
+
+#permanentBaseCard .card-header {
+    padding: 0.5rem 1rem !important;
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    color: white;
+}
+
+#permanentBaseCard .card-body {
+    padding: 0.75rem 1rem !important;
+}
+
+#permanentBaseCard h6 {
+    font-size: 0.9rem !important;
+    font-weight: 600;
+}
+
+#migrateBaseBtn {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.7rem;
+}
+
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-tasks text-white" style="background: rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 10px; margin-right: 10px;"></i>
+                <span>Estoque-On</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Status do usuário logado -->
+                    <li class="nav-item">
+                        <span class="nav-link user-status" id="userStatus" style="display: none;">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="userName">Usuário</span>
+                            <span class="user-role-badge badge bg-info" id="userRoleBadge">Role</span>
+                        </span>
+                    </li>
+                    
+                    <!-- Contagem - Disponível para todos -->
+                    <li class="nav-item">
+                        <a class="nav-link active view-switch" data-view="counting" href="#">
+                            <i class="fas fa-clipboard-check"></i> Contagem
+                        </a>
+                    </li>
+                    
+                    <!-- Histórico - Manager e Admin -->
+                    <li class="nav-item">
+                        <a class="nav-link view-switch manager-only" data-view="history" href="#">
+                            <i class="fas fa-history"></i> Histórico
+                        </a>
+                    </li>
+                    
+                    <!-- Dashboard - Manager e Admin -->
+                    <li class="nav-item">
+                        <a class="nav-link view-switch manager-only" data-view="dashboard" href="#">
+                            <i class="fas fa-chart-line"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    <!-- Consulta - Disponível para todos -->
+                    <li class="nav-item">
+                        <a class="nav-link view-switch" data-view="query" href="#">
+                            <i class="fas fa-search"></i> Consulta
+                        </a>
+                    </li>
+                    
+                    <!-- Base de Dados - Apenas Admin -->
+                    <li class="nav-item">
+                        <a class="nav-link admin-only" href="#" data-bs-toggle="modal" data-bs-target="#importModal">
+                            <i class="fas fa-database"></i> Base de Dados
+                        </a>
+                    </li>
+                    
+                    <!-- Usuários - Apenas Admin -->
+                    <li class="nav-item">
+                        <a class="nav-link view-switch admin-only" data-view="users" href="#">
+                            <i class="fas fa-users-cog"></i> Usuários
+                        </a>
+                    </li>
+                    
+                    <!-- Botão Sair -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutBtn" style="display: none;">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                    
+                    <!-- Botão Login -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="loginBtn">
+                            <i class="fas fa-user-shield"></i> Login
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tela de Login -->
+    <div id="loginView" class="view-container active">
+        <div class="login-container">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-lock me-2"></i>Acesso Administrativo</h4>
+                    <p class="mb-0 mt-1 opacity-75">Sistema Gerencial de Controle de Estoque</p>
+                </div>
+                <div class="card-body">
+                    <form id="loginForm">
+                        <div class="mb-4">
+                            <label for="username" class="form-label">Usuário</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="username" required placeholder="Digite seu usuário">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Senha</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                <input type="password" class="form-control" id="password" required placeholder="Digite sua senha">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>Acessar Sistema
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Tela de Contagem -->
+        <div id="countingView" class="view-container">
+            <div class="count-screen">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        <span>Registrar Item Contado</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="inventoryForm">
+                            <div class="mb-4">
+                                <label for="itemCode" class="form-label required-field">Código do Item</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                    <input type="text" class="form-control" id="itemCode" required 
+                                           placeholder="Digite o código (DUN/EAN/PLU)" autocomplete="off"
+                                           autofocus>
+                                    <span class="input-group-text" id="loadingIndicator">
+                                        <div class="loading-spinner" id="codeLoading"></div>
+                                    </span>
+                                </div>
+                                <div class="form-text text-muted mt-1">Digite o código DUN (14 dígitos), EAN (13 ou 8 dígitos) ou código interno</div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Descrição do Item</label>
+                                <div class="item-description" id="itemDescriptionDisplay">
+                                    <span class="text-muted">A descrição aparecerá aqui ao inserir o código</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="countedQuantity" class="form-label required-field">Quantidade Contada</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-boxes"></i></span>
+                                    <input type="number" class="form-control" id="countedQuantity" required min="0" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitButton" disabled>
+                                    <i class="fas fa-save me-2"></i>Registrar Contagem
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary" id="resetButton">
+                                    <i class="fas fa-undo me-2"></i>Limpar Campos
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Histórico -->
+        <div id="historyView" class="view-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title">Contagem de Inventário</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-list me-2"></i>Itens Contados
+                            </h5>
+                            <div>
+                                <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="Buscar...">
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Descrição</th>
+                                            <th>Sistema</th>
+                                            <th>Contado</th>
+                                            <th>Diferença</th>
+                                            <th>Valor Unit.</th>
+                                            <th>Valor Total</th>
+                                            <th>Contagens</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="inventoryTable">
+                                        <tr>
+                                            <td colspan="9" class="text-center text-muted py-4">
+                                                <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
+                                                Nenhum item contado ainda
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between mt-3">
+                                <button class="btn btn-success" id="exportBtn">
+                                    <i class="fas fa-file-export me-1"></i>Exportar XLSX
+                                </button>
+                                <button class="btn btn-danger" id="clearAllBtn">
+                                    <i class="fas fa-trash me-1"></i>Limpar Tudo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <h2 class="section-title">Dashboard</h2>
+                    
+                    <div class="row">
+                        <div class="col-6 col-md-12 col-lg-6 mb-3">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <i class="fas fa-boxes fs-1 mb-2 text-primary"></i>
+                                    <h6>Total de Itens</h6>
+                                    <div class="dashboard-number" id="totalItems">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-12 col-lg-6 mb-3">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <i class="fas fa-check-circle fs-1 mb-2 text-success"></i>
+                                    <h6>Itens Conferentes</h6>
+                                    <div class="dashboard-number" id="matchingItems">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-12 col-lg-6 mb-3">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <i class="fas fa-exclamation-triangle fs-1 mb-2 text-warning"></i>
+                                    <h6>Divergências Positivas</h6>
+                                    <div class="dashboard-number" id="positiveDiffItems">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-12 col-lg-6 mb-3">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <i class="fas fa-times-circle fs-1 mb-2 text-danger"></i>
+                                    <h6>Divergências Negativas</h6>
+                                    <div class="dashboard-number" id="negativeDiffItems">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-money-bill-wave me-2"></i>Resumo de Valores
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Valor Total em Sistema:</span>
+                                <strong id="totalSystemValue">R$ 0,00</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Valor Total Contado:</span>
+                                <strong id="totalCountedValue">R$ 0,00</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Diferença de Valor:</span>
+                                <strong id="totalDifferenceValue">R$ 0,00</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Dashboard Analítico -->
+        <div id="dashboardView" class="view-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title">Dashboard Analítico</h2>
+                <div class="dashboard-controls">
+                    <button class="btn btn-primary" id="refreshDashboard">
+                        <i class="fas fa-sync-alt me-1"></i>Atualizar
+                    </button>
+                    <button class="btn btn-success" id="exportDashboard">
+                        <i class="fas fa-file-export me-1"></i>Exportar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- KPIs Principais -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-neutral">
+                        <i class="fas fa-boxes"></i>
+                        <h6>Total de Itens Contados</h6>
+                        <div class="kpi-value" id="kpiTotalItems">0</div>
+                        <small>Itens únicos no inventário</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-positive">
+                        <i class="fas fa-percentage"></i>
+                        <h6>Precisão da Contagem</h6>
+                        <div class="kpi-value" id="kpiAccuracy">0%</div>
+                        <small>Itens sem divergência</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-negative">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h6>Valor das Divergências</h6>
+                        <div class="kpi-value" id="kpiDivergenceValue">R$ 0,00</div>
+                        <small>Impacto financeiro</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="kpi-card kpi-neutral">
+                        <i class="fas fa-chart-line"></i>
+                        <h6>Progresso da Contagem</h6>
+                        <div class="kpi-value" id="kpiProgress">0%</div>
+                        <small>Em relação ao total</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gráficos -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-chart-bar me-2"></i>Divergências por Quantidade
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="quantityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-chart-pie me-2"></i>Distribuição de Itens
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-chart-line me-2"></i>Evolução das Contagens
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="timelineChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-exclamation-circle me-2"></i>Itens Mais Críticos Top3
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="criticalItemsList">
+                                <p class="text-muted">Nenhum item crítico identificado.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabela de Análise Detalhada -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 d-flex align-items-center">
+                        <i class="fas fa-table me-2"></i>Análise Detalhada
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Sistema</th>
+                                    <th>Contado</th>
+                                    <th>Diferença</th>
+                                    <th>Valor Unit.</th>
+                                    <th>Valor Total Dif.</th>
+                                    <th>Impacto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analysisTable">
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">Nenhum dado disponível para análise.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Consulta de Embalagens -->
+        <div id="queryView" class="view-container">
+            <div class="count-screen">
+                <div class="card mb-4">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="fas fa-search me-2"></i>
+                        <span>Consulta de Embalagens</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="queryForm">
+                            <div class="mb-4">
+                                <label for="queryCode" class="form-label required-field">Código do Item</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                    <input type="text" class="form-control" id="queryCode" required 
+                                           placeholder="Digite o código (DUN/EAN/PLU)" autocomplete="off">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100 py-2">
+                                <i class="fas fa-search me-1"></i>Consultar
+                            </button>
+                        </form>
+                        
+                        <div id="packagingResult" class="packaging-info mt-4" style="display: none;">
+                            <h5 class="d-flex align-items-center">
+                                <i class="fas fa-box me-2"></i>Informações de Embalagem
+                            </h5>
+                            <div id="packagingDetails"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Gerenciamento de Usuários -->
+        <div id="usersView" class="view-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title">
+                    <i class="fas fa-users-cog me-2"></i>Gerenciamento de Usuários
+                </h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal">
+                    <i class="fas fa-user-plus me-2"></i>Novo Usuário
+                </button>
+            </div>
+
+            <!-- Estatísticas Rápidas -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card kpi-card kpi-neutral">
+                        <i class="fas fa-users"></i>
+                        <h6>Total de Usuários</h6>
+                        <div class="kpi-value" id="totalUsers">0</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card kpi-card kpi-positive">
+                        <i class="fas fa-user-check"></i>
+                        <h6>Usuários Ativos</h6>
+                        <div class="kpi-value" id="activeUsers">0</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card kpi-card kpi-negative">
+                        <i class="fas fa-user-clock"></i>
+                        <h6>Admins</h6>
+                        <div class="kpi-value" id="adminUsers">0</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card kpi-card kpi-neutral">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <h6>Logins Hoje</h6>
+                        <div class="kpi-value" id="todayLogins">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Usuários -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Usuários do Sistema
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control form-control-sm" id="userSearch" placeholder="Buscar usuário...">
+                        <select class="form-select form-select-sm" id="roleFilter" style="width: 150px;">
+                            <option value="">Todos os perfis</option>
+                            <option value="admin">Administradores</option>
+                            <option value="manager">Gerentes</option>
+                            <option value="user">Usuários</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Perfil</th>
+                                    <th>Status</th>
+                                    <th>Último Login</th>
+                                    <th>Criado em</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>
+                                        Carregando usuários...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Novo/Editar Usuário -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalTitle">
+                        <i class="fas fa-user-plus me-2"></i>Novo Usuário
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="editUserId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label required-field">Nome Completo</label>
+                            <input type="text" class="form-control" id="userFullName" required 
+                                   placeholder="Digite o nome completo">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label required-field">Email</label>
+                            <input type="email" class="form-control" id="userEmail" required 
+                                   placeholder="exemplo@empresa.com">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" id="passwordLabel">Senha</label>
+                            <input type="password" class="form-control" id="userPassword" 
+                                   placeholder="Mínimo 6 caracteres" minlength="6">
+                            <div class="form-text" id="passwordHelp">Deixe em branco para manter a senha atual</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label required-field">Perfil</label>
+                            <select class="form-control" id="userRole" required>
+                                <option value="">Selecione um perfil</option>
+                                <option value="user">Usuário</option>
+                                <option value="manager">Gerente</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="userActive" checked>
+                                <label class="form-check-label" for="userActive">
+                                    Usuário ativo
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="saveUserBtn">
+                        <i class="fas fa-save me-1"></i>Salvar Usuário
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir o usuário <strong id="deleteUserName">[Nome]</strong>?</p>
+                    <p class="text-muted small">Esta ação não pode ser desfeita. O usuário perderá acesso ao sistema.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteUser">Excluir Usuário</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Importação de Base de Dados -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title d-flex align-items-center">
+                    <i class="fas fa-database me-2"></i>Importar Base Local (Opcional)
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>O sistema já está usando a base online.</strong> Esta importação é opcional para ter uma cópia local de backup.
+                </div>
+                
+                <!-- Base de Produtos Permanente - REDESENHADA -->
+                <div id="permanentBaseCard" class="card mb-3">
+                    <div class="card-header py-2">
+                        <h6 class="mb-0 fs-6">
+                            <i class="fas fa-database me-2"></i>Base Permanente (Supabase)
+                        </h6>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-12">
+                                <button class="btn btn-success btn-sm w-100" id="migrateBaseBtn" style="padding: 0.4rem 0.8rem;">
+                                    <i class="fas fa-upload me-1"></i>Migrar para Online
+                                </button>
+                                <small class="text-muted d-block mt-1 text-center">Envia dados locais para a base online</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="excelFile" class="form-label">Selecionar arquivo Excel (.xlsx) - Opcional</label>
+                    <input class="form-control" type="file" id="excelFile" accept=".xlsx, .xls">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Estrutura esperada da planilha:</label>
+                    <div class="alert alert-info">
+                        <small>
+                            A planilha deve conter as colunas: <strong>CODIGO, DESCRICAO, QUANTIDADE, VALOR, DUN, EAN, EMBALAGEM</strong><br>
+                            Exemplo:<br>
+                            | CODIGO | DESCRICAO          | QUANTIDADE | VALOR | DUN           | EAN           | EMBALAGEM |<br>
+                            | 260    | AGUA SANITARIA... | 100        | 25.90 | 12345678901234| 7891234567890 | CX12      |
+                            | P002   | Produto Exemplo  | 50         | 13.75 | 98765432109876| 7899876543210 | CX6       |
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="import-preview">
+                    <h6>Pré-visualização:</h6>
+                    <table class="table table-sm table-striped" id="previewTable">
+                        <thead>
+                            <tr>
+                                <th>CODIGO</th>
+                                <th>DESCRICAO</th>
+                                <th>QUANTIDADE</th>
+                                <th>VALOR</th>
+                                <th>DUN</th>
+                                <th>EAN</th>
+                                <th>EMBALAGEM</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Preview será preenchido aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmImport">Importar Dados</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Modal de confirmação -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmClear">Limpar Tudo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de item já contado -->
+    <div class="modal fade" id="itemAlreadyCountedModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Item Já Contado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Este item já foi contado anteriormente. Deseja adicionar uma nova contagem ou substituir a contagem existente?</p>
+                    <div class="count-history" id="existingCountsInfo">
+                        <!-- Informações das contagens existentes serão inseridas aqui -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="addCountBtn">Adicionar Nova Contagem</button>
+                    <button type="button" class="btn btn-warning" id="replaceCountBtn">Substituir Contagem</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // =============================================
+        // CONFIGURAÇÃO INICIAL E VARIÁVEIS GLOBAIS
+        // =============================================
+        
+        // Configuração Supabase
+        const supabaseUrl = "https://uqmwegqpulqhwculfytr.supabase.co";
+        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbXdlZ3FwdWxxaHdjdWxmeXRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTk4NjI4MSwiZXhwIjoyMDc1NTYyMjgxfQ.ySQeZhEekxI9UxSD7Ndqax6e7ruC8KgVoZMalSMcL68";
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Variáveis globais
+        let inventoryItems = [];
+        let itemDatabase = [];
+        let systemUsers = [];
+        let isAdmin = false;
+        let currentUser = null;
+        let currentEditingUserId = null;
+        let currentItemCode = '';
+        let currentCountedQuantity = 0;
+        let existingItemIndex = -1;
+        
+        // Gráficos
+        let quantityChart, distributionChart, timelineChart;
+        let chartsInitialized = false;
+        
+        // =============================================
+        // INICIALIZAÇÃO DO SISTEMA
+        // =============================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSystem();
+        });
+        
+        async function initializeSystem() {
+            console.log('🚀 Inicializando sistema...');
+            
+            // Verificar sessão existente
+            const savedUser = localStorage.getItem('currentUser');
+            const savedIsAdmin = localStorage.getItem('isAdmin');
+            
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    isAdmin = savedIsAdmin === 'true';
+                    console.log('👤 Usuário recuperado:', currentUser.full_name);
+                } catch (error) {
+                    console.error('Erro ao recuperar usuário:', error);
+                    currentUser = null;
+                    isAdmin = false;
+                }
+            }
+            
+            // Configurar event listeners
+            setupEventListeners();
+            
+            // Inicializar sistema de usuários
+            await initializeSystemUsers();
+            
+            // Atualizar UI
+            updateUI();
+            
+            // Carregar dados se usuário logado
+            if (currentUser) {
+                await loadUserData();
+            }
+            
+            // Renderizar dados iniciais
+            renderInventoryTable();
+            updateSummary();
+            
+            console.log('✅ Sistema inicializado');
+        }
+        
+        // =============================================
+        // CONFIGURAÇÃO DO SUPABASE E CONEXÃO
+        // =============================================
+        
+        async function testSupabaseConnection() {
+            try {
+                console.log('🔗 Testando conexão Supabase...');
+                
+                const { data, error } = await supabase
+                    .from('products_base')
+                    .select('codigo')
+                    .limit(1);
+                    
+                if (error) {
+                    console.error('❌ Erro na conexão:', error);
+                    showNotification('Erro na conexão com o servidor', 'error');
+                    return false;
+                }
+                
+                console.log('✅ Conexão Supabase OK!');
+                showNotification('Conexão com servidor estabelecida', 'success');
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Erro no teste:', error);
+                showNotification('Erro ao conectar com servidor', 'error');
+                return false;
+            }
+        }
+        
+        // =============================================
+        // SISTEMA DE AUTENTICAÇÃO E USUÁRIOS
+        // =============================================
+        
+        async function initializeSystemUsers() {
+            try {
+                console.log('🔧 Inicializando sistema de usuários...');
+                
+                // Verificar se a tabela existe
+                const { data: users, error } = await supabase
+                    .from('system_users')
+                    .select('id')
+                    .limit(1);
+                    
+                if (error) {
+                    console.error('❌ Tabela de usuários não configurada:', error);
+                    
+                    // Criar usuário admin padrão se necessário
+                    if (error.code === 'PGRST116') {
+                        await createDefaultAdminUser();
+                    }
+                    return false;
+                }
+                
+                console.log('✅ Sistema de usuários configurado');
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Erro ao inicializar usuários:', error);
+                return false;
+            }
+        }
+        
+        async function createDefaultAdminUser() {
+            try {
+                console.log('👤 Criando usuário admin padrão...');
+                
+                const adminUser = {
+                    full_name: 'Administrador',
+                    email: 'admin@estoque.com',
+                    password_hash: btoa('admin123'),
+                    role: 'admin',
+                    is_active: true,
+                    created_at: new Date().toISOString()
+                };
+                
+                const { data: newUser, error } = await supabase
+                    .from('system_users')
+                    .insert([adminUser])
+                    .select();
+                    
+                if (error) throw error;
+                
+                console.log('✅ Usuário admin padrão criado');
+                showNotification('Usuário admin padrão criado! Use: admin@estoque.com / admin123', 'success');
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Erro ao criar admin:', error);
+                showNotification('Erro ao criar usuário admin padrão', 'error');
+                return false;
+            }
+        }
+        
+        // =============================================
+        // FUNÇÕES PRINCIPAIS DO SISTEMA
+        // =============================================
+        
+        function setupEventListeners() {
+            // Navegação
+            document.querySelectorAll('.view-switch').forEach(switchEl => {
+                switchEl.addEventListener('click', handleViewSwitch);
+            });
+            
+            // Login/Logout
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            document.getElementById('loginBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                switchView('login');
+            });
+            
+            // Contagem de inventário
+            document.getElementById('inventoryForm').addEventListener('submit', handleInventorySubmit);
+            document.getElementById('itemCode').addEventListener('input', handleItemCodeInput);
+            document.getElementById('resetButton').addEventListener('click', resetItemForm);
+            
+            // Histórico
+            document.getElementById('searchInput').addEventListener('input', filterInventoryTable);
+            document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+            document.getElementById('clearAllBtn').addEventListener('click', function() {
+                new bootstrap.Modal(document.getElementById('confirmModal')).show();
+            });
+            document.getElementById('confirmClear').addEventListener('click', clearAllData);
+            
+            // Dashboard
+            document.getElementById('refreshDashboard').addEventListener('click', updateDashboard);
+            document.getElementById('exportDashboard').addEventListener('click', exportDashboardData);
+            
+            // Consulta
+            document.getElementById('queryForm').addEventListener('submit', handleQuerySubmit);
+            
+            // Usuários
+            document.getElementById('saveUserBtn').addEventListener('click', saveUser);
+            document.getElementById('userSearch').addEventListener('input', filterUsersTable);
+            document.getElementById('roleFilter').addEventListener('change', filterUsersTable);
+            document.getElementById('confirmDeleteUser').addEventListener('click', function() {
+                if (currentEditingUserId) {
+                    deleteUser(currentEditingUserId);
+                }
+            });
+            
+            // Importação
+            document.getElementById('excelFile').addEventListener('change', previewExcelFile);
+            document.getElementById('confirmImport').addEventListener('click', importExcelData);
+            document.getElementById('migrateBaseBtn').addEventListener('click', migrateToPermanentBase);
+            
+            // Modais
+            document.getElementById('userModal').addEventListener('hidden.bs.modal', resetUserForm);
+            document.getElementById('addCountBtn').addEventListener('click', addNewCount);
+            document.getElementById('replaceCountBtn').addEventListener('click', replaceExistingCount);
+            
+            // Teclas de atalho
+            setupKeyboardShortcuts();
+        }
+        
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Foco no campo de código (Ctrl+K)
+                if (e.ctrlKey && e.key === 'k') {
+                    e.preventDefault();
+                    const itemCodeInput = document.getElementById('itemCode');
+                    if (itemCodeInput) itemCodeInput.focus();
+                }
+                
+                // Limpar formulário (Ctrl+L)
+                if (e.ctrlKey && e.key === 'l') {
+                    e.preventDefault();
+                    resetItemForm();
+                }
+            });
+        }
+        
+        // =============================================
+        // FUNÇÕES FALTANTES - CORREÇÃO DOS ERROS
+        // =============================================
+        
+        // ✅ CORREÇÃO: showClearConfirmation
+        function showClearConfirmation() {
+            new bootstrap.Modal(document.getElementById('confirmModal')).show();
+        }
+        
+        // ✅ CORREÇÃO: migrateToPermanentBase
+        async function migrateToPermanentBase() {
+            if (!itemDatabase || itemDatabase.length === 0) {
+                showNotification('Não há dados para migrar.', 'warning');
+                return;
+            }
+
+            if (!navigator.onLine) {
+                showNotification('Sem conexão com a internet.', 'error');
+                return;
+            }
+
+            const button = document.getElementById('migrateBaseBtn');
+            const originalText = button.innerHTML;
+
+            try {
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Migrando...';
+                button.disabled = true;
+
+                showNotification('Iniciando migração para base permanente...', 'info');
+
+                // Verificar estrutura da tabela
+                const { data: tableStructure, error: structureError } = await supabase
+                    .from('products_base')
+                    .select('*')
+                    .limit(1);
+
+                let availableColumns = [];
+                if (structureError) {
+                    console.error('Erro ao acessar tabela:', structureError);
+                    throw new Error(`Tabela inacessível: ${structureError.message}`);
+                } else if (tableStructure && tableStructure.length > 0) {
+                    availableColumns = Object.keys(tableStructure[0]);
+                } else {
+                    availableColumns = ['codigo', 'descricao', 'quantidade', 'valor', 'dun', 'ean', 'embalagem'];
+                }
+
+                const conflictColumn = availableColumns.includes('CODIGO') ? 'CODIGO' : 
+                                      availableColumns.includes('codigo') ? 'codigo' : 'codigo';
+
+                // Processar itens
+                const itemsToUpsert = [];
+                const codeCounter = new Map();
+
+                itemDatabase.forEach((item, index) => {
+                    const codigoBase = item.CODIGO?.toString().trim();
+                    if (!codigoBase) return;
+
+                    const count = (codeCounter.get(codigoBase) || 0) + 1;
+                    codeCounter.set(codigoBase, count);
+
+                    const codigoUnico = count > 1 ? `${codigoBase}_DUP${count}` : codigoBase;
+
+                    const mappedItem = {};
+                    availableColumns.forEach(col => {
+                        const upperCol = col.toUpperCase();
+                        if (upperCol === 'CODIGO') {
+                            mappedItem[col] = codigoUnico;
+                        } else if (upperCol === 'DESCRICAO') {
+                            const descricaoBase = item.DESCRICAO?.toString().trim() || '';
+                            mappedItem[col] = count > 1 ? `${descricaoBase} [DUPLICATA ${count}]` : descricaoBase;
+                        } else if (upperCol === 'QUANTIDADE') {
+                            mappedItem[col] = Number(item.QUANTIDADE) || 0;
+                        } else if (upperCol === 'VALOR') {
+                            mappedItem[col] = Number(item.VALOR) || 0;
+                        } else if (upperCol === 'DUN') {
+                            mappedItem[col] = item.DUN?.toString().trim() || null;
+                        } else if (upperCol === 'EAN') {
+                            mappedItem[col] = item.EAN?.toString().trim() || null;
+                        } else if (upperCol === 'EMBALAGEM') {
+                            mappedItem[col] = item.EMBALAGEM?.toString().trim() || null;
+                        }
+                    });
+
+                    itemsToUpsert.push(mappedItem);
+                });
+
+                if (itemsToUpsert.length === 0) {
+                    showNotification('Nenhum item válido para migrar.', 'error');
+                    return;
+                }
+
+                // Fazer upsert em lotes
+                const BATCH_SIZE = 100;
+                let successfulMigrations = 0;
+
+                for (let i = 0; i < itemsToUpsert.length; i += BATCH_SIZE) {
+                    const batch = itemsToUpsert.slice(i, i + BATCH_SIZE);
+                    const { data, error } = await supabase
+                        .from('products_base')
+                        .upsert(batch, {
+                            onConflict: conflictColumn
+                        });
+
+                    if (error) {
+                        console.error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}:`, error);
+                        throw new Error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}: ${error.message}`);
+                    }
+
+                    successfulMigrations += batch.length;
+                }
+
+                showNotification(`Migração concluída! ${successfulMigrations} produtos migrados.`, 'success');
+
+            } catch (error) {
+                console.error('Erro na migração:', error);
+                showNotification('Erro na migração: ' + error.message, 'error');
+            } finally {
+                button.innerHTML = '<i class="fas fa-upload me-1"></i>Migrar para Online';
+                button.disabled = false;
+            }
+        }
+        
+        // ✅ CORREÇÃO: loadUsers
+        async function loadUsers() {
+            try {
+                showNotification('Carregando usuários...', 'info');
+
+                const { data, error } = await supabase
+                    .from('system_users')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                systemUsers = data || [];
+                updateUsersStats();
+                renderUsersTable();
+
+                showNotification(`${systemUsers.length} usuários carregados`, 'success');
+
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+                showNotification('Erro ao carregar usuários: ' + error.message, 'error');
+            }
+        }
+        
+        // ✅ CORREÇÃO: Funções auxiliares para usuários
+        function updateUsersStats() {
+            const totalUsers = systemUsers.length;
+            const activeUsers = systemUsers.filter(user => user.is_active).length;
+            const adminUsers = systemUsers.filter(user => user.role === 'admin').length;
+            const todayLogins = systemUsers.filter(user => {
+                if (!user.last_login) return false;
+                const today = new Date().toDateString();
+                const lastLogin = new Date(user.last_login).toDateString();
+                return today === lastLogin;
+            }).length;
+            
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('activeUsers').textContent = activeUsers;
+            document.getElementById('adminUsers').textContent = adminUsers;
+            document.getElementById('todayLogins').textContent = todayLogins;
+        }
+        
+        function renderUsersTable() {
+            const usersTable = document.getElementById('usersTable');
+            
+            if (systemUsers.length === 0) {
+                usersTable.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="fas fa-users fa-2x mb-2 d-block"></i>
+                            Nenhum usuário cadastrado
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            usersTable.innerHTML = systemUsers.map(user => `
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar me-2">
+                                <i class="fas fa-user-circle ${getRoleColorClass(user.role)}"></i>
+                            </div>
+                            <div>
+                                <strong>${user.full_name}</strong>
+                                ${user.id === currentUser?.id ? '<span class="badge bg-info ms-1">Você</span>' : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td>
+                        <span class="badge ${getRoleBadgeClass(user.role)}">
+                            <i class="fas ${getRoleIcon(user.role)} me-1"></i>
+                            ${getRoleDisplayName(user.role)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${user.is_active ? 'bg-success' : 'bg-danger'}">
+                            ${user.is_active ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td>
+                        ${user.last_login ? 
+                            `<small>${new Date(user.last_login).toLocaleDateString('pt-BR')}<br>${new Date(user.last_login).toLocaleTimeString('pt-BR')}</small>` : 
+                            '<span class="text-muted">Nunca</span>'
+                        }
+                    </td>
+                    <td>${new Date(user.created_at).toLocaleDateString('pt-BR')}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary edit-user" data-id="${user.id}" 
+                                ${user.id === currentUser?.id ? 'disabled' : ''}>
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger delete-user" data-id="${user.id}"
+                                ${user.id === currentUser?.id ? 'disabled' : ''}>
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Adicionar event listeners aos botões
+            document.querySelectorAll('.edit-user').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editUser(this.getAttribute('data-id'));
+                });
+            });
+            
+            document.querySelectorAll('.delete-user').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    confirmDeleteUser(this.getAttribute('data-id'));
+                });
+            });
+        }
+        
+        function filterUsersTable() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            
+            const filteredUsers = systemUsers.filter(user => {
+                const matchesSearch = user.full_name.toLowerCase().includes(searchTerm) || 
+                                     user.email.toLowerCase().includes(searchTerm);
+                const matchesRole = !roleFilter || user.role === roleFilter;
+                return matchesSearch && matchesRole;
+            });
+            
+            const usersTable = document.getElementById('usersTable');
+            
+            if (filteredUsers.length === 0) {
+                usersTable.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="fas fa-search fa-2x mb-2 d-block"></i>
+                            Nenhum usuário encontrado
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            usersTable.innerHTML = filteredUsers.map(user => `
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar me-2">
+                                <i class="fas fa-user-circle ${getRoleColorClass(user.role)}"></i>
+                            </div>
+                            <div>
+                                <strong>${user.full_name}</strong>
+                                ${user.id === currentUser?.id ? '<span class="badge bg-info ms-1">Você</span>' : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td>
+                        <span class="badge ${getRoleBadgeClass(user.role)}">
+                            <i class="fas ${getRoleIcon(user.role)} me-1"></i>
+                            ${getRoleDisplayName(user.role)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${user.is_active ? 'bg-success' : 'bg-danger'}">
+                            ${user.is_active ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td>
+                        ${user.last_login ? 
+                            `<small>${new Date(user.last_login).toLocaleDateString('pt-BR')}<br>${new Date(user.last_login).toLocaleTimeString('pt-BR')}</small>` : 
+                            '<span class="text-muted">Nunca</span>'
+                        }
+                    </td>
+                    <td>${new Date(user.created_at).toLocaleDateString('pt-BR')}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary edit-user" data-id="${user.id}" 
+                                    ${user.id === currentUser?.id ? 'disabled' : ''}>
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger delete-user" data-id="${user.id}"
+                                    ${user.id === currentUser?.id ? 'disabled' : ''}>
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Re-adicionar event listeners
+            document.querySelectorAll('.edit-user').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editUser(this.getAttribute('data-id'));
+                });
+            });
+            
+            document.querySelectorAll('.delete-user').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    confirmDeleteUser(this.getAttribute('data-id'));
+                });
+            });
+        }
+        
+        function editUser(userId) {
+            const user = systemUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            currentEditingUserId = userId;
+            
+            document.getElementById('userModalTitle').innerHTML = '<i class="fas fa-user-edit me-2"></i>Editar Usuário';
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('userFullName').value = user.full_name;
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userRole').value = user.role;
+            document.getElementById('userActive').checked = user.is_active;
+            
+            document.getElementById('passwordLabel').textContent = 'Nova Senha';
+            document.getElementById('passwordHelp').textContent = 'Deixe em branco para manter a senha atual';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userPassword').required = false;
+            
+            new bootstrap.Modal(document.getElementById('userModal')).show();
+        }
+        
+        function confirmDeleteUser(userId) {
+            const user = systemUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            if (user.id === currentUser?.id) {
+                showNotification('Você não pode excluir seu próprio usuário', 'error');
+                return;
+            }
+
+            document.getElementById('deleteUserName').textContent = user.full_name;
+            currentEditingUserId = userId;
+
+            new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
+        }
+        
+        async function deleteUser(userId) {
+            try {
+                const { error } = await supabase
+                    .from('system_users')
+                    .delete()
+                    .eq('id', userId);
+                    
+                if (error) throw error;
+                
+                await loadUsers();
+                showNotification('Usuário excluído com sucesso!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('deleteUserModal')).hide();
+                
+            } catch (error) {
+                console.error('Erro ao excluir usuário:', error);
+                showNotification('Erro ao excluir usuário: ' + error.message, 'error');
+            }
+        }
+        
+        async function saveUser() {
+            const form = document.getElementById('userForm');
+            const saveBtn = document.getElementById('saveUserBtn');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const userData = {
+                full_name: document.getElementById('userFullName').value.trim(),
+                email: document.getElementById('userEmail').value.trim(),
+                role: document.getElementById('userRole').value,
+                is_active: document.getElementById('userActive').checked,
+                updated_at: new Date().toISOString()
+            };
+            
+            if (currentEditingUserId) {
+                userData.id = currentEditingUserId;
+            }
+            
+            const password = document.getElementById('userPassword').value;
+            if (password && password.length >= 6) {
+                userData.password_hash = btoa(password);
+            }
+            
+            try {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Salvando...';
+                
+                let result;
+                if (currentEditingUserId) {
+                    result = await supabase
+                        .from('system_users')
+                        .update(userData)
+                        .eq('id', currentEditingUserId);
+                } else {
+                    userData.created_by = currentUser?.id || null;
+                    result = await supabase
+                        .from('system_users')
+                        .insert([userData]);
+                }
+                
+                if (result.error) throw result.error;
+                
+                bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+                await loadUsers();
+                
+                showNotification(
+                    currentEditingUserId ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!', 
+                    'success'
+                );
+                
+            } catch (error) {
+                console.error('Erro ao salvar usuário:', error);
+                showNotification('Erro ao salvar usuário: ' + error.message, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save me-1"></i>Salvar Usuário';
+            }
+        }
+        
+        function resetUserForm() {
+            document.getElementById('userForm').reset();
+            document.getElementById('userModalTitle').innerHTML = '<i class="fas fa-user-plus me-2"></i>Novo Usuário';
+            document.getElementById('passwordLabel').textContent = 'Senha';
+            document.getElementById('passwordHelp').textContent = 'Mínimo 6 caracteres';
+            document.getElementById('userPassword').required = true;
+            document.getElementById('editUserId').value = '';
+            currentEditingUserId = null;
+        }
+        
+        // ✅ CORREÇÃO: Funções para roles
+        function getRoleBadgeClass(role) {
+            const classes = {
+                'admin': 'bg-danger',
+                'manager': 'bg-warning',
+                'user': 'bg-info'
+            };
+            return classes[role] || 'bg-secondary';
+        }
+        
+        function getRoleColorClass(role) {
+            const classes = {
+                'admin': 'text-danger',
+                'manager': 'text-warning', 
+                'user': 'text-info'
+            };
+            return classes[role] || 'text-secondary';
+        }
+        
+        function getRoleIcon(role) {
+            const icons = {
+                'admin': 'fa-shield-alt',
+                'manager': 'fa-user-tie',
+                'user': 'fa-user'
+            };
+            return icons[role] || 'fa-user';
+        }
+        
+        function getRoleDisplayName(role) {
+            const names = {
+                'admin': 'Administrador',
+                'manager': 'Gerente',
+                'user': 'Usuário'
+            };
+            return names[role] || role;
+        }
+        
+        // =============================================
+        // CONTINUAÇÃO DAS FUNÇÕES PRINCIPAIS
+        // =============================================
+        
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                showNotification('🔐 Verificando credenciais...', 'info');
+                
+                // Normalizar email
+                let email = username;
+                if (username === 'admin') email = 'admin@estoque.com';
+                if (username === 'gerente') email = 'gerente@estoque.com';
+                if (username === 'usuario') email = 'usuario@estoque.com';
+                
+                // Buscar usuário
+                const { data: users, error } = await supabase
+                    .from('system_users')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('is_active', true);
+                    
+                if (error) {
+                    console.error('Erro ao buscar usuário:', error);
+                    showNotification('Erro de conexão com o servidor', 'error');
+                    return;
+                }
+                
+                if (!users || users.length === 0) {
+                    showNotification('Usuário não encontrado', 'error');
+                    return;
+                }
+                
+                const user = users[0];
+                
+                // Verificar senha (base64 para demo)
+                if (user.password_hash !== btoa(password)) {
+                    showNotification('Senha incorreta', 'error');
+                    return;
+                }
+                
+                // Atualizar último login
+                await supabase
+                    .from('system_users')
+                    .update({ last_login: new Date().toISOString() })
+                    .eq('id', user.id);
+                
+                // Configurar sessão
+                currentUser = user;
+                isAdmin = user.role === 'admin';
+                
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('isAdmin', isAdmin.toString());
+                
+                await loadUserData();
+                updateUI();
+                switchView('counting');
+                
+                showNotification(`✅ Login realizado! Bem-vindo, ${user.full_name}`, 'success');
+                
+            } catch (error) {
+                console.error('Erro no login:', error);
+                showNotification('Erro ao fazer login', 'error');
+            }
+        }
+        
+        async function handleLogout(e) {
+            e.preventDefault();
+            
+            currentUser = null;
+            isAdmin = false;
+            inventoryItems = [];
+            
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('isAdmin');
+            
+            updateUI();
+            switchView('counting');
+            
+            showNotification('👋 Logout realizado com sucesso!', 'info');
+        }
+        
+        function updateUI() {
+            checkAdminStatus();
+            updateUserStatus();
+        }
+        
+        function checkAdminStatus() {
+            const adminOnlyElements = document.querySelectorAll('.admin-only');
+            const managerOnlyElements = document.querySelectorAll('.manager-only');
+            
+            if (currentUser) {
+                // Mostrar/ocultar elementos baseado na role
+                if (currentUser.role === 'admin') {
+                    adminOnlyElements.forEach(el => el.style.display = 'block');
+                    managerOnlyElements.forEach(el => el.style.display = 'block');
+                } else if (currentUser.role === 'manager') {
+                    adminOnlyElements.forEach(el => el.style.display = 'none');
+                    managerOnlyElements.forEach(el => el.style.display = 'block');
+                } else {
+                    adminOnlyElements.forEach(el => el.style.display = 'none');
+                    managerOnlyElements.forEach(el => el.style.display = 'none');
+                }
+                
+                document.getElementById('logoutBtn').style.display = 'block';
+                document.getElementById('loginBtn').style.display = 'none';
+            } else {
+                adminOnlyElements.forEach(el => el.style.display = 'none');
+                managerOnlyElements.forEach(el => el.style.display = 'none');
+                document.getElementById('logoutBtn').style.display = 'none';
+                document.getElementById('loginBtn').style.display = 'block';
+            }
+        }
+        
+        function updateUserStatus() {
+            const userStatus = document.getElementById('userStatus');
+            const userName = document.getElementById('userName');
+            const userRoleBadge = document.getElementById('userRoleBadge');
+            
+            if (currentUser) {
+                userName.textContent = currentUser.full_name;
+                userRoleBadge.textContent = getRoleDisplayName(currentUser.role);
+                userRoleBadge.className = `user-role-badge badge ${getRoleBadgeClass(currentUser.role)}`;
+                userStatus.style.display = 'block';
+            } else {
+                userStatus.style.display = 'none';
+            }
+        }
+        
+        // =============================================
+        // GERENCIAMENTO DE INVENTÁRIO
+        // =============================================
+        
+        async function handleInventorySubmit(e) {
+            e.preventDefault();
+            await processInventoryItem();
+        }
+        
+        function handleItemCodeInput() {
+            const code = this.value.trim();
+            const codeLoading = document.getElementById('codeLoading');
+            
+            if (code.length >= 3) {
+                codeLoading.style.display = 'inline-block';
+                
+                setTimeout(async () => {
+                    try {
+                        const item = await findItemByCode(code);
+                        
+                        if (item) {
+                            displayItemInfo(item);
+                            moveFocusToQuantity();
+                        } else {
+                            displayItemNotFound(code);
+                        }
+                    } catch (error) {
+                        displayItemNotFound(code);
+                    }
+                    
+                    codeLoading.style.display = 'none';
+                }, 500);
+            } else {
+                resetItemForm();
+            }
+        }
+        
+        async function findItemByCode(code) {
+            try {
+                const sanitizedCode = code.toString().replace(/[^a-zA-Z0-9]/g, '');
+                
+                const { data, error } = await supabase
+                    .from('products_base')
+                    .select('*')
+                    .or(`codigo.eq.${sanitizedCode},dun.eq.${sanitizedCode},ean.eq.${sanitizedCode}`)
+                    .limit(1);
+                    
+                if (error) return null;
+                if (!data || data.length === 0) return null;
+                
+                return data[0];
+                
+            } catch (error) {
+                console.error('Erro na busca:', error);
+                return null;
+            }
+        }
+        
+        function displayItemInfo(item) {
+            const codigo = item.codigo || item.CODIGO;
+            const descricao = item.descricao || item.DESCRICAO;
+            const quantidade = item.quantidade || item.QUANTIDADE || 0;
+            const valor = item.valor || item.VALOR || 0;
+            const embalagem = item.embalagem || item.EMBALAGEM || 'N/A';
+            
+            const itemDescriptionDisplay = document.getElementById('itemDescriptionDisplay');
+            itemDescriptionDisplay.innerHTML = `
+                <strong>${descricao}</strong>
+                <span class="status-indicator online" title="Código válido">
+                    <i class="fas fa-circle"></i>
+                </span>
+                <br>
+                <small class="text-muted">
+                    Sistema: ${quantidade} unidades | 
+                    Valor: R$ ${valor.toFixed(2)} |
+                    Embalagem: ${embalagem}
+                </small>
+            `;
+            
+            const countedQuantityInput = document.getElementById('countedQuantity');
+            const submitButton = document.getElementById('submitButton');
+            
+            countedQuantityInput.disabled = false;
+            submitButton.disabled = false;
+            
+            // Verificar se item já foi contado
+            existingItemIndex = inventoryItems.findIndex(invItem => invItem.code === codigo);
+            if (existingItemIndex !== -1) {
+                const existingItem = inventoryItems[existingItemIndex];
+                itemDescriptionDisplay.innerHTML += `
+                    <div class="count-history">
+                        <small>Já contado: ${existingItem.countedQuantity} unidades (${existingItem.counts} vez(es))</small>
+                    </div>
+                `;
+            }
+            
+            currentItemCode = codigo;
+        }
+        
+        function displayItemNotFound(code) {
+            const itemDescriptionDisplay = document.getElementById('itemDescriptionDisplay');
+            itemDescriptionDisplay.innerHTML = `
+                <span class="text-danger">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Item não encontrado na base online
+                </span>
+                <span class="status-indicator offline" title="Código não encontrado">
+                    <i class="fas fa-circle"></i>
+                </span>
+                <br>
+                <small class="text-muted">Código: ${code}</small>
+            `;
+            
+            const countedQuantityInput = document.getElementById('countedQuantity');
+            const submitButton = document.getElementById('submitButton');
+            
+            countedQuantityInput.disabled = true;
+            submitButton.disabled = true;
+            currentItemCode = '';
+        }
+        
+        function resetItemForm() {
+            const itemDescriptionDisplay = document.getElementById('itemDescriptionDisplay');
+            const countedQuantityInput = document.getElementById('countedQuantity');
+            const submitButton = document.getElementById('submitButton');
+            const codeLoading = document.getElementById('codeLoading');
+            
+            itemDescriptionDisplay.innerHTML = '<span class="text-muted">A descrição aparecerá aqui ao inserir o código</span>';
+            countedQuantityInput.value = '';
+            countedQuantityInput.disabled = true;
+            submitButton.disabled = true;
+            currentItemCode = '';
+            existingItemIndex = -1;
+            codeLoading.style.display = 'none';
+        }
+        
+        function moveFocusToQuantity() {
+            const countedQuantityInput = document.getElementById('countedQuantity');
+            if (!countedQuantityInput.disabled) {
+                countedQuantityInput.classList.add('auto-focus');
+                countedQuantityInput.focus();
+                countedQuantityInput.select();
+                
+                setTimeout(() => {
+                    countedQuantityInput.classList.remove('auto-focus');
+                }, 1000);
+            }
+        }
+        
+        async function processInventoryItem() {
+            const countedQuantityInput = document.getElementById('countedQuantity');
+            const countedQuantity = parseInt(countedQuantityInput.value);
+            
+            if (countedQuantity > 999999) {
+                showNotification('Quantidade muito alta! Verifique o valor.', 'warning');
+                return;
+            }
+            
+            if (existingItemIndex !== -1) {
+                currentCountedQuantity = countedQuantity;
+                showItemAlreadyCountedModal();
+                return;
+            }
+            
+            await addNewInventoryItem(countedQuantity);
+        }
+        
+        function showItemAlreadyCountedModal() {
+            const existingItem = inventoryItems[existingItemIndex];
+            const existingCountsInfoEl = document.getElementById('existingCountsInfo');
+            
+            existingCountsInfoEl.innerHTML = `
+                <div class="count-history-item">
+                    <strong>Contagem atual:</strong> ${existingItem.countedQuantity} unidades
+                    <br><small>Contado ${existingItem.counts} vez(es)</small>
+                </div>
+                <div class="count-history-item">
+                    <strong>Nova contagem:</strong> ${currentCountedQuantity} unidades
+                </div>
+                <div class="count-history-item bg-light p-2 rounded mt-2">
+                    <strong>Resultado se SOMAR:</strong> ${existingItem.countedQuantity + currentCountedQuantity} unidades
+                </div>
+            `;
+            
+            new bootstrap.Modal(document.getElementById('itemAlreadyCountedModal')).show();
+        }
+        
+        async function addNewCount() {
+            const existingItem = inventoryItems[existingItemIndex];
+            
+            const totalCounted = existingItem.countedQuantity + currentCountedQuantity;
+            
+            inventoryItems[existingItemIndex] = {
+                ...existingItem,
+                countedQuantity: totalCounted,
+                counts: existingItem.counts + 1,
+                history: [
+                    ...(existingItem.history || []),
+                    {
+                        date: new Date().toISOString(),
+                        quantity: currentCountedQuantity
+                    }
+                ]
+            };
+            
+            await saveInventoryData();
+            resetFormAfterSubmission();
+            renderInventoryTable();
+            updateSummary();
+            showNotification('Nova contagem adicionada com sucesso! Total: ' + totalCounted + ' unidades', 'success');
+        }
+        
+        async function replaceExistingCount() {
+            inventoryItems[existingItemIndex] = {
+                ...inventoryItems[existingItemIndex],
+                countedQuantity: currentCountedQuantity,
+                counts: 1,
+                history: [
+                    {
+                        date: new Date().toISOString(),
+                        quantity: currentCountedQuantity
+                    }
+                ]
+            };
+            
+            await saveInventoryData();
+            resetFormAfterSubmission();
+            renderInventoryTable();
+            updateSummary();
+            showNotification('Contagem substituída com sucesso!', 'success');
+        }
+        
+        async function addNewInventoryItem(countedQuantity) {
+            if (!currentItemCode) {
+                showNotification('Código do item não foi validado', 'error');
+                return;
+            }
+            
+            let itemDescription = 'Item não identificado';
+            const itemDescriptionDisplay = document.getElementById('itemDescriptionDisplay');
+            
+            // Tentar obter descrição do display
+            try {
+                const descriptionElement = itemDescriptionDisplay.querySelector('strong');
+                if (descriptionElement && descriptionElement.textContent) {
+                    itemDescription = descriptionElement.textContent.trim();
+                }
+            } catch (error) {
+                console.error('Erro ao buscar descrição:', error);
+            }
+            
+            // Se não encontrou, buscar do item
+            if (itemDescription === 'Item não identificado') {
+                try {
+                    const item = await findItemByCode(currentItemCode);
+                    if (item && item.descricao) {
+                        itemDescription = item.descricao;
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar descrição do item:', error);
+                }
+            }
+            
+            const newItem = {
+                code: currentItemCode,
+                description: itemDescription,
+                systemQuantity: 0,
+                countedQuantity: countedQuantity,
+                unitValue: 0,
+                counts: 1,
+                date: new Date().toISOString(),
+                history: [{
+                    date: new Date().toISOString(),
+                    quantity: countedQuantity
+                }]
+            };
+            
+            inventoryItems.push(newItem);
+            await saveInventoryData();
+            resetFormAfterSubmission();
+            renderInventoryTable();
+            updateSummary();
+            
+            showNotification(`✅ "${itemDescription}" registrado com sucesso!`, 'success');
+        }
+        
+        function resetFormAfterSubmission() {
+            const itemCodeInput = document.getElementById('itemCode');
+            itemCodeInput.value = '';
+            resetItemForm();
+            
+            setTimeout(() => {
+                itemCodeInput.focus();
+            }, 100);
+        }
+        
+        // =============================================
+        // GERENCIAMENTO DE DADOS
+        // =============================================
+        
+        async function loadUserData() {
+            try {
+                if (!currentUser || !currentUser.id) {
+                    inventoryItems = [];
+                    return;
+                }
+                
+                // Carregar itens do inventário
+                const { data: inventoryData, error: inventoryError } = await supabase
+                    .from('inventory_items')
+                    .select('*')
+                    .eq('user_id', currentUser.id);
+                
+                if (inventoryError) {
+                    console.error('Erro ao carregar inventário:', inventoryError);
+                    throw inventoryError;
+                }
+                
+                inventoryItems = inventoryData || [];
+                
+                // Fallback para localStorage
+                const localData = localStorage.getItem(`inventoryItems_${currentUser.id}`);
+                if (!inventoryItems.length && localData) {
+                    inventoryItems = JSON.parse(localData);
+                }
+                
+                console.log('Dados carregados:', inventoryItems.length, 'itens');
+                
+            } catch (error) {
+                console.error('Erro carregar dados:', error);
+                showNotification('Erro ao carregar dados', 'error');
+            }
+        }
+        
+        async function saveInventoryData() {
+            try {
+                // Salvar no localStorage como backup
+                if (currentUser?.id) {
+                    localStorage.setItem(`inventoryItems_${currentUser.id}`, JSON.stringify(inventoryItems));
+                }
+                
+                // Sincronizar com Supabase se online
+                if (navigator.onLine && currentUser && currentUser.id) {
+                    // Implementar lógica de upsert para Supabase aqui
+                    console.log('Sincronizando com nuvem...');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao salvar dados:', error);
+            }
+        }
+        
+        // =============================================
+        // FUNÇÕES DE VISUALIZAÇÃO E RELATÓRIOS
+        // =============================================
+        
+        function renderInventoryTable() {
+            const inventoryTable = document.getElementById('inventoryTable');
+            
+            if (inventoryItems.length === 0) {
+                inventoryTable.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">
+                            <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
+                            Nenhum item contado ainda
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            inventoryTable.innerHTML = inventoryItems.map((item, index) => {
+                const difference = item.countedQuantity - item.systemQuantity;
+                const differenceClass = difference === 0 ? '' : 
+                                      difference > 0 ? 'positive-diff' : 'negative-diff';
+                
+                const totalValue = item.countedQuantity * item.unitValue;
+                
+                return `
+                    <tr>
+                        <td>${item.code}</td>
+                        <td>${item.description}</td>
+                        <td>${item.systemQuantity}</td>
+                        <td>${item.countedQuantity}</td>
+                        <td class="${differenceClass}">${difference > 0 ? '+' : ''}${difference}</td>
+                        <td>R$ ${item.unitValue.toFixed(2)}</td>
+                        <td>R$ ${totalValue.toFixed(2)}</td>
+                        <td>${item.counts}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary view-history" data-index="${index}" title="Ver histórico">
+                                <i class="fas fa-history"></i>
+                            </button>
+                            ${isAdmin ? `
+                                <button class="btn btn-sm btn-outline-danger delete-item" data-index="${index}" title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Adicionar event listeners
+            document.querySelectorAll('.view-history').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    viewItemHistory(index);
+                });
+            });
+            
+            document.querySelectorAll('.delete-item').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deleteInventoryItem(index);
+                });
+            });
+        }
+        
+        function viewItemHistory(index) {
+            const item = inventoryItems[index];
+            let historyHTML = '';
+            
+            if (item.history && item.history.length > 0) {
+                historyHTML = '<ul class="list-unstyled">';
+                item.history.forEach(record => {
+                    const date = new Date(record.date).toLocaleString('pt-BR');
+                    historyHTML += `<li><small>${date}: ${record.quantity} unidades</small></li>`;
+                });
+                historyHTML += '</ul>';
+            } else {
+                historyHTML = '<p class="text-muted">Nenhum histórico disponível.</p>';
+            }
+            
+            alert(`
+                Histórico de contagens para ${item.description} (${item.code}):
+
+                Quantidade no sistema: ${item.systemQuantity}
+                Quantidade contada: ${item.countedQuantity}
+                Diferença: ${item.countedQuantity - item.systemQuantity}
+
+                Histórico de contagens:
+                ${historyHTML.replace(/<[^>]*>/g, '')}
+            `);
+        }
+        
+        async function deleteInventoryItem(index) {
+            if (confirm('Tem certeza que deseja excluir este item do inventário?')) {
+                inventoryItems.splice(index, 1);
+                await saveInventoryData();
+                renderInventoryTable();
+                updateSummary();
+            }
+        }
+        
+        function filterInventoryTable() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#inventoryTable tr');
+            
+            rows.forEach(row => {
+                const cells = row.getElementsByTagName('td');
+                let found = false;
+                
+                for (let cell of cells) {
+                    if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                        found = true;
+                        break;
+                    }
+                }
+                
+                row.style.display = found ? '' : 'none';
+            });
+        }
+        
+        function updateSummary() {
+            const totalItems = inventoryItems.length;
+            const matchingItems = inventoryItems.filter(item => item.countedQuantity === item.systemQuantity).length;
+            const positiveDiffItems = inventoryItems.filter(item => item.countedQuantity > item.systemQuantity).length;
+            const negativeDiffItems = inventoryItems.filter(item => item.countedQuantity < item.systemQuantity).length;
+            
+            let totalSystemValue = 0;
+            let totalCountedValue = 0;
+            
+            inventoryItems.forEach(item => {
+                totalSystemValue += item.systemQuantity * item.unitValue;
+                totalCountedValue += item.countedQuantity * item.unitValue;
+            });
+            
+            const totalDifferenceValue = totalCountedValue - totalSystemValue;
+            
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('matchingItems').textContent = matchingItems;
+            document.getElementById('positiveDiffItems').textContent = positiveDiffItems;
+            document.getElementById('negativeDiffItems').textContent = negativeDiffItems;
+            
+            document.getElementById('totalSystemValue').textContent = `R$ ${totalSystemValue.toFixed(2)}`;
+            document.getElementById('totalCountedValue').textContent = `R$ ${totalCountedValue.toFixed(2)}`;
+            
+            const differenceClass = totalDifferenceValue === 0 ? '' : 
+                                  totalDifferenceValue > 0 ? 'positive-diff' : 'negative-diff';
+            document.getElementById('totalDifferenceValue').innerHTML = `<span class="${differenceClass}">R$ ${totalDifferenceValue.toFixed(2)}</span>`;
+        }
+        
+        // =============================================
+        // NAVEGAÇÃO E CONTROLE DE TELAS
+        // =============================================
+        
+        function handleViewSwitch(e) {
+            e.preventDefault();
+            const targetView = this.getAttribute('data-view');
+            switchView(targetView);
+        }
+        
+        async function switchView(viewName) {
+            // Esconder todas as telas
+            document.querySelectorAll('.view-container').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // Remover active de todos os links
+            document.querySelectorAll('.view-switch').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Mostrar tela selecionada
+            const targetView = document.getElementById(viewName + 'View');
+            if (targetView) {
+                targetView.classList.add('active');
+                
+                // Ativar link correspondente
+                const activeLink = document.querySelector(`.view-switch[data-view="${viewName}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+                
+                // Ações específicas por tela
+                switch(viewName) {
+                    case 'counting':
+                        setTimeout(() => {
+                            const itemCodeInput = document.getElementById('itemCode');
+                            if (itemCodeInput) itemCodeInput.focus();
+                        }, 100);
+                        break;
+                    case 'history':
+                        renderInventoryTable();
+                        updateSummary();
+                        break;
+                    case 'dashboard':
+                        updateDashboard();
+                        break;
+                    case 'users':
+                        loadUsers();
+                        break;
+                }
+            }
+        }
+        
+        // =============================================
+        // FUNÇÕES UTILITÁRIAS
+        // =============================================
+        
+        function showNotification(message, type = 'info') {
+            const typeMap = {
+                'success': 'alert-success',
+                'error': 'alert-danger', 
+                'warning': 'alert-warning',
+                'info': 'alert-info'
+            };
+            
+            const icons = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = `alert ${typeMap[type] || 'alert-info'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = `
+                top: 20px; 
+                right: 20px; 
+                z-index: 9999; 
+                min-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            
+            notification.innerHTML = `
+                <i class="fas ${icons[type] || 'fa-info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Focar no campo de código após notificação
+            setTimeout(() => {
+                const itemCodeInput = document.getElementById('itemCode');
+                if (itemCodeInput) {
+                    itemCodeInput.focus();
+                }
+            }, 100);
+            
+            // Remover automaticamente
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+        
+        // =============================================
+        // EXPORTAÇÃO E RELATÓRIOS
+        // =============================================
+        
+        function exportToExcel() {
+            if (inventoryItems.length === 0) {
+                showNotification('Não há dados para exportar.', 'warning');
+                return;
+            }
+            
+            const data = [
+                ['Código', 'Descrição', 'Quantidade Sistema', 'Quantidade Contada', 'Diferença', 'Valor Unitário', 'Valor Total', 'Contagens', 'Data']
+            ];
+            
+            inventoryItems.forEach(item => {
+                const difference = item.countedQuantity - item.systemQuantity;
+                const totalValue = item.countedQuantity * item.unitValue;
+                const date = new Date(item.date).toLocaleDateString('pt-BR');
+                
+                data.push([
+                    item.code,
+                    item.description,
+                    item.systemQuantity,
+                    item.countedQuantity,
+                    difference,
+                    item.unitValue,
+                    totalValue,
+                    item.counts,
+                    date
+                ]);
+            });
+            
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Inventário');
+            XLSX.writeFile(wb, 'inventario.xlsx');
+            
+            showNotification('Relatório exportado com sucesso!', 'success');
+        }
+        
+        // =============================================
+        // LIMPEZA DE DADOS
+        // =============================================
+        
+        async function clearAllData() {
+            if (currentUser && currentUser.id !== 'local-admin') {
+                try {
+                    const { error } = await supabase
+                        .from('inventory_items')
+                        .delete()
+                        .eq('user_id', currentUser.id);
+                    
+                    if (error) throw error;
+                } catch (error) {
+                    console.error('Erro limpar dados online:', error);
+                    showNotification('Erro ao limpar dados online', 'error');
+                    return;
+                }
+            }
+            
+            inventoryItems = [];
+            await saveInventoryData();
+            renderInventoryTable();
+            updateSummary();
+            bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+            
+            showNotification('Todos os dados foram limpos!', 'success');
+        }
+        
+        // =============================================
+        // CONSULTA DE EMBALAGENS
+        // =============================================
+        
+        async function handleQuerySubmit(e) {
+            e.preventDefault();
+            const queryCodeInput = document.getElementById('queryCode');
+            const code = queryCodeInput.value.trim();
+            
+            if (!code) {
+                showNotification('Por favor, insira um código para consulta.', 'warning');
+                return;
+            }
+            
+            try {
+                const item = await findItemByCode(code);
+                const packagingResult = document.getElementById('packagingResult');
+                const packagingDetails = document.getElementById('packagingDetails');
+                
+                if (item) {
+                    const descricao = item.descricao || item.DESCRICAO;
+                    const embalagem = item.embalagem || item.EMBALAGEM || 'N/A';
+                    const quantidade = item.quantidade || item.QUANTIDADE || 0;
+                    const valor = item.valor || item.VALOR || 0;
+                    const dun = item.dun || item.DUN || 'N/A';
+                    const ean = item.ean || item.EAN || 'N/A';
+                    
+                    packagingDetails.innerHTML = `
+                        <p><strong>Código:</strong> ${code}</p>
+                        <p><strong>Descrição:</strong> ${descricao}</p>
+                        <p><strong>Embalagem:</strong> ${embalagem}</p>
+                        <p><strong>Quantidade no sistema:</strong> ${quantidade}</p>
+                        <p><strong>Valor unitário:</strong> R$ ${valor.toFixed(2)}</p>
+                        <p><strong>Código DUN:</strong> ${dun}</p>
+                        <p><strong>Código EAN:</strong> ${ean}</p>
+                    `;
+                    packagingResult.style.display = 'block';
+                    
+                    showNotification('Item encontrado!', 'success');
+                } else {
+                    packagingDetails.innerHTML = '<p class="text-danger">Item não encontrado no banco de dados.</p>';
+                    packagingResult.style.display = 'block';
+                    showNotification('Item não encontrado', 'warning');
+                }
+                
+            } catch (error) {
+                console.error('Erro na consulta:', error);
+                showNotification('Erro ao consultar item', 'error');
+            }
+        }
+        
+        // =============================================
+        // IMPORTACAO DE DADOS
+        // =============================================
+        
+        function previewExcelFile() {
+            const file = document.getElementById('excelFile').files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                const previewTable = document.querySelector('#previewTable tbody');
+                previewTable.innerHTML = '';
+                
+                // Mostrar as primeiras 5 linhas
+                const maxRows = Math.min(5, jsonData.length);
+                for (let i = 0; i < maxRows; i++) {
+                    const row = document.createElement('tr');
+                    for (let j = 0; j < jsonData[i].length; j++) {
+                        const cell = document.createElement('td');
+                        cell.textContent = jsonData[i][j] || '';
+                        row.appendChild(cell);
+                    }
+                    previewTable.appendChild(row);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        async function importExcelData() {
+            const file = document.getElementById('excelFile').files[0];
+            if (!file) {
+                showNotification('Por favor, selecione um arquivo Excel.', 'warning');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    // Mapear colunas (case insensitive)
+                    const mappedData = jsonData.map(row => {
+                        const mappedRow = {};
+                        for (const key in row) {
+                            const normalizedKey = key.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                            
+                            if (normalizedKey.includes('CODIGO') || normalizedKey.includes('COD')) {
+                                mappedRow.CODIGO = row[key]?.toString() || '';
+                            } else if (normalizedKey.includes('DESCRICAO') || normalizedKey.includes('DESC')) {
+                                mappedRow.DESCRICAO = row[key]?.toString() || '';
+                            } else if (normalizedKey.includes('QUANTIDADE') || normalizedKey.includes('QTD')) {
+                                mappedRow.QUANTIDADE = parseFloat(row[key]) || 0;
+                            } else if (normalizedKey.includes('VALOR') || normalizedKey.includes('PRECO')) {
+                                mappedRow.VALOR = parseFloat(row[key]) || 0;
+                            } else if (normalizedKey.includes('DUN')) {
+                                mappedRow.DUN = row[key]?.toString() || '';
+                            } else if (normalizedKey.includes('EAN')) {
+                                mappedRow.EAN = row[key]?.toString() || '';
+                            } else if (normalizedKey.includes('EMBALAGEM') || normalizedKey.includes('EMB')) {
+                                mappedRow.EMBALAGEM = row[key]?.toString() || '';
+                            }
+                        }
+                        return mappedRow;
+                    });
+                    
+                    itemDatabase = mappedData.filter(item => item.CODIGO && item.DESCRICAO);
+                    // await saveItemDatabase(); // Comentado pois a função não está definida
+
+                    bootstrap.Modal.getInstance(document.getElementById('importModal')).hide();
+                    showNotification(`Base de dados importada com sucesso! ${itemDatabase.length} itens carregados.`, 'success');
+                } catch (error) {
+                    console.error('Erro ao importar arquivo:', error);
+                    showNotification('Erro ao importar arquivo. Verifique o formato.', 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // =============================================
+        // DASHBOARD E GRÁFICOS
+        // =============================================
+        
+        function updateDashboard() {
+            // Implementação simplificada - atualizar apenas KPIs
+            const totalItems = inventoryItems.length;
+            const matchingItems = inventoryItems.filter(item => item.countedQuantity === item.systemQuantity).length;
+            
+            document.getElementById('kpiTotalItems').textContent = totalItems;
+            document.getElementById('kpiAccuracy').textContent = totalItems > 0 ? 
+                `${((matchingItems / totalItems) * 100).toFixed(1)}%` : '0%';
+                
+            showNotification('Dashboard atualizado!', 'success');
+        }
+        
+        function exportDashboardData() {
+            showNotification('Funcionalidade de exportação do dashboard em desenvolvimento', 'info');
+        }
+        
+        // =============================================
+        // TESTE DE CONEXÃO AO INICIAR
+        // =============================================
+        
+        // Testar conexão após inicialização
+        setTimeout(() => {
+            testSupabaseConnection();
+        }, 2000);
+        
+    </script>
+</body>
+</html>

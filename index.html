@@ -1423,7 +1423,7 @@
         // Configuração Supabase
         const supabaseUrl = "https://uqmwegqpulqhwculfytr.supabase.co";
         const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbXdlZ3FwdWxxaHdjdWxmeXRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTk4NjI4MSwiZXhwIjoyMDc1NTYyMjgxfQ.ySQeZhEekxI9UxSD7Ndqax6e7ruC8KgVoZMalSMcL68";
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         
         // Variáveis globais
         let inventoryItems = [];
@@ -1496,7 +1496,7 @@
             try {
                 console.log('🔗 Testando conexão Supabase...');
                 
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('products_base')
                     .select('codigo')
                     .limit(1);
@@ -1527,7 +1527,7 @@
                 console.log('🔧 Inicializando sistema de usuários...');
                 
                 // Verificar se a tabela existe
-                const { data: users, error } = await supabase
+                const { data: users, error } = await supabaseClient
                     .from('system_users')
                     .select('id')
                     .limit(1);
@@ -1564,7 +1564,7 @@
                     created_at: new Date().toISOString()
                 };
                 
-                const { data: newUser, error } = await supabase
+                const { data: newUser, error } = await supabaseClient
                     .from('system_users')
                     .insert([adminUser])
                     .select();
@@ -1692,7 +1692,7 @@
                 showNotification('Iniciando migração para base permanente...', 'info');
 
                 // Verificar estrutura da tabela
-                const { data: tableStructure, error: structureError } = await supabase
+                const { data: tableStructure, error: structureError } = await supabaseClient
                     .from('products_base')
                     .select('*')
                     .limit(1);
@@ -1758,7 +1758,7 @@
 
                 for (let i = 0; i < itemsToUpsert.length; i += BATCH_SIZE) {
                     const batch = itemsToUpsert.slice(i, i + BATCH_SIZE);
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('products_base')
                         .upsert(batch, {
                             onConflict: conflictColumn
@@ -1788,7 +1788,7 @@
             try {
                 showNotification('Carregando usuários...', 'info');
 
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('system_users')
                     .select('*')
                     .order('created_at', { ascending: false });
@@ -2025,7 +2025,7 @@
         
         async function deleteUser(userId) {
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('system_users')
                     .delete()
                     .eq('id', userId);
@@ -2074,13 +2074,13 @@
                 
                 let result;
                 if (currentEditingUserId) {
-                    result = await supabase
+                    result = await supabaseClient
                         .from('system_users')
                         .update(userData)
                         .eq('id', currentEditingUserId);
                 } else {
                     userData.created_by = currentUser?.id || null;
-                    result = await supabase
+                    result = await supabaseClient
                         .from('system_users')
                         .insert([userData]);
                 }
@@ -2171,7 +2171,7 @@
                 if (username === 'usuario') email = 'usuario@estoque.com';
                 
                 // Buscar usuário
-                const { data: users, error } = await supabase
+                const { data: users, error } = await supabaseClient
                     .from('system_users')
                     .select('*')
                     .eq('email', email)
@@ -2197,7 +2197,7 @@
                 }
                 
                 // Atualizar último login
-                await supabase
+                await supabaseClient
                     .from('system_users')
                     .update({ last_login: new Date().toISOString() })
                     .eq('id', user.id);
@@ -2325,7 +2325,7 @@
             try {
                 const sanitizedCode = code.toString().replace(/[^a-zA-Z0-9]/g, '');
                 
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('products_base')
                     .select('*')
                     .or(`codigo.eq.${sanitizedCode},dun.eq.${sanitizedCode},ean.eq.${sanitizedCode}`)
@@ -2592,7 +2592,7 @@
                 }
                 
                 // Carregar itens do inventário
-                const { data: inventoryData, error: inventoryError } = await supabase
+                const { data: inventoryData, error: inventoryError } = await supabaseClient
                     .from('inventory_items')
                     .select('*')
                     .eq('user_id', currentUser.id);
@@ -2940,7 +2940,7 @@
         async function clearAllData() {
             if (currentUser && currentUser.id !== 'local-admin') {
                 try {
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('inventory_items')
                         .delete()
                         .eq('user_id', currentUser.id);

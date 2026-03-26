@@ -57,7 +57,6 @@
         color: var(--text-primary);
     }
     
-    /* Navbar */
     .navbar {
         background: linear-gradient(135deg, #64748b, #475569) !important;
         box-shadow: 0 4px 20px rgba(71, 85, 105, 0.15);
@@ -111,7 +110,6 @@
         font-size: 1.1rem;
     }
     
-    /* Cards */
     .card {
         border: none;
         border-radius: 12px;
@@ -139,7 +137,6 @@
         padding: 1.5rem;
     }
     
-    /* Botões */
     .btn-primary {
         background: linear-gradient(135deg, #64748b, #475569) !important;
         border: none;
@@ -204,7 +201,6 @@
         color: #713f12 !important;
     }
     
-    /* Formulários */
     .form-control {
         border: 2px solid #e0e0e0;
         border-radius: 8px;
@@ -224,7 +220,6 @@
         margin-bottom: 0.5rem;
     }
     
-    /* Tela de Login */
     .login-container {
         max-width: 440px;
         margin: 80px auto;
@@ -246,7 +241,6 @@
         padding: 2.5rem;
     }
     
-    /* Tela de Contagem */
     .count-screen {
         max-width: 600px;
         width: 100%;
@@ -267,7 +261,6 @@
         border-left: 4px solid var(--primary-main);
     }
     
-    /* Animações */
     .auto-focus {
         animation: pulse-focus 0.6s ease-in-out;
         box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.3);
@@ -294,7 +287,6 @@
         100% { transform: rotate(360deg); }
     }
     
-    /* Dashboard */
     .kpi-card {
         text-align: center;
         padding: 1.5rem;
@@ -314,7 +306,7 @@
         margin-bottom: 1rem;
         background: var(--gradient-primary);
         -webkit-background-clip: text;
-        background-clip: text; /* ✅ CORREÇÃO APLICADA */
+        background-clip: text;
         -webkit-text-fill-color: transparent;
     }
     
@@ -325,26 +317,6 @@
         color: var(--primary-main);
     }
     
-    .kpi-positive {
-        border-top-color: var(--accent-success);
-    }
-    
-    .kpi-negative {
-        border-top-color: var(--accent-danger);
-    }
-    
-    .kpi-neutral {
-        border-top-color: var(--accent-info);
-    }
-    
-    /* Gráficos */
-    .chart-container {
-        position: relative;
-        height: 300px;
-        margin-bottom: 20px;
-    }
-    
-    /* Tabelas */
     .table {
         border-collapse: separate;
         border-spacing: 0;
@@ -370,7 +342,6 @@
         background: rgba(100, 116, 139, 0.03);
     }
     
-    /* Badges */
     .badge {
         padding: 0.5rem 0.75rem;
         border-radius: 6px;
@@ -378,27 +349,6 @@
         font-size: 0.75rem;
     }
     
-    .badge.bg-primary {
-        background: var(--gradient-primary) !important;
-        color: white !important;
-    }
-    
-    .badge.bg-success {
-        background: var(--gradient-secondary) !important;
-        color: #065f46 !important;
-    }
-    
-    .badge.bg-danger {
-        background: linear-gradient(135deg, var(--accent-danger) 0%, #f87171 100%) !important;
-        color: #991b1b !important;
-    }
-    
-    .badge.bg-warning {
-        background: linear-gradient(135deg, var(--accent-warning) 0%, #fbbf24 100%) !important;
-        color: #713f12 !important;
-    }
-    
-    /* Itens Críticos */
     .critical-item {
         background: rgba(244, 67, 54, 0.05);
         border-left: 4px solid var(--accent-danger);
@@ -412,19 +362,6 @@
         background: rgba(244, 67, 54, 0.08);
     }
     
-    /* Progress Bars */
-    .progress {
-        height: 10px;
-        border-radius: 10px;
-        background: #f0f0f0;
-        overflow: hidden;
-    }
-    
-    .progress-bar {
-        border-radius: 10px;
-    }
-    
-    /* Modais */
     .modal-content {
         border: none;
         border-radius: 16px;
@@ -449,7 +386,6 @@
         background: var(--neutral-bg);
     }
     
-    /* Navegação entre Telas */
     .view-container {
         display: none;
         flex: 1;
@@ -466,7 +402,6 @@
         to { opacity: 1; transform: translateY(0); }
     }
     
-    /* Seção de Títulos */
     .section-title {
         border-bottom: 3px solid var(--primary-main);
         padding-bottom: 0.75rem;
@@ -476,17 +411,15 @@
         display: inline-block;
     }
     
-    /* Dashboard */
     .dashboard-number {
         font-size: 2.5rem;
         font-weight: 700;
         background: var(--gradient-primary);
         -webkit-background-clip: text;
-        background-clip: text; /* ✅ CORREÇÃO APLICADA */
+        background-clip: text;
         -webkit-text-fill-color: transparent;
     }
     
-    /* Diferenciação de Valores */
     .positive-diff {
         color: var(--accent-success);
         font-weight: 600;
@@ -497,13 +430,11 @@
         font-weight: 600;
     }
     
-    /* Indicador de Campo Obrigatório */
     .required-field::after {
         content: " *";
         color: var(--accent-danger);
     }
     
-    /* Responsividade */
     @media (max-width: 768px) {
         .navbar-brand {
             font-size: 1.3rem;
@@ -531,7 +462,6 @@
         }
     }
 
-    /* Indicadores de status */
     .status-indicator {
         display: inline-block !important;
         margin-left: 8px !important;
@@ -551,7 +481,6 @@
         color: var(--accent-danger) !important;
     }
 
-    /* Controle de Acesso */
     .admin-only {
         display: none !important;
     }
@@ -576,7 +505,6 @@
         font-weight: 600;
     }
 
-    /* Badges para roles */
     .badge-role-admin {
         background: linear-gradient(135deg, #f44336, #d32f2f) !important;
     }
@@ -589,7 +517,6 @@
         background: linear-gradient(135deg, #2196f3, #1976d2) !important;
     }
 
-    /* Botões Outline Corrigidos */
     .btn-outline-primary {
         border: none !important;
         color: white !important;
@@ -626,35 +553,30 @@
         border: none !important;
     }
 
-    /* Estilo para logo transparente */
     .logo-transparent {
         filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)) saturate(1.2);
         background: transparent;
         mix-blend-mode: multiply;
     }
 
-    /* Estilo para favicon transparente */
     .favicon-transparent {
         filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)) saturate(1.2);
         background: transparent;
         mix-blend-mode: multiply;
     }
 
-    /* Estilo global para imagens com fundo a ser removido */
     img[src*="postimg.cc"] {
         filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)) saturate(1.2);
         background: transparent;
         mix-blend-mode: multiply;
     }
 
-    /* Estilo para favicon processado */
     .favicon-processed {
         filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)) saturate(1.2);
         background: transparent;
         mix-blend-mode: multiply;
     }
 
-    /* Garantir cores nos botões */
     .btn {
         -webkit-text-fill-color: unset !important;
     }
@@ -663,40 +585,36 @@
         -webkit-text-fill-color: unset !important;
     }
 
-    /* Estilos para o card de base permanente */
-#permanentBaseCard {
-    margin-bottom: 1rem !important;
-}
+    #permanentBaseCard {
+        margin-bottom: 1rem !important;
+    }
 
-#permanentBaseCard .card-header {
-    padding: 0.5rem 1rem !important;
-    background: linear-gradient(135deg, #86efac, #4ade80) !important;
-    color: #065f46;
-}
+    #permanentBaseCard .card-header {
+        padding: 0.5rem 1rem !important;
+        background: linear-gradient(135deg, #86efac, #4ade80) !important;
+        color: #065f46;
+    }
 
-#permanentBaseCard .card-body {
-    padding: 0.75rem 1rem !important;
-}
+    #permanentBaseCard .card-body {
+        padding: 0.75rem 1rem !important;
+    }
 
-#migrateBaseBtn {
-    font-size: 0.8rem;
-    padding: 0.35rem 0.7rem;
-}
+    #migrateBaseBtn {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.7rem;
+    }
 
-/* Itens da navbar ocultos até o login */
-.navbar-nav {
-    display: none !important;
-}
+    .navbar-nav {
+        display: none !important;
+    }
 
-.navbar-nav.visible {
-    display: flex !important;
-}
-
+    .navbar-nav.visible {
+        display: flex !important;
+    }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="#">
@@ -709,7 +627,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <!-- Status do usuário logado -->
                     <li class="nav-item">
                         <span class="nav-link user-status" id="userStatus" style="display: none;">
                             <i class="fas fa-user me-1"></i>
@@ -718,49 +635,42 @@
                         </span>
                     </li>
                     
-                    <!-- Contagem - Disponível para todos -->
                     <li class="nav-item">
                         <a class="nav-link active view-switch" data-view="counting" href="#">
                             <i class="fas fa-clipboard-check"></i> Contagem
                         </a>
                     </li>
                     
-                    <!-- Histórico - Manager e Admin -->
                     <li class="nav-item">
                         <a class="nav-link view-switch manager-only" data-view="history" href="#">
                             <i class="fas fa-history"></i> Histórico
                         </a>
                     </li>
                     
-                    <!-- Dashboard - Manager e Admin -->
                     <li class="nav-item">
                         <a class="nav-link view-switch manager-only" data-view="dashboard" href="#">
                             <i class="fas fa-chart-line"></i> Dashboard
                         </a>
                     </li>
                     
-                    <!-- Base de Dados - Apenas Admin -->
                     <li class="nav-item">
                         <a class="nav-link admin-only" href="#" data-bs-toggle="modal" data-bs-target="#importModal">
                             <i class="fas fa-database"></i> Base de Dados
                         </a>
                     </li>
                     
-                    <!-- Usuários - Apenas Admin -->
                     <li class="nav-item">
                         <a class="nav-link view-switch admin-only" data-view="users" href="#">
                             <i class="fas fa-users-cog"></i> Usuários
                         </a>
                     </li>
                     
-                    <!-- Botão Sair -->
                     <li class="nav-item">
                         <a class="nav-link" href="#" id="logoutBtn" style="display: none;">
                             <i class="fas fa-sign-out-alt"></i> Sair
                         </a>
                     </li>
                     
-                    <!-- Botão Login -->
                     <li class="nav-item">
                         <a class="nav-link" href="#" id="loginBtn">
                             <i class="fas fa-user-shield"></i> Login
@@ -771,7 +681,6 @@
         </div>
     </nav>
 
-    <!-- Tela de Login -->
     <div id="loginView" class="view-container active">
         <div class="login-container">
             <div class="card">
@@ -811,7 +720,6 @@
     </div>
 
     <div class="container mt-4">
-        <!-- Tela de Contagem -->
         <div id="countingView" class="view-container">
             <div class="count-screen">
                 <div class="card">
@@ -884,7 +792,6 @@
             </div>
         </div>
 
-        <!-- Tela de Histórico -->
         <div id="historyView" class="view-container">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="section-title">Contagem de Inventário</h2>
@@ -905,8 +812,7 @@
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover">
                                     <thead>
-                                        <tr>
-                                            <th>Tipo</th>
+                                        32<th>Tipo</th>
                                             <th>Código</th>
                                             <th>Descrição</th>
                                             <th>Sistema</th>
@@ -1007,7 +913,6 @@
             </div>
         </div>
 
-        <!-- Tela de Dashboard Analítico -->
         <div id="dashboardView" class="view-container">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="section-title">Dashboard Analítico</h2>
@@ -1021,7 +926,6 @@
                 </div>
             </div>
             
-            <!-- KPIs Principais -->
             <div class="row mb-4">
                 <div class="col-md-3">
                     <div class="kpi-card kpi-neutral">
@@ -1057,7 +961,6 @@
                 </div>
             </div>
             
-            <!-- Gráficos -->
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="card">
@@ -1120,7 +1023,6 @@
                 </div>
             </div>
             
-            <!-- Tabela de Análise Detalhada -->
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0 d-flex align-items-center">
@@ -1131,8 +1033,7 @@
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
-                                <tr>
-                                    <th>Código</th>
+                                32<th>Código</th>
                                     <th>Descrição</th>
                                     <th>Sistema</th>
                                     <th>Contado</th>
@@ -1153,9 +1054,6 @@
             </div>
         </div>
 
-        <!-- Tela de Análise Histórica removida -->
-
-        <!-- Tela de Gerenciamento de Usuários -->
         <div id="usersView" class="view-container">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="section-title">
@@ -1166,7 +1064,6 @@
                 </button>
             </div>
 
-            <!-- Estatísticas Rápidas -->
             <div class="row mb-4">
                 <div class="col-md-3">
                     <div class="card kpi-card kpi-neutral">
@@ -1198,7 +1095,6 @@
                 </div>
             </div>
 
-            <!-- Tabela de Usuários -->
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
@@ -1218,8 +1114,7 @@
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead>
-                                <tr>
-                                    <th>Nome</th>
+                                32<th>Nome</th>
                                     <th>Email</th>
                                     <th>Perfil</th>
                                     <th>Status</th>
@@ -1243,7 +1138,6 @@
         </div>
     </div>
 
-    <!-- Modal de Novo/Editar Usuário -->
     <div class="modal fade" id="userModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1305,7 +1199,6 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação de Exclusão -->
     <div class="modal fade" id="deleteUserModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1327,88 +1220,82 @@
         </div>
     </div>
 
-    <!-- Modal de Importação de Base de Dados -->
-<div class="modal fade" id="importModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title d-flex align-items-center">
-                    <i class="fas fa-database me-2"></i>Importar Base Local (Opcional)
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>O sistema já está usando a base online.</strong> Esta importação é opcional para ter uma cópia local de backup.
+    <div class="modal fade" id="importModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title d-flex align-items-center">
+                        <i class="fas fa-database me-2"></i>Importar Base Local (Opcional)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                
-                <!-- Base de Produtos Permanente - REDESENHADA -->
-                <div id="permanentBaseCard" class="card mb-3">
-                    <div class="card-header py-2">
-                        <h6 class="mb-0 fs-6">
-                            <i class="fas fa-database me-2"></i>Base Permanente (Supabase)
-                        </h6>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>O sistema já está usando a base online.</strong> Esta importação é opcional para ter uma cópia local de backup.
                     </div>
-                    <div class="card-body py-2">
-                        <div class="row g-2 align-items-center">
-                            <div class="col-12">
-                                <button class="btn btn-success btn-sm w-100" id="migrateBaseBtn" style="padding: 0.4rem 0.8rem;">
-                                    <i class="fas fa-upload me-1"></i>Migrar para Online
-                                </button>
-                                <small class="text-muted d-block mt-1 text-center">Envia dados locais para a base online</small>
+                    
+                    <div id="permanentBaseCard" class="card mb-3">
+                        <div class="card-header py-2">
+                            <h6 class="mb-0 fs-6">
+                                <i class="fas fa-database me-2"></i>Base Permanente (Supabase)
+                            </h6>
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12">
+                                    <button class="btn btn-success btn-sm w-100" id="migrateBaseBtn" style="padding: 0.4rem 0.8rem;">
+                                        <i class="fas fa-upload me-1"></i>Migrar para Online
+                                    </button>
+                                    <small class="text-muted d-block mt-1 text-center">Envia dados locais para a base online</small>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="excelFile" class="form-label">Selecionar arquivo Excel (.xlsx) - Opcional</label>
-                    <input class="form-control" type="file" id="excelFile" accept=".xlsx, .xls">
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Estrutura esperada da planilha:</label>
-                    <div class="alert alert-info">
-                        <small>
-                            A planilha deve conter as colunas: <strong>CODE, DESCRICAO, QUANTIDADE, VALOR, DUN, EAN, EMBALAGEM</strong><br>
-                            Exemplo:<br>
-                            | CODE | DESCRICAO          | QUANTIDADE | VALOR | DUN           | EAN           | EMBALAGEM |<br>
-                            | 260    | AGUA SANITARIA... | 100        | 25.90 | 12345678901234| 7891234567890 | CX12      |
-                            | P002   | Produto Exemplo  | 50         | 13.75 | 98765432109876| 7899876543210 | CX6       |
-                        </small>
+                    
+                    <div class="mb-3">
+                        <label for="excelFile" class="form-label">Selecionar arquivo Excel (.xlsx) - Opcional</label>
+                        <input class="form-control" type="file" id="excelFile" accept=".xlsx, .xls">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Estrutura esperada da planilha:</label>
+                        <div class="alert alert-info">
+                            <small>
+                                A planilha deve conter as colunas: <strong>CODE, DESCRICAO, QUANTIDADE, VALOR, DUN, EAN, EMBALAGEM</strong><br>
+                                Exemplo:<br>
+                                | CODE | DESCRICAO          | QUANTIDADE | VALOR | DUN           | EAN           | EMBALAGEM |<br>
+                                | 260    | AGUA SANITARIA... | 100        | 25.90 | 12345678901234| 7891234567890 | CX12      |
+                                | P002   | Produto Exemplo  | 50         | 13.75 | 98765432109876| 7899876543210 | CX6       |
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="import-preview">
+                        <h6>Pré-visualização:</h6>
+                        <table class="table table-sm table-striped" id="previewTable">
+                            <thead>
+                                32<th>CODE</th>
+                                    <th>DESCRICAO</th>
+                                    <th>QUANTIDADE</th>
+                                    <th>VALOR</th>
+                                    <th>DUN</th>
+                                    <th>EAN</th>
+                                    <th>EMBALAGEM</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
-                
-                <div class="import-preview">
-                    <h6>Pré-visualização:</h6>
-                    <table class="table table-sm table-striped" id="previewTable">
-                        <thead>
-                            <tr>
-                                <th>CODE</th>
-                                <th>DESCRICAO</th>
-                                <th>QUANTIDADE</th>
-                                <th>VALOR</th>
-                                <th>DUN</th>
-                                <th>EAN</th>
-                                <th>EMBALAGEM</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Preview será preenchido aqui -->
-                        </tbody>
-                    </table>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmImport">Importar Dados</button>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="confirmImport">Importar Dados</button>
             </div>
         </div>
     </div>
-</div>
 
-    <!-- Modal de confirmação -->
     <div class="modal fade" id="confirmModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1427,7 +1314,6 @@
         </div>
     </div>
 
-    <!-- Modal de item já contado -->
     <div class="modal fade" id="itemAlreadyCountedModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1437,9 +1323,7 @@
                 </div>
                 <div class="modal-body">
                     <p>Este item já foi contado anteriormente. Deseja adicionar uma nova contagem ou substituir a contagem existente?</p>
-                    <div class="count-history" id="existingCountsInfo">
-                        <!-- Informações das contagens existentes serão inseridas aqui -->
-                    </div>
+                    <div class="count-history" id="existingCountsInfo"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -1450,7 +1334,6 @@
         </div>
     </div>
 
-    <!-- Modal de Registro de Novo Usuário -->
     <div class="modal fade" id="registerModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1494,9 +1377,7 @@
                             </div>
                         </div>
 
-                        <div class="alert alert-info d-none" id="registerAlertBox" role="alert">
-                            <!-- Mensagens de alerta aparecerão aqui -->
-                        </div>
+                        <div class="alert alert-info d-none" id="registerAlertBox" role="alert"></div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -1512,16 +1393,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // =============================================
-        // CONFIGURAÇÃO INICIAL E VARIÁVEIS GLOBAIS
-        // =============================================
-        
-        // Configuração Supabase
         const supabaseUrl = "https://uqmwegqpulqhwculfytr.supabase.co";
         const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbXdlZ3FwdWxxaHdjdWxmeXRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTk4NjI4MSwiZXhwIjoyMDc1NTYyMjgxfQ.ySQeZhEekxI9UxSD7Ndqax6e7ruC8KgVoZMalSMcL68";
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         
-        // Variáveis globais
         let inventoryItems = [];
         let itemDatabase = [];
         let systemUsers = [];
@@ -1531,25 +1406,19 @@
         let currentItemCode = '';
         let currentCountedQuantity = 0;
         let existingItemIndex = -1;
-        let itemCodeSearchTimeout = null; // Debounce para busca de código
-        let currentCountingType = ''; // Tipo de contagem ativa (Avaria, RH, etc.)
-        let countingSessionActive = false; // Indica se uma sessão de contagem está ativa
+        let itemCodeSearchTimeout = null;
+        let currentCountingType = '';
+        let countingSessionActive = false;
         
-        // Gráficos
         let quantityChart, distributionChart, timelineChart;
-        let chartsInitialized = false;
-        let inventoryColumnsCache = null; // cache das colunas da tabela products_base (lowercase)
-
-        // Helper: converte camelCase -> snake_case
+        let inventoryColumnsCache = null;
+        
         function camelToSnake(str) {
             return String(str).replace(/([A-Z])/g, '_$1').toLowerCase();
         }
-
-        // Monta um payload seguro para a tabela `inventory_items` (campo em snake_case)
+        
         function buildInventoryPayload(item) {
             const payload = {};
-
-            // Mapeamento explícito (campos usados no app -> colunas no banco)
             const map = {
                 code: 'code',
                 description: 'description',
@@ -1557,33 +1426,22 @@
                 countedQuantity: 'counted_quantity',
                 unitValue: 'unit_value',
                 counts: 'counts',
-                // countingType intentionally omitted to avoid sending unknown column
                 date: 'created_at'
             };
-
             for (const key in map) {
                 if (Object.prototype.hasOwnProperty.call(item, key) && item[key] !== undefined) {
                     payload[map[key]] = item[key];
                 }
             }
-
-            // Garantir user_id válido
             if (currentUser && currentUser.id) {
                 payload.user_id = currentUser.id;
             } else {
-                console.error('❌ ERRO: user_id não está definido. currentUser:', currentUser);
-                throw new Error('Usuário não autenticado. Não é possível salvar dados.');
+                throw new Error('Usuário não autenticado');
             }
-
             payload.code = payload.code || item.code;
             payload.created_at = payload.created_at || item.date || new Date().toISOString();
-
             return payload;
         }
-        
-        // =============================================
-        // INICIALIZAÇÃO DO SISTEMA
-        // =============================================
         
         document.addEventListener('DOMContentLoaded', function() {
             initializeSystem();
@@ -1592,7 +1450,6 @@
         async function initializeSystem() {
             console.log('🚀 Inicializando sistema...');
             
-            // Verificar sessão existente
             const savedUser = localStorage.getItem('currentUser');
             const savedIsAdmin = localStorage.getItem('isAdmin');
             
@@ -1600,8 +1457,6 @@
                 try {
                     currentUser = JSON.parse(savedUser);
                     isAdmin = savedIsAdmin === 'true';
-                    console.log('👤 Usuário recuperado:', currentUser.full_name);
-                    // Se havia usuário salvo, mostrar itens de navegação
                     document.querySelector('.navbar-nav').classList.add('visible');
                 } catch (error) {
                     console.error('Erro ao recuperar usuário:', error);
@@ -1610,143 +1465,58 @@
                 }
             }
             
-            // Configurar event listeners
             setupEventListeners();
-            
-            // Inicializar sistema de usuários
             await initializeSystemUsers();
-            
-            // Criar admin padrão se não existir
             await ensureAdminExists();
-            
-            // Atualizar UI
             updateUI();
             
-            // Carregar dados se usuário logado
             if (currentUser) {
                 await loadUserData();
-                // Atualizar dashboard com dados carregados
                 updateDashboard();
-                // Mostrar a tela de contagem ao recuperar sessão
                 switchView('counting');
             }
             
-            // Renderizar dados iniciais
             renderInventoryTable();
             updateSummary();
-            
             console.log('✅ Sistema inicializado');
         }
         
-        // =============================================
-        // CONFIGURAÇÃO DO SUPABASE E CONEXÃO
-        // =============================================
-        
         async function testSupabaseConnection() {
             try {
-                console.log('🔗 Testando conexão Supabase...');
-                // Tentar ler uma linha e detectar colunas disponíveis (mais tolerante a schemas diferentes)
                 const { data, error } = await supabaseClient
                     .from('products_base')
                     .select('*')
                     .limit(1);
-
-                if (error) {
-                    console.error('❌ Erro na conexão:', error);
-                    showNotification('Erro na conexão com o servidor', 'error');
-                    return false;
-                }
-
-                // Cache das colunas para evitar erros posteriores
+                if (error) throw error;
                 if (data && data.length > 0) {
                     inventoryColumnsCache = Object.keys(data[0]).map(k => k.toLowerCase());
-                    console.log('Colunas detectadas em products_base:', inventoryColumnsCache);
                 } else {
                     inventoryColumnsCache = [];
-                    console.warn('Conexão OK, mas tabela products_base vazia ou sem amostra.');
                 }
-
-                console.log('✅ Conexão Supabase OK!');
-                showNotification('Conexão com servidor estabelecida', 'success');
                 return true;
-                
             } catch (error) {
-                console.error('❌ Erro no teste:', error);
-                showNotification('Erro ao conectar com servidor', 'error');
+                console.error('❌ Erro na conexão:', error);
                 return false;
             }
         }
         
-        // =============================================
-        // SISTEMA DE AUTENTICAÇÃO E USUÁRIOS
-        // =============================================
-        
         async function initializeSystemUsers() {
             try {
-                console.log('🔧 Inicializando sistema de usuários...');
-                
-                // Verificar se a tabela existe
                 const { data: users, error } = await supabaseClient
                     .from('system_users')
                     .select('id')
                     .limit(1);
-                    
-                if (error) {
-                    console.error('❌ Tabela de usuários não configurada:', error);
-                    
-                    // Criar usuário admin padrão se necessário
-                    if (error.code === 'PGRST116') {
-                        await createDefaultAdminUser();
-                    }
-                    return false;
-                }
-                
-                console.log('✅ Sistema de usuários configurado');
+                if (error) throw error;
                 return true;
-                
             } catch (error) {
                 console.error('❌ Erro ao inicializar usuários:', error);
                 return false;
             }
         }
         
-        async function createDefaultAdminUser() {
-            try {
-                console.log('👤 Criando usuário admin padrão...');
-                
-                const adminUser = {
-                    full_name: 'Administrador',
-                    email: 'admin@estoque.com',
-                    password_hash: btoa('admin123'),
-                    role: 'admin',
-                    is_active: true,
-                    created_at: new Date().toISOString()
-                };
-                
-                const { data: newUser, error } = await supabaseClient
-                    .from('system_users')
-                    .insert([adminUser])
-                    .select();
-                    
-                if (error) throw error;
-                
-                console.log('✅ Usuário admin padrão criado');
-                showNotification('Usuário admin padrão criado! Use: admin@estoque.com / admin123', 'success');
-                return true;
-                
-            } catch (error) {
-                console.error('❌ Erro ao criar admin:', error);
-                showNotification('Erro ao criar usuário admin padrão', 'error');
-                return false;
-            }
-        }
-        
         async function ensureAdminExists() {
             try {
-                console.log('🔐 Verificando existência de usuário admin...');
                 const adminEmail = 'admin@estoque.local';
-                
-                // Verificar se admin já existe
                 const { data: existingAdmin, error: checkError } = await supabaseClient
                     .from('system_users')
                     .select('*')
@@ -1755,32 +1525,14 @@
                 
                 if (existingAdmin && existingAdmin.length > 0) {
                     const admin = existingAdmin[0];
-                    console.log('✅ Usuário admin já existe');
-                    console.log('  - Role atual:', admin.role);
-                    
-                    // Se o role não é admin, atualizar para admin
                     if (admin.role !== 'admin') {
-                        console.log('🔄 Corrigindo role do admin de "' + admin.role + '" para "admin"...');
-                        
-                        const { data: updated, error: updateError } = await supabaseClient
+                        await supabaseClient
                             .from('system_users')
                             .update({ role: 'admin' })
-                            .eq('id', admin.id)
-                            .select();
-                        
-                        if (updateError) {
-                            console.error('❌ Erro ao atualizar role:', updateError);
-                            return false;
-                        }
-                        
-                        console.log('✅ Role do admin atualizado para "admin"');
-                        showNotification('🔐 Admin configurado corretamente!', 'success');
+                            .eq('id', admin.id);
                     }
                     return true;
                 }
-                
-                // Criar admin padrão se não existir
-                console.log('👤 Criando usuário admin padrão...');
                 
                 const adminUser = {
                     email: adminEmail,
@@ -1792,41 +1544,19 @@
                     updated_at: new Date().toISOString()
                 };
                 
-                const { data: newUser, error } = await supabaseClient
-                    .from('system_users')
-                    .insert([adminUser])
-                    .select();
-                    
-                if (error) {
-                    console.error('Erro ao criar admin:', error.message);
-                    return false;
-                }
-                
-                console.log('✅ Usuário admin padrão criado com sucesso!');
-                console.log('📋 Dados do admin criado:', newUser);
-                console.log('  - Email:', newUser[0]?.email);
-                console.log('  - Role:', newUser[0]?.role);
-                console.log('  - Full Name:', newUser[0]?.full_name);
-                showNotification('🔐 Admin criado! Matrícula: admin | Senha: admin123', 'success');
+                await supabaseClient.from('system_users').insert([adminUser]);
                 return true;
-                
             } catch (error) {
                 console.error('❌ Erro ao verificar/criar admin:', error.message);
                 return false;
             }
         }
         
-        // =============================================
-        // FUNÇÕES PRINCIPAIS DO SISTEMA
-        // =============================================
-        
         function setupEventListeners() {
-            // Navegação
             document.querySelectorAll('.view-switch').forEach(switchEl => {
                 switchEl.addEventListener('click', handleViewSwitch);
             });
             
-            // Login/Logout
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('logoutBtn').addEventListener('click', handleLogout);
             document.getElementById('loginBtn').addEventListener('click', function(e) {
@@ -1834,23 +1564,18 @@
                 switchView('login');
             });
             
-            // Registro de novo usuário
             document.getElementById('submitRegisterBtn').addEventListener('click', handleRegister);
-            
-            // Limpar alerta ao abrir modal de registro
             document.getElementById('registerModal').addEventListener('show.bs.modal', function() {
                 document.getElementById('registerAlertBox').classList.add('d-none');
                 document.getElementById('registerForm').reset();
             });
             
-            // Contagem de inventário
             document.getElementById('inventoryForm').addEventListener('submit', handleInventorySubmit);
             document.getElementById('itemCode').addEventListener('input', handleItemCodeInput);
             document.getElementById('resetButton').addEventListener('click', resetItemForm);
             document.getElementById('countingType').addEventListener('change', handleCountingTypeChange);
             document.getElementById('finalizeCountingBtn').addEventListener('click', handleFinalizeCountingSession);
             
-            // Histórico
             document.getElementById('searchInput').addEventListener('input', filterInventoryTable);
             document.getElementById('exportBtn').addEventListener('click', exportToExcel);
             document.getElementById('clearAllBtn').addEventListener('click', function() {
@@ -1858,13 +1583,9 @@
             });
             document.getElementById('confirmClear').addEventListener('click', clearAllData);
             
-            // Dashboard
             document.getElementById('refreshDashboard').addEventListener('click', updateDashboard);
             document.getElementById('exportDashboard').addEventListener('click', exportDashboardData);
             
-                // Análise Histórica removida (listeners desativados)
-            
-            // Usuários
             document.getElementById('saveUserBtn').addEventListener('click', saveUser);
             document.getElementById('userSearch').addEventListener('input', filterUsersTable);
             document.getElementById('roleFilter').addEventListener('change', filterUsersTable);
@@ -1874,40 +1595,37 @@
                 }
             });
             
-            // Importação
             document.getElementById('excelFile').addEventListener('change', previewExcelFile);
             document.getElementById('confirmImport').addEventListener('click', importExcelData);
             document.getElementById('migrateBaseBtn').addEventListener('click', migrateToPermanentBase);
             
-            // Modais
             document.getElementById('userModal').addEventListener('hidden.bs.modal', resetUserForm);
             document.getElementById('addCountBtn').addEventListener('click', addNewCount);
             document.getElementById('replaceCountBtn').addEventListener('click', replaceExistingCount);
             
-            // Teclas de atalho
+            document.getElementById('countedQuantity').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('submitButton').click();
+                }
+            });
+            
             setupKeyboardShortcuts();
         }
         
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', function(e) {
-                // Foco no campo de código (Ctrl+K)
                 if (e.ctrlKey && e.key === 'k') {
                     e.preventDefault();
                     const itemCodeInput = document.getElementById('itemCode');
                     if (itemCodeInput) itemCodeInput.focus();
                 }
-                
-                // Limpar formulário (Ctrl+L)
                 if (e.ctrlKey && e.key === 'l') {
                     e.preventDefault();
                     resetItemForm();
                 }
             });
         }
-        
-        // =============================================
-        // FUNÇÕES DE GERENCIAMENTO DE TIPO DE CONTAGEM
-        // =============================================
         
         function handleCountingTypeChange() {
             const countingType = document.getElementById('countingType').value;
@@ -1922,7 +1640,6 @@
                 sessionStatus.style.display = 'inline-block';
                 sessionTypeDisplay.textContent = `📋 Contagem: ${countingType}`;
                 sessionStatus.className = 'badge bg-success ms-3';
-                
                 document.getElementById('itemCode').focus();
                 showNotification(`✏️ Sessão de contagem iniciada: ${countingType}`, 'info');
             } else {
@@ -1945,22 +1662,17 @@
             
             if (confirm(`Tem certeza que deseja finalizar esta contagem?\n\nTipo: ${countingType}\nItens: ${itemCount}`)) {
                 try {
-                    // Salvar antes de finalizar
                     await saveInventoryData();
-                    
-                    // Registrar finalização no localStorage
                     const sessionLog = {
                         type: countingType,
                         itemsCount: itemCount,
                         finalizedAt: new Date().toISOString(),
                         userId: currentUser?.id
                     };
-                    
                     let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory') || '[]');
                     sessionHistory.push(sessionLog);
                     localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
                     
-                    // Resetar sessão
                     document.getElementById('countingType').value = '';
                     currentCountingType = '';
                     countingSessionActive = false;
@@ -1975,68 +1687,43 @@
             }
         }
         
-        // =============================================
-        // FUNÇÕES FALTANTES - CORREÇÃO DOS ERROS
-        // =============================================
-        
-        // ✅ CORREÇÃO: showClearConfirmation
-        function showClearConfirmation() {
-            new bootstrap.Modal(document.getElementById('confirmModal')).show();
-        }
-        
-        // ✅ CORREÇÃO: migrateToPermanentBase
         async function migrateToPermanentBase() {
             if (!itemDatabase || itemDatabase.length === 0) {
                 showNotification('Não há dados para migrar.', 'warning');
                 return;
             }
-
             if (!navigator.onLine) {
                 showNotification('Sem conexão com a internet.', 'error');
                 return;
             }
-
             const button = document.getElementById('migrateBaseBtn');
             const originalText = button.innerHTML;
-
             try {
                 button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Migrando...';
                 button.disabled = true;
-
-                showNotification('Iniciando migração para base permanente...', 'info');
-
-                // Verificar estrutura da tabela
                 const { data: tableStructure, error: structureError } = await supabaseClient
-                        .from('products_base')
+                    .from('products_base')
                     .select('*')
                     .limit(1);
-
                 let availableColumns = [];
                 if (structureError) {
-                    console.error('Erro ao acessar tabela:', structureError);
                     throw new Error(`Tabela inacessível: ${structureError.message}`);
                 } else if (tableStructure && tableStructure.length > 0) {
                     availableColumns = Object.keys(tableStructure[0]);
                 } else {
                     availableColumns = ['code', 'descricao', 'quantidade', 'valor', 'dun', 'ean', 'embalagem'];
                 }
-
                 const conflictColumn = availableColumns.includes('CODE') ? 'CODE' : 
                                       availableColumns.includes('code') ? 'code' : 'code';
-
-                // Processar itens
+                
                 const itemsToUpsert = [];
                 const codeCounter = new Map();
-
                 itemDatabase.forEach((item, index) => {
                     const codeBase = (item.CODE || item.CODIGO)?.toString().trim();
                     if (!codeBase) return;
-
                     const count = (codeCounter.get(codeBase) || 0) + 1;
                     codeCounter.set(codeBase, count);
-
                     const codeUnico = count > 1 ? `${codeBase}_DUP${count}` : codeBase;
-
                     const mappedItem = {};
                     availableColumns.forEach(col => {
                         const upperCol = col.toUpperCase();
@@ -2057,37 +1744,23 @@
                             mappedItem[col] = item.EMBALAGEM?.toString().trim() || item.PACKAGING?.toString().trim() || null;
                         }
                     });
-
                     itemsToUpsert.push(mappedItem);
                 });
-
                 if (itemsToUpsert.length === 0) {
                     showNotification('Nenhum item válido para migrar.', 'error');
                     return;
                 }
-
-                // Fazer upsert em lotes
                 const BATCH_SIZE = 100;
                 let successfulMigrations = 0;
-
                 for (let i = 0; i < itemsToUpsert.length; i += BATCH_SIZE) {
                     const batch = itemsToUpsert.slice(i, i + BATCH_SIZE);
                     const { data, error } = await supabaseClient
-                            .from('products_base')
-                        .upsert(batch, {
-                            onConflict: conflictColumn
-                        });
-
-                    if (error) {
-                        console.error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}:`, error);
-                        throw new Error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}: ${error.message}`);
-                    }
-
+                        .from('products_base')
+                        .upsert(batch, { onConflict: conflictColumn });
+                    if (error) throw new Error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}: ${error.message}`);
                     successfulMigrations += batch.length;
                 }
-
                 showNotification(`Migração concluída! ${successfulMigrations} produtos migrados.`, 'success');
-
             } catch (error) {
                 console.error('Erro na migração:', error);
                 showNotification('Erro na migração: ' + error.message, 'error');
@@ -2097,31 +1770,23 @@
             }
         }
         
-        // ✅ CORREÇÃO: loadUsers
         async function loadUsers() {
             try {
-                showNotification('Carregando usuários...', 'info');
-
                 const { data, error } = await supabaseClient
                     .from('system_users')
                     .select('*')
                     .order('created_at', { ascending: false });
-
                 if (error) throw error;
-
                 systemUsers = data || [];
                 updateUsersStats();
                 renderUsersTable();
-
                 showNotification(`${systemUsers.length} usuários carregados`, 'success');
-
             } catch (error) {
                 console.error('Erro ao carregar usuários:', error);
                 showNotification('Erro ao carregar usuários: ' + error.message, 'error');
             }
         }
         
-        // ✅ CORREÇÃO: Funções auxiliares para usuários
         function updateUsersStats() {
             const totalUsers = systemUsers.length;
             const activeUsers = systemUsers.filter(user => user.is_active).length;
@@ -2132,7 +1797,6 @@
                 const lastLogin = new Date(user.last_login).toDateString();
                 return today === lastLogin;
             }).length;
-            
             document.getElementById('totalUsers').textContent = totalUsers;
             document.getElementById('activeUsers').textContent = activeUsers;
             document.getElementById('adminUsers').textContent = adminUsers;
@@ -2141,215 +1805,85 @@
         
         function renderUsersTable() {
             const usersTable = document.getElementById('usersTable');
-            
             if (systemUsers.length === 0) {
-                usersTable.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
-                            <i class="fas fa-users fa-2x mb-2 d-block"></i>
-                            Nenhum usuário cadastrado
-                        </td>
-                    </tr>
-                `;
+                usersTable.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4"><i class="fas fa-users fa-2x mb-2 d-block"></i>Nenhum usuário cadastrado</td></tr>`;
                 return;
             }
-            
             usersTable.innerHTML = systemUsers.map(user => `
                 <tr>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="user-avatar me-2">
-                                <i class="fas fa-user-circle ${getRoleColorClass(user.role)}"></i>
-                            </div>
-                            <div>
-                                <strong>${user.full_name}</strong>
-                                ${user.id === currentUser?.id ? '<span class="badge bg-info ms-1">Você</span>' : ''}
-                            </div>
-                        </div>
-                    </td>
+                    <td><div class="d-flex align-items-center"><div class="user-avatar me-2"><i class="fas fa-user-circle ${getRoleColorClass(user.role)}"></i></div><div><strong>${user.full_name}</strong>${user.id === currentUser?.id ? '<span class="badge bg-info ms-1">Você</span>' : ''}</div></div></td>
                     <td>${user.email}</td>
-                    <td>
-                        <span class="badge ${getRoleBadgeClass(user.role)}">
-                            <i class="fas ${getRoleIcon(user.role)} me-1"></i>
-                            ${getRoleDisplayName(user.role)}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge ${user.is_active ? 'bg-success' : 'bg-danger'}">
-                            ${user.is_active ? 'Ativo' : 'Inativo'}
-                        </span>
-                    </td>
-                    <td>
-                        ${user.last_login ? 
-                            `<small>${new Date(user.last_login).toLocaleDateString('pt-BR')}<br>${new Date(user.last_login).toLocaleTimeString('pt-BR')}</small>` : 
-                            '<span class="text-muted">Nunca</span>'
-                        }
-                    </td>
+                    <td><span class="badge ${getRoleBadgeClass(user.role)}"><i class="fas ${getRoleIcon(user.role)} me-1"></i>${getRoleDisplayName(user.role)}</span></td>
+                    <td><span class="badge ${user.is_active ? 'bg-success' : 'bg-danger'}">${user.is_active ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>${user.last_login ? `<small>${new Date(user.last_login).toLocaleDateString('pt-BR')}<br>${new Date(user.last_login).toLocaleTimeString('pt-BR')}</small>` : '<span class="text-muted">Nunca</span>'}</td>
                     <td>${new Date(user.created_at).toLocaleDateString('pt-BR')}</td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary edit-user" data-id="${user.id}" 
-                                ${user.id === currentUser?.id ? 'disabled' : ''}>
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-outline-danger delete-user" data-id="${user.id}"
-                                ${user.id === currentUser?.id ? 'disabled' : ''}>
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
+                    <td><div class="btn-group btn-group-sm"><button class="btn btn-outline-primary edit-user" data-id="${user.id}" ${user.id === currentUser?.id ? 'disabled' : ''}><i class="fas fa-edit"></i></button><button class="btn btn-outline-danger delete-user" data-id="${user.id}" ${user.id === currentUser?.id ? 'disabled' : ''}><i class="fas fa-trash"></i></button></div></td>
                 </tr>
             `).join('');
-            
-            // Adicionar event listeners aos botões
-            document.querySelectorAll('.edit-user').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    editUser(this.getAttribute('data-id'));
-                });
-            });
-            
-            document.querySelectorAll('.delete-user').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    confirmDeleteUser(this.getAttribute('data-id'));
-                });
-            });
+            document.querySelectorAll('.edit-user').forEach(btn => btn.addEventListener('click', () => editUser(btn.getAttribute('data-id'))));
+            document.querySelectorAll('.delete-user').forEach(btn => btn.addEventListener('click', () => confirmDeleteUser(btn.getAttribute('data-id'))));
         }
         
         function filterUsersTable() {
             const searchTerm = document.getElementById('userSearch').value.toLowerCase();
             const roleFilter = document.getElementById('roleFilter').value;
-            
-            const filteredUsers = systemUsers.filter(user => {
-                const matchesSearch = user.full_name.toLowerCase().includes(searchTerm) || 
-                                     user.email.toLowerCase().includes(searchTerm);
-                const matchesRole = !roleFilter || user.role === roleFilter;
-                return matchesSearch && matchesRole;
-            });
-            
+            const filteredUsers = systemUsers.filter(user => (user.full_name.toLowerCase().includes(searchTerm) || user.email.toLowerCase().includes(searchTerm)) && (!roleFilter || user.role === roleFilter));
             const usersTable = document.getElementById('usersTable');
-            
             if (filteredUsers.length === 0) {
-                usersTable.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
-                            <i class="fas fa-search fa-2x mb-2 d-block"></i>
-                            Nenhum usuário encontrado
-                        </td>
-                    </tr>
-                `;
+                usersTable.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4"><i class="fas fa-search fa-2x mb-2 d-block"></i>Nenhum usuário encontrado</td></tr>`;
                 return;
             }
-            
             usersTable.innerHTML = filteredUsers.map(user => `
                 <tr>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="user-avatar me-2">
-                                <i class="fas fa-user-circle ${getRoleColorClass(user.role)}"></i>
-                            </div>
-                            <div>
-                                <strong>${user.full_name}</strong>
-                                ${user.id === currentUser?.id ? '<span class="badge bg-info ms-1">Você</span>' : ''}
-                            </div>
-                        </div>
-                    </td>
+                    <td><div class="d-flex align-items-center"><div class="user-avatar me-2"><i class="fas fa-user-circle ${getRoleColorClass(user.role)}"></i></div><div><strong>${user.full_name}</strong>${user.id === currentUser?.id ? '<span class="badge bg-info ms-1">Você</span>' : ''}</div></div></td>
                     <td>${user.email}</td>
-                    <td>
-                        <span class="badge ${getRoleBadgeClass(user.role)}">
-                            <i class="fas ${getRoleIcon(user.role)} me-1"></i>
-                            ${getRoleDisplayName(user.role)}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge ${user.is_active ? 'bg-success' : 'bg-danger'}">
-                            ${user.is_active ? 'Ativo' : 'Inativo'}
-                        </span>
-                    </td>
-                    <td>
-                        ${user.last_login ? 
-                            `<small>${new Date(user.last_login).toLocaleDateString('pt-BR')}<br>${new Date(user.last_login).toLocaleTimeString('pt-BR')}</small>` : 
-                            '<span class="text-muted">Nunca</span>'
-                        }
-                    </td>
+                    <td><span class="badge ${getRoleBadgeClass(user.role)}"><i class="fas ${getRoleIcon(user.role)} me-1"></i>${getRoleDisplayName(user.role)}</span></td>
+                    <td><span class="badge ${user.is_active ? 'bg-success' : 'bg-danger'}">${user.is_active ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>${user.last_login ? `<small>${new Date(user.last_login).toLocaleDateString('pt-BR')}<br>${new Date(user.last_login).toLocaleTimeString('pt-BR')}</small>` : '<span class="text-muted">Nunca</span>'}</td>
                     <td>${new Date(user.created_at).toLocaleDateString('pt-BR')}</td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary edit-user" data-id="${user.id}" 
-                                    ${user.id === currentUser?.id ? 'disabled' : ''}>
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-outline-danger delete-user" data-id="${user.id}"
-                                    ${user.id === currentUser?.id ? 'disabled' : ''}>
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
+                    <td><div class="btn-group btn-group-sm"><button class="btn btn-outline-primary edit-user" data-id="${user.id}" ${user.id === currentUser?.id ? 'disabled' : ''}><i class="fas fa-edit"></i></button><button class="btn btn-outline-danger delete-user" data-id="${user.id}" ${user.id === currentUser?.id ? 'disabled' : ''}><i class="fas fa-trash"></i></button></div></td>
                 </tr>
             `).join('');
-            
-            // Re-adicionar event listeners
-            document.querySelectorAll('.edit-user').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    editUser(this.getAttribute('data-id'));
-                });
-            });
-            
-            document.querySelectorAll('.delete-user').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    confirmDeleteUser(this.getAttribute('data-id'));
-                });
-            });
+            document.querySelectorAll('.edit-user').forEach(btn => btn.addEventListener('click', () => editUser(btn.getAttribute('data-id'))));
+            document.querySelectorAll('.delete-user').forEach(btn => btn.addEventListener('click', () => confirmDeleteUser(btn.getAttribute('data-id'))));
         }
         
         function editUser(userId) {
             const user = systemUsers.find(u => u.id === userId);
             if (!user) return;
-            
             currentEditingUserId = userId;
-            
             document.getElementById('userModalTitle').innerHTML = '<i class="fas fa-user-edit me-2"></i>Editar Usuário';
             document.getElementById('editUserId').value = user.id;
             document.getElementById('userFullName').value = user.full_name;
             document.getElementById('userEmail').value = user.email;
             document.getElementById('userRole').value = user.role;
             document.getElementById('userActive').checked = user.is_active;
-            
             document.getElementById('passwordLabel').textContent = 'Nova Senha';
             document.getElementById('passwordHelp').textContent = 'Deixe em branco para manter a senha atual';
             document.getElementById('userPassword').value = '';
             document.getElementById('userPassword').required = false;
-            
             new bootstrap.Modal(document.getElementById('userModal')).show();
         }
         
         function confirmDeleteUser(userId) {
             const user = systemUsers.find(u => u.id === userId);
             if (!user) return;
-
             if (user.id === currentUser?.id) {
                 showNotification('Você não pode excluir seu próprio usuário', 'error');
                 return;
             }
-
             document.getElementById('deleteUserName').textContent = user.full_name;
             currentEditingUserId = userId;
-
             new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
         }
         
         async function deleteUser(userId) {
             try {
-                const { error } = await supabaseClient
-                    .from('system_users')
-                    .delete()
-                    .eq('id', userId);
-                    
+                const { error } = await supabaseClient.from('system_users').delete().eq('id', userId);
                 if (error) throw error;
-                
                 await loadUsers();
                 showNotification('Usuário excluído com sucesso!', 'success');
                 bootstrap.Modal.getInstance(document.getElementById('deleteUserModal')).hide();
-                
             } catch (error) {
                 console.error('Erro ao excluir usuário:', error);
                 showNotification('Erro ao excluir usuário: ' + error.message, 'error');
@@ -2358,13 +1892,10 @@
         
         async function saveUser() {
             const form = document.getElementById('userForm');
-            const saveBtn = document.getElementById('saveUserBtn');
-            
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
             }
-            
             const userData = {
                 full_name: document.getElementById('userFullName').value.trim(),
                 email: document.getElementById('userEmail').value.trim(),
@@ -2372,49 +1903,28 @@
                 is_active: document.getElementById('userActive').checked,
                 updated_at: new Date().toISOString()
             };
-            
-            if (currentEditingUserId) {
-                userData.id = currentEditingUserId;
-            }
-            
+            if (currentEditingUserId) userData.id = currentEditingUserId;
             const password = document.getElementById('userPassword').value;
-            if (password && password.length >= 6) {
-                userData.password_hash = btoa(password);
-            }
-            
+            if (password && password.length >= 6) userData.password_hash = btoa(password);
             try {
+                const saveBtn = document.getElementById('saveUserBtn');
                 saveBtn.disabled = true;
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Salvando...';
-
-                let result;
                 if (currentEditingUserId) {
-                    result = await supabaseClient
-                        .from('system_users')
-                        .update(userData)
-                        .eq('id', currentEditingUserId);
+                    await supabaseClient.from('system_users').update(userData).eq('id', currentEditingUserId);
                 } else {
                     userData.created_by = currentUser?.id || null;
-                    result = await supabaseClient
-                        .from('system_users')
-                        .insert([userData]);
+                    await supabaseClient.from('system_users').insert([userData]);
                 }
-                
-                if (result.error) throw result.error;
-                
                 bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
                 await loadUsers();
-                
-                showNotification(
-                    currentEditingUserId ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!', 
-                    'success'
-                );
-                
+                showNotification(currentEditingUserId ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!', 'success');
             } catch (error) {
                 console.error('Erro ao salvar usuário:', error);
                 showNotification('Erro ao salvar usuário: ' + error.message, 'error');
             } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = '<i class="fas fa-save me-1"></i>Salvar Usuário';
+                document.getElementById('saveUserBtn').disabled = false;
+                document.getElementById('saveUserBtn').innerHTML = '<i class="fas fa-save me-1"></i>Salvar Usuário';
             }
         }
         
@@ -2428,123 +1938,61 @@
             currentEditingUserId = null;
         }
         
-        // ✅ CORREÇÃO: Funções para roles
         function getRoleBadgeClass(role) {
-            const classes = {
-                'admin': 'bg-danger',
-                'manager': 'bg-warning',
-                'user': 'bg-info'
-            };
+            const classes = { 'admin': 'bg-danger', 'manager': 'bg-warning', 'user': 'bg-info' };
             return classes[role] || 'bg-secondary';
         }
         
         function getRoleColorClass(role) {
-            const classes = {
-                'admin': 'text-danger',
-                'manager': 'text-warning', 
-                'user': 'text-info'
-            };
+            const classes = { 'admin': 'text-danger', 'manager': 'text-warning', 'user': 'text-info' };
             return classes[role] || 'text-secondary';
         }
         
         function getRoleIcon(role) {
-            const icons = {
-                'admin': 'fa-shield-alt',
-                'manager': 'fa-user-tie',
-                'user': 'fa-user'
-            };
+            const icons = { 'admin': 'fa-shield-alt', 'manager': 'fa-user-tie', 'user': 'fa-user' };
             return icons[role] || 'fa-user';
         }
         
         function getRoleDisplayName(role) {
-            const names = {
-                'admin': 'Administrador',
-                'manager': 'Gerente',
-                'user': 'Usuário'
-            };
+            const names = { 'admin': 'Administrador', 'manager': 'Gerente', 'user': 'Usuário' };
             return names[role] || role;
         }
         
-        // =============================================
-        // CONTINUAÇÃO DAS FUNÇÕES PRINCIPAIS
-        // =============================================
-        
         async function handleLogin(e) {
             e.preventDefault();
-            
             const matricula = document.getElementById('matricula').value.trim();
             const password = document.getElementById('password').value;
-            
             try {
-                showNotification('🔐 Verificando credenciais...', 'info');
-                
-                // Formatar matrícula como email
                 const email = `${matricula}@estoque.local`;
-                
-                // Buscar usuário pelo email (que contém a matrícula)
                 const { data: users, error } = await supabaseClient
                     .from('system_users')
                     .select('*')
                     .eq('email', email)
                     .eq('is_active', true);
-                    
-                if (error) {
-                    console.error('Erro ao buscar usuário:', error);
-                    showNotification('Erro de conexão com o servidor', 'error');
-                    return;
-                }
-                
+                if (error) throw error;
                 if (!users || users.length === 0) {
                     showNotification('Matrícula não encontrada', 'error');
                     return;
                 }
-                
                 const user = users[0];
-                
-                console.log('👤 Usuário encontrado no banco:', user);
-                console.log('  - Email:', user.email);
-                console.log('  - Role:', user.role);
-                console.log('  - Full Name:', user.full_name);
-                
-                // Verificar senha (base64 para demo)
                 if (user.password_hash !== btoa(password)) {
                     showNotification('Senha incorreta', 'error');
                     return;
                 }
-                
-                // Atualizar último login
                 await supabaseClient
                     .from('system_users')
                     .update({ last_login: new Date().toISOString() })
                     .eq('id', user.id);
-                
-                // Configurar sessão
                 currentUser = user;
                 isAdmin = user.role === 'admin';
-                
-                console.log('✅ Sessão configurada:');
-                console.log('  - currentUser.role:', currentUser.role);
-                console.log('  - isAdmin:', isAdmin);
-                
                 localStorage.setItem('currentUser', JSON.stringify(user));
                 localStorage.setItem('isAdmin', isAdmin.toString());
-                
-                // Mostrar itens de navegação após login
                 document.querySelector('.navbar-nav').classList.add('visible');
-                
                 await loadUserData();
                 updateUI();
-                
-                // Chamar checkAdminStatus novamente após um pequeno delay para garantir que funcionou
-                setTimeout(() => {
-                    console.log('🔄 Re-verificando status admin após login...');
-                    checkAdminStatus();
-                }, 200);
-                
+                setTimeout(() => checkAdminStatus(), 200);
                 switchView('counting');
-                
                 showNotification(`✅ Login realizado! Bem-vindo, ${user.full_name}`, 'success');
-                
             } catch (error) {
                 console.error('Erro no login:', error);
                 showNotification('Erro ao fazer login', 'error');
@@ -2553,20 +2001,14 @@
         
         async function handleLogout(e) {
             e.preventDefault();
-            
             currentUser = null;
             isAdmin = false;
             inventoryItems = [];
-            
             localStorage.removeItem('currentUser');
             localStorage.removeItem('isAdmin');
-            
-            // Esconder itens de navegação ao fazer logout
             document.querySelector('.navbar-nav').classList.remove('visible');
-            
             updateUI();
             switchView('login');
-            
             showNotification('👋 Logout realizado com sucesso!', 'info');
         }
         
@@ -2577,44 +2019,33 @@
             const regConfirmSenha = document.getElementById('regConfirmSenha').value;
             const alertBox = document.getElementById('registerAlertBox');
             const submitBtn = document.getElementById('submitRegisterBtn');
-            
-            // Validações
             if (!regMatricula || !regNome || !regSenha || !regConfirmSenha) {
                 alertBox.innerHTML = '<strong>Erro:</strong> Todos os campos são obrigatórios';
                 alertBox.className = 'alert alert-danger';
                 alertBox.classList.remove('d-none');
                 return;
             }
-            
             if (regSenha.length < 6) {
                 alertBox.innerHTML = '<strong>Erro:</strong> A senha deve ter mínimo 6 caracteres';
                 alertBox.className = 'alert alert-danger';
                 alertBox.classList.remove('d-none');
                 return;
             }
-            
             if (regSenha !== regConfirmSenha) {
                 alertBox.innerHTML = '<strong>Erro:</strong> As senhas não conferem';
                 alertBox.className = 'alert alert-danger';
                 alertBox.classList.remove('d-none');
                 return;
             }
-            
             try {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Criando...';
-
-                // Formatar email a partir da matrícula
                 const email = `${regMatricula}@estoque.local`;
-                
-                // Verificar se email (matrícula) já existe
                 const { data: existingUsers, error: checkError } = await supabaseClient
                     .from('system_users')
                     .select('id')
                     .eq('email', email);
-                
                 if (checkError) throw checkError;
-                
                 if (existingUsers && existingUsers.length > 0) {
                     alertBox.innerHTML = '<strong>Erro:</strong> Esta matrícula já está cadastrada';
                     alertBox.className = 'alert alert-danger';
@@ -2623,8 +2054,6 @@
                     submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Criar Conta';
                     return;
                 }
-                
-                // Criar novo usuário
                 const newUser = {
                     email: email,
                     full_name: regNome,
@@ -2634,29 +2063,17 @@
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
-                
-                const { data: createdUser, error: insertError } = await supabaseClient
-                    .from('system_users')
-                    .insert([newUser])
-                    .select();
-                
-                if (insertError) throw insertError;
-                
+                await supabaseClient.from('system_users').insert([newUser]);
                 alertBox.innerHTML = '<strong>Sucesso!</strong> Conta criada com sucesso! Faça login agora.';
                 alertBox.className = 'alert alert-success';
                 alertBox.classList.remove('d-none');
-                
-                // Limpar formulário
                 document.getElementById('registerForm').reset();
-                
-                // Fechar modal após 2 segundos
                 setTimeout(() => {
                     bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
                     alertBox.classList.add('d-none');
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Criar Conta';
                 }, 2000);
-                
             } catch (error) {
                 console.error('Erro ao registrar:', error);
                 alertBox.innerHTML = `<strong>Erro:</strong> ${error.message || 'Erro ao criar conta'}`;
@@ -2675,60 +2092,22 @@
         function checkAdminStatus() {
             const adminOnlyElements = document.querySelectorAll('.admin-only');
             const managerOnlyElements = document.querySelectorAll('.manager-only');
-            
-            console.log('🔍 checkAdminStatus chamado:');
-            console.log('  - currentUser:', currentUser);
-            console.log('  - currentUser?.role:', currentUser?.role);
-            console.log('  - isAdmin:', isAdmin);
-            console.log('  - adminOnlyElements encontrados:', adminOnlyElements.length);
-            console.log('  - managerOnlyElements encontrados:', managerOnlyElements.length);
-            
-            // Listar todos os elements encontrados
-            console.log('📋 Elementos admin-only encontrados:');
-            adminOnlyElements.forEach((el, idx) => {
-                console.log(`   [${idx}]`, el.textContent?.trim().substring(0, 50), el.className);
-            });
-            
             if (currentUser) {
-                console.log(`👤 User atual: ${currentUser.full_name} | Role: ${currentUser.role}`);
-                
-                // Mostrar/ocultar elementos baseado na role
                 if (currentUser.role === 'admin') {
-                    console.log('✅ ADMIN DETECTADO! Exibindo elementos ADMIN-ONLY...');
-                    adminOnlyElements.forEach((el, idx) => {
-                        el.style.display = 'block !important';
-                        el.style.setProperty('display', 'block', 'important');
-                        console.log(`  ✓ Elemento [${idx}] exibido`);
-                    });
-                    managerOnlyElements.forEach((el, idx) => {
-                        el.style.display = 'block !important';
-                        el.style.setProperty('display', 'block', 'important');
-                        console.log(`  ✓ Manager elemento [${idx}] exibido`);
-                    });
+                    adminOnlyElements.forEach(el => { el.style.display = 'block'; el.style.setProperty('display', 'block', 'important'); });
+                    managerOnlyElements.forEach(el => { el.style.display = 'block'; el.style.setProperty('display', 'block', 'important'); });
                 } else if (currentUser.role === 'manager' || currentUser.role === 'user') {
-                    console.log(`✅ ${currentUser.role.toUpperCase()} DETECTADO! Exibindo elementos MANAGER-ONLY...`);
                     adminOnlyElements.forEach(el => el.style.display = 'none');
-                    managerOnlyElements.forEach((el, idx) => {
-                        el.style.display = 'block !important';
-                        el.style.setProperty('display', 'block', 'important');
-                        console.log(`  ✓ Manager elemento [${idx}] exibido`);
-                    });
+                    managerOnlyElements.forEach(el => { el.style.display = 'block'; el.style.setProperty('display', 'block', 'important'); });
                 } else {
-                    console.log('⚠️  Role não reconhecida:', currentUser.role);
                     adminOnlyElements.forEach(el => el.style.display = 'none');
                     managerOnlyElements.forEach(el => el.style.display = 'none');
                 }
-                
                 document.getElementById('logoutBtn').style.display = 'block';
                 document.getElementById('loginBtn').style.display = 'none';
             } else {
-                console.log('❌ Nenhum usuário logado');
-                adminOnlyElements.forEach(el => {
-                    el.style.setProperty('display', 'none', 'important');
-                });
-                managerOnlyElements.forEach(el => {
-                    el.style.setProperty('display', 'none', 'important');
-                });
+                adminOnlyElements.forEach(el => el.style.setProperty('display', 'none', 'important'));
+                managerOnlyElements.forEach(el => el.style.setProperty('display', 'none', 'important'));
                 document.getElementById('logoutBtn').style.display = 'none';
                 document.getElementById('loginBtn').style.display = 'block';
             }
@@ -2738,7 +2117,6 @@
             const userStatus = document.getElementById('userStatus');
             const userName = document.getElementById('userName');
             const userRoleBadge = document.getElementById('userRoleBadge');
-            
             if (currentUser) {
                 userName.textContent = currentUser.full_name;
                 userRoleBadge.textContent = getRoleDisplayName(currentUser.role);
@@ -2749,10 +2127,6 @@
             }
         }
         
-        // =============================================
-        // GERENCIAMENTO DE INVENTÁRIO
-        // =============================================
-        
         async function handleInventorySubmit(e) {
             e.preventDefault();
             await processInventoryItem();
@@ -2761,21 +2135,12 @@
         function handleItemCodeInput() {
             const code = this.value.trim();
             const codeLoading = document.getElementById('codeLoading');
-            
-            // Cancelar busca anterior se o usuário continuar digitando
-            if (itemCodeSearchTimeout) {
-                clearTimeout(itemCodeSearchTimeout);
-                codeLoading.style.display = 'none';
-            }
-            
+            if (itemCodeSearchTimeout) clearTimeout(itemCodeSearchTimeout);
             if (code.length >= 8) {
                 codeLoading.style.display = 'inline-block';
-                
-                // Usar um debounce maior (1500ms) para códigos mais compridos
                 itemCodeSearchTimeout = setTimeout(async () => {
                     try {
                         const item = await findItemByCode(code);
-                        
                         if (item) {
                             displayItemInfo(item);
                             moveFocusToQuantity();
@@ -2785,18 +2150,14 @@
                     } catch (error) {
                         displayItemNotFound(code);
                     }
-                    
                     codeLoading.style.display = 'none';
                     itemCodeSearchTimeout = null;
-                }, 1500);
+                }, 300);
             } else if (code.length > 0 && code.length < 8) {
-                // Para códigos curtos, mantém a espera
                 codeLoading.style.display = 'inline-block';
-                
                 itemCodeSearchTimeout = setTimeout(async () => {
                     try {
                         const item = await findItemByCode(code);
-                        
                         if (item) {
                             displayItemInfo(item);
                             moveFocusToQuantity();
@@ -2806,10 +2167,9 @@
                     } catch (error) {
                         displayItemNotFound(code);
                     }
-                    
                     codeLoading.style.display = 'none';
                     itemCodeSearchTimeout = null;
-                }, 800);
+                }, 200);
             } else {
                 resetItemForm();
             }
@@ -2819,8 +2179,6 @@
             try {
                 const sanitizedCode = code?.toString().replace(/[^a-zA-Z0-9]/g, '') || '';
                 if (!sanitizedCode) return null;
-
-                // Obter colunas disponíveis na tabela (cache)
                 let availableCols = inventoryColumnsCache;
                 if (!availableCols) {
                     try {
@@ -2834,34 +2192,23 @@
                             availableCols = [];
                         }
                     } catch (err) {
-                        console.warn('Erro ao obter colunas da tabela products_base:', err);
+                        console.warn('Erro ao obter colunas:', err);
                         availableCols = [];
                     }
                     inventoryColumnsCache = availableCols;
                 }
-
                 const candidateCols = ['code', 'codigo', 'cod', 'dun', 'ean', 'gtin'];
                 const colsToQuery = candidateCols.filter(c => availableCols.includes(c));
-                if (colsToQuery.length === 0) {
-                    console.warn('Nenhuma coluna candidata (code/dun/ean) encontrada em products_base; abortando busca.');
-                    return null;
-                }
-
+                if (colsToQuery.length === 0) return null;
                 for (const col of colsToQuery) {
                     const { data, error } = await supabaseClient
-                            .from('products_base')
+                        .from('products_base')
                         .select('*')
                         .eq(col, sanitizedCode)
                         .limit(1);
-
-                    if (error) {
-                        console.warn(`Erro ao consultar por ${col}:`, error);
-                        continue;
-                    }
-
+                    if (error) continue;
                     if (data && data.length > 0) return data[0];
                 }
-
                 return null;
             } catch (error) {
                 console.error('Erro na busca:', error);
@@ -2875,58 +2222,35 @@
             const quantidade = item.quantidade || item.QUANTIDADE || 0;
             const valor = item.valor || item.VALOR || 0;
             const embalagem = item.embalagem || item.EMBALAGEM || 'N/A';
-            
             const itemDescriptionDisplay = document.getElementById('itemDescriptionDisplay');
             itemDescriptionDisplay.innerHTML = `
                 <strong>${descricao}</strong>
-                <span class="status-indicator online" title="Código válido">
-                    <i class="fas fa-circle"></i>
-                </span>
+                <span class="status-indicator online" title="Código válido"><i class="fas fa-circle"></i></span>
                 <br>
-                <small class="text-muted">
-                    Sistema: ${quantidade} unidades | 
-                    Valor: R$ ${valor.toFixed(2)} |
-                    Embalagem: ${embalagem}
-                </small>
+                <small class="text-muted">Sistema: ${quantidade} unidades | Valor: R$ ${valor.toFixed(2)} | Embalagem: ${embalagem}</small>
             `;
-            
             const countedQuantityInput = document.getElementById('countedQuantity');
             const submitButton = document.getElementById('submitButton');
-            
             countedQuantityInput.disabled = false;
             submitButton.disabled = false;
-            
-            // Verificar se item já foi contado
             existingItemIndex = inventoryItems.findIndex(invItem => invItem.code === code);
             if (existingItemIndex !== -1) {
                 const existingItem = inventoryItems[existingItemIndex];
-                itemDescriptionDisplay.innerHTML += `
-                    <div class="count-history">
-                        <small>Já contado: ${existingItem.countedQuantity} unidades (${existingItem.counts} vez(es))</small>
-                    </div>
-                `;
+                itemDescriptionDisplay.innerHTML += `<div class="count-history"><small>Já contado: ${existingItem.countedQuantity} unidades (${existingItem.counts} vez(es))</small></div>`;
             }
-            
             currentItemCode = code;
         }
         
         function displayItemNotFound(code) {
             const itemDescriptionDisplay = document.getElementById('itemDescriptionDisplay');
             itemDescriptionDisplay.innerHTML = `
-                <span class="text-danger">
-                    <i class="fas fa-exclamation-triangle me-1"></i>
-                    Item não encontrado na base online
-                </span>
-                <span class="status-indicator offline" title="Código não encontrado">
-                    <i class="fas fa-circle"></i>
-                </span>
+                <span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Item não encontrado na base online</span>
+                <span class="status-indicator offline" title="Código não encontrado"><i class="fas fa-circle"></i></span>
                 <br>
                 <small class="text-muted">Código: ${code}</small>
             `;
-            
             const countedQuantityInput = document.getElementById('countedQuantity');
             const submitButton = document.getElementById('submitButton');
-            
             countedQuantityInput.disabled = true;
             submitButton.disabled = true;
             currentItemCode = '';
@@ -2937,7 +2261,6 @@
             const countedQuantityInput = document.getElementById('countedQuantity');
             const submitButton = document.getElementById('submitButton');
             const codeLoading = document.getElementById('codeLoading');
-            
             itemDescriptionDisplay.innerHTML = '<span class="text-muted">A descrição aparecerá aqui ao inserir o código</span>';
             countedQuantityInput.value = '';
             countedQuantityInput.disabled = true;
@@ -2953,70 +2276,45 @@
                 countedQuantityInput.classList.add('auto-focus');
                 countedQuantityInput.focus();
                 countedQuantityInput.select();
-                
-                setTimeout(() => {
-                    countedQuantityInput.classList.remove('auto-focus');
-                }, 1000);
+                setTimeout(() => countedQuantityInput.classList.remove('auto-focus'), 1000);
             }
         }
         
         async function processInventoryItem() {
             const countedQuantityInput = document.getElementById('countedQuantity');
             const countedQuantity = parseInt(countedQuantityInput.value);
-            
             if (countedQuantity > 999999) {
                 showNotification('Quantidade muito alta! Verifique o valor.', 'warning');
                 return;
             }
-            
             if (existingItemIndex !== -1) {
                 currentCountedQuantity = countedQuantity;
                 showItemAlreadyCountedModal();
                 return;
             }
-            
             await addNewInventoryItem(countedQuantity);
         }
         
         function showItemAlreadyCountedModal() {
             const existingItem = inventoryItems[existingItemIndex];
             const existingCountsInfoEl = document.getElementById('existingCountsInfo');
-            
             existingCountsInfoEl.innerHTML = `
-                <div class="count-history-item">
-                    <strong>Contagem atual:</strong> ${existingItem.countedQuantity} unidades
-                    <br><small>Contado ${existingItem.counts} vez(es)</small>
-                </div>
-                <div class="count-history-item">
-                    <strong>Nova contagem:</strong> ${currentCountedQuantity} unidades
-                </div>
-                <div class="count-history-item bg-light p-2 rounded mt-2">
-                    <strong>Resultado se SOMAR:</strong> ${existingItem.countedQuantity + currentCountedQuantity} unidades
-                </div>
+                <div class="count-history-item"><strong>Contagem atual:</strong> ${existingItem.countedQuantity} unidades<br><small>Contado ${existingItem.counts} vez(es)</small></div>
+                <div class="count-history-item"><strong>Nova contagem:</strong> ${currentCountedQuantity} unidades</div>
+                <div class="count-history-item bg-light p-2 rounded mt-2"><strong>Resultado se SOMAR:</strong> ${existingItem.countedQuantity + currentCountedQuantity} unidades</div>
             `;
-            
             new bootstrap.Modal(document.getElementById('itemAlreadyCountedModal')).show();
         }
         
         async function addNewCount() {
             const existingItem = inventoryItems[existingItemIndex];
-            
             const totalCounted = existingItem.countedQuantity + currentCountedQuantity;
-            
             inventoryItems[existingItemIndex] = {
                 ...existingItem,
                 countedQuantity: totalCounted,
                 counts: existingItem.counts + 1,
-                history: [
-                    ...(existingItem.history || []),
-                    {
-                        date: new Date().toISOString(),
-                        quantity: currentCountedQuantity,
-                        type: currentCountingType
-                    }
-                ]
+                history: [...(existingItem.history || []), { date: new Date().toISOString(), quantity: currentCountedQuantity, type: currentCountingType }]
             };
-            
             await saveInventoryData();
             resetFormAfterSubmission();
             renderInventoryTable();
@@ -3031,15 +2329,8 @@
                 countedQuantity: currentCountedQuantity,
                 counts: 1,
                 countingType: currentCountingType,
-                history: [
-                    {
-                        date: new Date().toISOString(),
-                        quantity: currentCountedQuantity,
-                        type: currentCountingType
-                    }
-                ]
+                history: [{ date: new Date().toISOString(), quantity: currentCountedQuantity, type: currentCountingType }]
             };
-            
             await saveInventoryData();
             resetFormAfterSubmission();
             renderInventoryTable();
@@ -3053,38 +2344,25 @@
                 showNotification('Código do item não foi validado', 'error');
                 return;
             }
-            
             if (!currentCountingType) {
                 showNotification('⚠️ Selecione um tipo de contagem', 'warning');
                 document.getElementById('countingType').focus();
                 return;
             }
-            
             let itemDescription = 'Item não identificado';
             const itemDescriptionDisplay = document.getElementById('itemDescriptionDisplay');
-            
-            // Tentar obter descrição do display
             try {
                 const descriptionElement = itemDescriptionDisplay.querySelector('strong');
                 if (descriptionElement && descriptionElement.textContent) {
                     itemDescription = descriptionElement.textContent.trim();
                 }
-            } catch (error) {
-                console.error('Erro ao buscar descrição:', error);
-            }
-            
-            // Se não encontrou, buscar do item
+            } catch (error) {}
             if (itemDescription === 'Item não identificado') {
                 try {
                     const item = await findItemByCode(currentItemCode);
-                    if (item && item.descricao) {
-                        itemDescription = item.descricao;
-                    }
-                } catch (error) {
-                    console.error('Erro ao buscar descrição do item:', error);
-                }
+                    if (item && item.descricao) itemDescription = item.descricao;
+                } catch (error) {}
             }
-            
             const newItem = {
                 code: currentItemCode,
                 description: itemDescription,
@@ -3094,20 +2372,14 @@
                 counts: 1,
                 countingType: currentCountingType,
                 date: new Date().toISOString(),
-                history: [{
-                    date: new Date().toISOString(),
-                    quantity: countedQuantity,
-                    type: currentCountingType
-                }]
+                history: [{ date: new Date().toISOString(), quantity: countedQuantity, type: currentCountingType }]
             };
-            
             inventoryItems.push(newItem);
             await saveInventoryData();
             resetFormAfterSubmission();
             renderInventoryTable();
             updateSummary();
             updateDashboard();
-            
             showNotification(`✅ "${itemDescription}" registrado com sucesso!`, 'success');
         }
         
@@ -3115,15 +2387,8 @@
             const itemCodeInput = document.getElementById('itemCode');
             itemCodeInput.value = '';
             resetItemForm();
-            
-            setTimeout(() => {
-                itemCodeInput.focus();
-            }, 100);
+            setTimeout(() => itemCodeInput.focus(), 100);
         }
-        
-        // =============================================
-        // GERENCIAMENTO DE DADOS
-        // =============================================
         
         async function loadUserData() {
             try {
@@ -3131,28 +2396,14 @@
                     inventoryItems = [];
                     return;
                 }
-                
-                // Carregar itens do inventário
                 const { data: inventoryData, error: inventoryError } = await supabaseClient
                     .from('inventory_items')
                     .select('*')
                     .eq('user_id', currentUser.id);
-                
-                if (inventoryError) {
-                    console.error('Erro ao carregar inventário:', inventoryError);
-                    throw inventoryError;
-                }
-                
+                if (inventoryError) throw inventoryError;
                 inventoryItems = inventoryData || [];
-                
-                // Fallback para localStorage
                 const localData = localStorage.getItem(`inventoryItems_${currentUser.id}`);
-                if (!inventoryItems.length && localData) {
-                    inventoryItems = JSON.parse(localData);
-                }
-                
-                console.log('Dados carregados:', inventoryItems.length, 'itens');
-                
+                if (!inventoryItems.length && localData) inventoryItems = JSON.parse(localData);
             } catch (error) {
                 console.error('Erro carregar dados:', error);
                 showNotification('Erro ao carregar dados', 'error');
@@ -3161,119 +2412,46 @@
         
         async function saveInventoryData() {
             try {
-                // Salvar no localStorage como backup
-                if (currentUser?.id) {
-                    localStorage.setItem(`inventoryItems_${currentUser.id}`, JSON.stringify(inventoryItems));
-                }
-
-                // Sincronizar com Supabase se online
+                if (currentUser?.id) localStorage.setItem(`inventoryItems_${currentUser.id}`, JSON.stringify(inventoryItems));
                 if (navigator.onLine && currentUser && currentUser.id) {
-                    console.log('📤 Sincronizando inventário com Supabase...');
-                    console.log('   user_id:', currentUser.id);
-
                     for (const item of inventoryItems) {
                         try {
                             const payload = buildInventoryPayload(item);
-
-                            // Verificar existência pelo par user_id + code
                             const { data: existing, error: checkError } = await supabaseClient
                                 .from('inventory_items')
                                 .select('id')
                                 .eq('user_id', payload.user_id)
                                 .eq('code', payload.code)
                                 .maybeSingle();
-
-                            if (checkError) {
-                                console.warn('Aviso ao checar existência:', checkError, 'item:', item.code);
-                            }
-
                             if (existing && existing.id) {
-                                // Atualizar apenas campos permitidos (evitar enviar counting_type)
                                 const updatePayload = Object.assign({}, payload, { updated_at: new Date().toISOString() });
-                                // Remover created_at antes do update
                                 delete updatePayload.created_at;
-
-                                const { error: updateError } = await supabaseClient
-                                    .from('inventory_items')
-                                    .update(updatePayload)
-                                    .eq('id', existing.id)
-                                    .select();
-
-                                if (updateError) {
-                                    console.error('Erro ao atualizar inventory_items:', updateError, 'payload:', updatePayload);
-                                    throw updateError;
-                                }
+                                await supabaseClient.from('inventory_items').update(updatePayload).eq('id', existing.id);
                             } else {
-                                // Inserir novo registro
-                                console.log('📝 Inserindo item:', item.code, 'user_id:', payload.user_id);
-                                const { error: insertError } = await supabaseClient
-                                    .from('inventory_items')
-                                    .insert(payload)
-                                    .select();
-
-                                if (insertError) {
-                                    console.error('Erro ao inserir inventory_items:', insertError, 'payload:', payload);
-                                    
-                                    // Se erro for de FK 23503, informar que usuário não existe no Supabase
-                                    if (insertError.code === '23503') {
-                                        console.error('❌ ERRO: user_id não existe na tabela "users" do Supabase');
-                                        console.error('   Certifique-se que o usuário foi criado primeiro no Supabase');
-                                        showNotification('❌ Erro: Usuário não registrado no servidor. Contate o administrador.', 'error');
-                                    }
-                                    throw insertError;
-                                }
+                                await supabaseClient.from('inventory_items').insert(payload);
                             }
                         } catch (itemError) {
                             console.warn('⚠️ Erro ao sincronizar item:', item.code, itemError);
-                            // Continuar com próximos itens ao invés de parar tudo
                         }
                     }
-
-                    console.log('✅ Sincronização concluída');
                 }
-                
             } catch (error) {
                 console.error('Erro ao salvar dados:', error);
-                // Não lançar erro, pois os dados já foram salvos no localStorage
             }
         }
         
-        // =============================================
-        // FUNÇÕES DE VISUALIZAÇÃO E RELATÓRIOS
-        // =============================================
-        
         function renderInventoryTable() {
             const inventoryTable = document.getElementById('inventoryTable');
-            
             if (inventoryItems.length === 0) {
-                inventoryTable.innerHTML = `
-                    <tr>
-                        <td colspan="10" class="text-center text-muted py-4">
-                            <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
-                            Nenhum item contado ainda
-                        </td>
-                    </tr>
-                `;
+                inventoryTable.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4"><i class="fas fa-box-open fa-2x mb-2 d-block"></i>Nenhum item contado ainda</td></tr>`;
                 return;
             }
-            
             inventoryTable.innerHTML = inventoryItems.map((item, index) => {
                 const difference = item.countedQuantity - item.systemQuantity;
-                const differenceClass = difference === 0 ? '' : 
-                                      difference > 0 ? 'positive-diff' : 'negative-diff';
-                
+                const differenceClass = difference === 0 ? '' : (difference > 0 ? 'positive-diff' : 'negative-diff');
                 const totalValue = item.countedQuantity * item.unitValue;
-                
-                // Definir cor do badge baseado no tipo de contagem
-                const typeColors = {
-                    'Avaria': 'danger',
-                    'RH': 'warning',
-                    'Auditoria': 'info',
-                    'Reposição': 'success',
-                    'Outro': 'secondary'
-                };
+                const typeColors = { 'Avaria': 'danger', 'RH': 'warning', 'Auditoria': 'info', 'Reposição': 'success', 'Outro': 'secondary' };
                 const typeColor = typeColors[item.countingType] || 'secondary';
-                
                 return `
                     <tr>
                         <td><span class="badge bg-${typeColor}">${item.countingType || 'N/A'}</span></td>
@@ -3286,39 +2464,26 @@
                         <td>R$ ${totalValue.toFixed(2)}</td>
                         <td>${item.counts}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary view-history" data-index="${index}" title="Ver histórico">
-                                <i class="fas fa-history"></i>
-                            </button>
-                            ${isAdmin ? `
-                                <button class="btn btn-sm btn-outline-danger delete-item" data-index="${index}" title="Excluir">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            ` : ''}
+                            <button class="btn btn-sm btn-outline-primary view-history" data-index="${index}" title="Ver histórico"><i class="fas fa-history"></i></button>
+                            ${isAdmin ? `<button class="btn btn-sm btn-outline-danger delete-item" data-index="${index}" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}
                         </td>
                     </tr>
                 `;
             }).join('');
-            
-            // Adicionar event listeners
-            document.querySelectorAll('.view-history').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    viewItemHistory(index);
-                });
-            });
-            
-            document.querySelectorAll('.delete-item').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    deleteInventoryItem(index);
-                });
-            });
+            document.querySelectorAll('.view-history').forEach(btn => btn.addEventListener('click', function() { viewItemHistory(parseInt(this.getAttribute('data-index'))); }));
+            document.querySelectorAll('.delete-item').forEach(btn => btn.addEventListener('click', async function() { 
+                if (confirm('Tem certeza que deseja excluir este item?')) {
+                    inventoryItems.splice(parseInt(this.getAttribute('data-index')), 1);
+                    await saveInventoryData();
+                    renderInventoryTable();
+                    updateSummary();
+                }
+            }));
         }
         
         function viewItemHistory(index) {
             const item = inventoryItems[index];
             let historyHTML = '';
-            
             if (item.history && item.history.length > 0) {
                 historyHTML = '<ul class="list-unstyled">';
                 item.history.forEach(record => {
@@ -3329,43 +2494,18 @@
             } else {
                 historyHTML = '<p class="text-muted">Nenhum histórico disponível.</p>';
             }
-            
-            alert(`
-                Histórico de contagens para ${item.description} (${item.code}):
-
-                Quantidade no sistema: ${item.systemQuantity}
-                Quantidade contada: ${item.countedQuantity}
-                Diferença: ${item.countedQuantity - item.systemQuantity}
-
-                Histórico de contagens:
-                ${historyHTML.replace(/<[^>]*>/g, '')}
-            `);
-        }
-        
-        async function deleteInventoryItem(index) {
-            if (confirm('Tem certeza que deseja excluir este item do inventário?')) {
-                inventoryItems.splice(index, 1);
-                await saveInventoryData();
-                renderInventoryTable();
-                updateSummary();
-            }
+            alert(`Histórico de contagens para ${item.description} (${item.code}):\n\nQuantidade no sistema: ${item.systemQuantity}\nQuantidade contada: ${item.countedQuantity}\nDiferença: ${item.countedQuantity - item.systemQuantity}\n\nHistórico de contagens:\n${historyHTML.replace(/<[^>]*>/g, '')}`);
         }
         
         function filterInventoryTable() {
-            const searchTerm = this.value.toLowerCase();
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const rows = document.querySelectorAll('#inventoryTable tr');
-            
             rows.forEach(row => {
                 const cells = row.getElementsByTagName('td');
                 let found = false;
-                
                 for (let cell of cells) {
-                    if (cell.textContent.toLowerCase().includes(searchTerm)) {
-                        found = true;
-                        break;
-                    }
+                    if (cell.textContent.toLowerCase().includes(searchTerm)) { found = true; break; }
                 }
-                
                 row.style.display = found ? '' : 'none';
             });
         }
@@ -3375,33 +2515,21 @@
             const matchingItems = inventoryItems.filter(item => item.countedQuantity === item.systemQuantity).length;
             const positiveDiffItems = inventoryItems.filter(item => item.countedQuantity > item.systemQuantity).length;
             const negativeDiffItems = inventoryItems.filter(item => item.countedQuantity < item.systemQuantity).length;
-            
-            let totalSystemValue = 0;
-            let totalCountedValue = 0;
-            
+            let totalSystemValue = 0, totalCountedValue = 0;
             inventoryItems.forEach(item => {
                 totalSystemValue += item.systemQuantity * item.unitValue;
                 totalCountedValue += item.countedQuantity * item.unitValue;
             });
-            
             const totalDifferenceValue = totalCountedValue - totalSystemValue;
-            
             document.getElementById('totalItems').textContent = totalItems;
             document.getElementById('matchingItems').textContent = matchingItems;
             document.getElementById('positiveDiffItems').textContent = positiveDiffItems;
             document.getElementById('negativeDiffItems').textContent = negativeDiffItems;
-            
             document.getElementById('totalSystemValue').textContent = `R$ ${totalSystemValue.toFixed(2)}`;
             document.getElementById('totalCountedValue').textContent = `R$ ${totalCountedValue.toFixed(2)}`;
-            
-            const differenceClass = totalDifferenceValue === 0 ? '' : 
-                                  totalDifferenceValue > 0 ? 'positive-diff' : 'negative-diff';
+            const differenceClass = totalDifferenceValue === 0 ? '' : (totalDifferenceValue > 0 ? 'positive-diff' : 'negative-diff');
             document.getElementById('totalDifferenceValue').innerHTML = `<span class="${differenceClass}">R$ ${totalDifferenceValue.toFixed(2)}</span>`;
         }
-        
-        // =============================================
-        // NAVEGAÇÃO E CONTROLE DE TELAS
-        // =============================================
         
         function handleViewSwitch(e) {
             e.preventDefault();
@@ -3410,155 +2538,74 @@
         }
         
         async function switchView(viewName) {
-            // Esconder todas as telas
-            document.querySelectorAll('.view-container').forEach(view => {
-                view.classList.remove('active');
-            });
-            
-            // Remover active de todos os links
-            document.querySelectorAll('.view-switch').forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            // Mostrar tela selecionada
+            document.querySelectorAll('.view-container').forEach(view => view.classList.remove('active'));
+            document.querySelectorAll('.view-switch').forEach(link => link.classList.remove('active'));
             const targetView = document.getElementById(viewName + 'View');
             if (targetView) {
                 targetView.classList.add('active');
-                
-                // Ativar link correspondente
                 const activeLink = document.querySelector(`.view-switch[data-view="${viewName}"]`);
-                if (activeLink) {
-                    activeLink.classList.add('active');
-                }
-                
-                // Ações específicas por tela
+                if (activeLink) activeLink.classList.add('active');
                 switch(viewName) {
-                    case 'counting':
-                        setTimeout(() => {
-                            const itemCodeInput = document.getElementById('itemCode');
-                            if (itemCodeInput) itemCodeInput.focus();
-                        }, 100);
-                        break;
-                    case 'history':
-                        renderInventoryTable();
-                        updateSummary();
-                        break;
-                    case 'analytics':
-                        // Tela de análise histórica removida — redirecionar para dashboard
-                        updateDashboard();
-                        break;
-                    case 'dashboard':
-                        updateDashboard();
-                        break;
-                    case 'users':
-                        loadUsers();
-                        break;
+                    case 'counting': setTimeout(() => { const input = document.getElementById('itemCode'); if (input) input.focus(); }, 100); break;
+                    case 'history': renderInventoryTable(); updateSummary(); break;
+                    case 'dashboard': updateDashboard(); break;
+                    case 'users': loadUsers(); break;
                 }
             }
         }
         
-        // =============================================
-        // FUNÇÕES UTILITÁRIAS
-        // =============================================
-        
         function showNotification(message, type = 'info') {
-            // Log apenas no console, sem exibir visual na tela
-            const prefix = `[${type.toUpperCase()}]`;
-            console.log(`${prefix} ${message}`);
+            console.log(`[${type.toUpperCase()}] ${message}`);
         }
-        
-        // =============================================
-        // EXPORTAÇÃO E RELATÓRIOS
-        // =============================================
         
         function exportToExcel() {
             if (inventoryItems.length === 0) {
                 showNotification('Não há dados para exportar.', 'warning');
                 return;
             }
-            
-            const data = [
-                ['Tipo Contagem', 'Código', 'Descrição', 'Quantidade Sistema', 'Quantidade Contada', 'Diferença', 'Valor Unitário', 'Valor Total', 'Contagens', 'Data']
-            ];
-            
+            const data = [['Tipo Contagem', 'Código', 'Descrição', 'Quantidade Sistema', 'Quantidade Contada', 'Diferença', 'Valor Unitário', 'Valor Total', 'Contagens', 'Data']];
             inventoryItems.forEach(item => {
                 const difference = item.countedQuantity - item.systemQuantity;
                 const totalValue = item.countedQuantity * item.unitValue;
                 const date = new Date(item.date).toLocaleDateString('pt-BR');
-                
-                data.push([
-                    item.countingType || 'N/A',
-                    item.code,
-                    item.description,
-                    item.systemQuantity,
-                    item.countedQuantity,
-                    difference,
-                    item.unitValue,
-                    totalValue,
-                    item.counts,
-                    date
-                ]);
+                data.push([item.countingType || 'N/A', item.code, item.description, item.systemQuantity, item.countedQuantity, difference, item.unitValue, totalValue, item.counts, date]);
             });
-            
             const ws = XLSX.utils.aoa_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Inventário');
             XLSX.writeFile(wb, 'inventario.xlsx');
-            
             showNotification('Relatório exportado com sucesso!', 'success');
         }
-        
-        // Exportação de históricos antigos removida para melhor performance
-        
-        // =============================================
-        // LIMPEZA DE DADOS
-        // =============================================
         
         async function clearAllData() {
             if (currentUser && currentUser.id !== 'local-admin') {
                 try {
-                    // Limpar os itens do usuário na tabela de inventário (inventory_items)
-                    const { error } = await supabaseClient
-                        .from('inventory_items')
-                        .delete()
-                        .eq('user_id', currentUser.id);
-
-                    if (error) throw error;
+                    await supabaseClient.from('inventory_items').delete().eq('user_id', currentUser.id);
                 } catch (error) {
                     console.error('Erro limpar dados online:', error);
                     showNotification('Erro ao limpar dados online', 'error');
                     return;
                 }
             }
-            
             inventoryItems = [];
             await saveInventoryData();
             renderInventoryTable();
             updateSummary();
             bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
-            
             showNotification('Todos os dados foram limpos!', 'success');
         }
-        
-        // =============================================
-        // IMPORTACAO DE DADOS
-        // =============================================
         
         function previewExcelFile() {
             const file = document.getElementById('excelFile').files[0];
             if (!file) return;
-            
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                
                 const previewTable = document.querySelector('#previewTable tbody');
                 previewTable.innerHTML = '';
-                
-                // Mostrar as primeiras 5 linhas
                 const maxRows = Math.min(5, jsonData.length);
                 for (let i = 0; i < maxRows; i++) {
                     const row = document.createElement('tr');
@@ -3579,7 +2626,6 @@
                 showNotification('Por favor, selecione um arquivo Excel.', 'warning');
                 return;
             }
-            
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
@@ -3587,35 +2633,21 @@
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-                    
-                    // Mapear colunas (case insensitive)
                     const mappedData = jsonData.map(row => {
                         const mappedRow = {};
                         for (const key in row) {
                             const normalizedKey = key.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                            
-                            if (normalizedKey.includes('CODIGO') || normalizedKey.includes('COD')) {
-                                mappedRow.CODE = row[key]?.toString() || '';
-                            } else if (normalizedKey.includes('DESCRICAO') || normalizedKey.includes('DESC')) {
-                                mappedRow.DESCRICAO = row[key]?.toString() || '';
-                            } else if (normalizedKey.includes('QUANTIDADE') || normalizedKey.includes('QTD')) {
-                                mappedRow.QUANTIDADE = parseFloat(row[key]) || 0;
-                            } else if (normalizedKey.includes('VALOR') || normalizedKey.includes('PRECO')) {
-                                mappedRow.VALOR = parseFloat(row[key]) || 0;
-                            } else if (normalizedKey.includes('DUN')) {
-                                mappedRow.DUN = row[key]?.toString() || '';
-                            } else if (normalizedKey.includes('EAN')) {
-                                mappedRow.EAN = row[key]?.toString() || '';
-                            } else if (normalizedKey.includes('EMBALAGEM') || normalizedKey.includes('EMB')) {
-                                mappedRow.EMBALAGEM = row[key]?.toString() || '';
-                            }
+                            if (normalizedKey.includes('CODIGO') || normalizedKey.includes('COD')) mappedRow.CODE = row[key]?.toString() || '';
+                            else if (normalizedKey.includes('DESCRICAO') || normalizedKey.includes('DESC')) mappedRow.DESCRICAO = row[key]?.toString() || '';
+                            else if (normalizedKey.includes('QUANTIDADE') || normalizedKey.includes('QTD')) mappedRow.QUANTIDADE = parseFloat(row[key]) || 0;
+                            else if (normalizedKey.includes('VALOR') || normalizedKey.includes('PRECO')) mappedRow.VALOR = parseFloat(row[key]) || 0;
+                            else if (normalizedKey.includes('DUN')) mappedRow.DUN = row[key]?.toString() || '';
+                            else if (normalizedKey.includes('EAN')) mappedRow.EAN = row[key]?.toString() || '';
+                            else if (normalizedKey.includes('EMBALAGEM') || normalizedKey.includes('EMB')) mappedRow.EMBALAGEM = row[key]?.toString() || '';
                         }
                         return mappedRow;
                     });
-                    
                     itemDatabase = mappedData.filter(item => item.CODE && item.DESCRICAO);
-                    // await saveItemDatabase(); // Comentado pois a função não está definida
-
                     bootstrap.Modal.getInstance(document.getElementById('importModal')).hide();
                     showNotification(`Base de dados importada com sucesso! ${itemDatabase.length} itens carregados.`, 'success');
                 } catch (error) {
@@ -3626,217 +2658,64 @@
             reader.readAsArrayBuffer(file);
         }
         
-        // =============================================
-        // DASHBOARD E GRÁFICOS
-        // =============================================
-        
         function updateDashboard() {
             const totalItems = inventoryItems.length;
-            
             if (totalItems === 0) {
-                // Se não há itens, limpar o dashboard
                 document.getElementById('kpiTotalItems').textContent = '0';
                 document.getElementById('kpiAccuracy').textContent = '0%';
                 document.getElementById('kpiDivergenceValue').textContent = 'R$ 0,00';
                 document.getElementById('kpiProgress').textContent = '0%';
-                document.getElementById('analysisTable').innerHTML = '<tr><td colspan="8" class="text-center text-muted">Nenhum dado disponível para análise.</td></tr>';
+                document.getElementById('analysisTable').innerHTML = '67e<td colspan="8" class="text-center text-muted">Nenhum dado disponível para análise.2s2s';
                 document.getElementById('criticalItemsList').innerHTML = '<p class="text-muted">Nenhum item crítico identificado.</p>';
                 return;
             }
-            
-            // Calcular KPIs
             const matchingItems = inventoryItems.filter(item => item.countedQuantity === item.systemQuantity).length;
-            let totalDivergenceValue = 0;
-            let positiveItems = 0;
-            let negativeItems = 0;
-            
+            let totalDivergenceValue = 0, positiveItems = 0, negativeItems = 0;
             inventoryItems.forEach(item => {
                 const diff = item.countedQuantity - item.systemQuantity;
                 const divergenceValue = Math.abs(diff) * (item.unitValue || 0);
                 totalDivergenceValue += divergenceValue;
-                
                 if (diff > 0) positiveItems++;
                 else if (diff < 0) negativeItems++;
             });
-            
-            // Atualizar KPIs
             document.getElementById('kpiTotalItems').textContent = totalItems;
             document.getElementById('kpiAccuracy').textContent = `${((matchingItems / totalItems) * 100).toFixed(1)}%`;
             document.getElementById('kpiDivergenceValue').textContent = `R$ ${totalDivergenceValue.toFixed(2)}`;
-            document.getElementById('kpiProgress').textContent = `${((totalItems / totalItems) * 100).toFixed(1)}%`;
-            
-            // Preparar dados para gráficos
+            document.getElementById('kpiProgress').textContent = `100%`;
             const quantityLabels = ['Acima', 'Abaixo', 'Correto'];
             const quantityData = [positiveItems, negativeItems, matchingItems];
             const quantityColors = ['#4caf50', '#f44336', '#2196f3'];
-            
-            // Gráfico 1: Divergências por Quantidade
             const ctxQuantity = document.getElementById('quantityChart').getContext('2d');
             if (quantityChart) quantityChart.destroy();
-            quantityChart = new Chart(ctxQuantity, {
-                type: 'bar',
-                data: {
-                    labels: quantityLabels,
-                    datasets: [{
-                        label: 'Itens',
-                        data: quantityData,
-                        backgroundColor: quantityColors,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, max: totalItems }
-                    }
-                }
-            });
-            
-            // Gráfico 2: Distribuição de Itens (Pizza)
+            quantityChart = new Chart(ctxQuantity, { type: 'bar', data: { labels: quantityLabels, datasets: [{ label: 'Itens', data: quantityData, backgroundColor: quantityColors, borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: totalItems } } } });
             const ctxDistribution = document.getElementById('distributionChart').getContext('2d');
             if (distributionChart) distributionChart.destroy();
-            distributionChart = new Chart(ctxDistribution, {
-                type: 'doughnut',
-                data: {
-                    labels: quantityLabels,
-                    datasets: [{
-                        data: quantityData,
-                        backgroundColor: quantityColors,
-                        borderColor: 'white',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-            
-            // Gráfico 3: Linha do Tempo (Evolução)
+            distributionChart = new Chart(ctxDistribution, { type: 'doughnut', data: { labels: quantityLabels, datasets: [{ data: quantityData, backgroundColor: quantityColors, borderColor: 'white', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
             const timelineLabels = inventoryItems.map(item => item.code);
             const timelineData = inventoryItems.map(item => item.countedQuantity - item.systemQuantity);
-            
             const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
             if (timelineChart) timelineChart.destroy();
-            timelineChart = new Chart(ctxTimeline, {
-                type: 'line',
-                data: {
-                    labels: timelineLabels,
-                    datasets: [{
-                        label: 'Divergência por Item',
-                        data: timelineData,
-                        borderColor: '#4361ee',
-                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: timelineData.map(v => v > 0 ? '#4caf50' : v < 0 ? '#f44336' : '#2196f3'),
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-            
-            // Tabela de Análise Detalhada
+            timelineChart = new Chart(ctxTimeline, { type: 'line', data: { labels: timelineLabels, datasets: [{ label: 'Divergência por Item', data: timelineData, borderColor: '#4361ee', backgroundColor: 'rgba(67, 97, 238, 0.1)', fill: true, tension: 0.4, pointBackgroundColor: timelineData.map(v => v > 0 ? '#4caf50' : v < 0 ? '#f44336' : '#2196f3'), pointRadius: 4, pointHoverRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } } });
             const analysisTable = document.getElementById('analysisTable');
-            analysisTable.innerHTML = inventoryItems.map((item, idx) => {
+            analysisTable.innerHTML = inventoryItems.map(item => {
                 const diff = item.countedQuantity - item.systemQuantity;
                 const diffValue = Math.abs(diff) * (item.unitValue || 0);
-                const impactClass = diff > 0 ? 'positive-diff' : diff < 0 ? 'negative-diff' : '';
                 const impactIcon = diff > 0 ? '📈' : diff < 0 ? '📉' : '✅';
-                
-                return `
-                    <tr>
-                        <td><strong>${item.code}</strong></td>
-                        <td>${item.description || 'N/A'}</td>
-                        <td>${item.systemQuantity || 0}</td>
-                        <td>${item.countedQuantity}</td>
-                        <td class="${impactClass}">${diff > 0 ? '+' : ''}${diff}</td>
-                        <td>R$ ${(item.unitValue || 0).toFixed(2)}</td>
-                        <td>R$ ${diffValue.toFixed(2)}</td>
-                        <td>${impactIcon}</td>
-                    </tr>
-                `;
+                return `<tr><td><strong>${item.code}</strong></td><td>${item.description || 'N/A'}</td><td>${item.systemQuantity || 0}</td><td>${item.countedQuantity}</td><td class="${diff > 0 ? 'positive-diff' : diff < 0 ? 'negative-diff' : ''}">${diff > 0 ? '+' : ''}${diff}</td><td>R$ ${(item.unitValue || 0).toFixed(2)}</td><td>R$ ${diffValue.toFixed(2)}</td><td>${impactIcon}</td></tr>`;
             }).join('');
-            
-            // Itens Mais Críticos (Top 3)
-            const criticalItems = [...inventoryItems]
-                .map(item => ({
-                    ...item,
-                    divergenceValue: Math.abs(item.countedQuantity - item.systemQuantity) * (item.unitValue || 0)
-                }))
-                .sort((a, b) => b.divergenceValue - a.divergenceValue)
-                .slice(0, 3);
-            
+            const criticalItems = [...inventoryItems].map(item => ({ ...item, divergenceValue: Math.abs(item.countedQuantity - item.systemQuantity) * (item.unitValue || 0) })).sort((a, b) => b.divergenceValue - a.divergenceValue).slice(0, 3);
             const criticalListHtml = criticalItems.length > 0 ? criticalItems.map(item => {
                 const diff = item.countedQuantity - item.systemQuantity;
-                return `
-                    <div class="critical-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <strong>${item.code}</strong><br>
-                                <small class="text-muted">${item.description || 'Sem descrição'}</small>
-                            </div>
-                            <span class="badge ${diff > 0 ? 'bg-success' : 'bg-danger'}">
-                                ${diff > 0 ? '+' : ''}${diff}
-                            </span>
-                        </div>
-                        <div class="mt-2">
-                            <small>Impacto: <strong>R$ ${(Math.abs(diff) * (item.unitValue || 0)).toFixed(2)}</strong></small>
-                        </div>
-                    </div>
-                `;
+                return `<div class="critical-item"><div class="d-flex justify-content-between align-items-start"><div><strong>${item.code}</strong><br><small class="text-muted">${item.description || 'Sem descrição'}</small></div><span class="badge ${diff > 0 ? 'bg-success' : 'bg-danger'}">${diff > 0 ? '+' : ''}${diff}</span></div><div class="mt-2"><small>Impacto: <strong>R$ ${(Math.abs(diff) * (item.unitValue || 0)).toFixed(2)}</strong></small></div></div>`;
             }).join('') : '<p class="text-muted">Nenhum item crítico identificado.</p>';
-            
             document.getElementById('criticalItemsList').innerHTML = criticalListHtml;
-            
-            showNotification('✅ Dashboard atualizado!', 'success');
         }
         
         function exportDashboardData() {
             showNotification('Funcionalidade de exportação do dashboard em desenvolvimento', 'info');
         }
         
-        // =============================================
-        // SINCRONIZAÇÃO MANUAL COM NUVEM
-        // =============================================
-        async function syncWithCloud() {
-            showNotification('🔄 Iniciando sincronização com a nuvem...', 'info');
-            await saveInventoryData();
-            showNotification('✅ Sincronização finalizada', 'success');
-        }
-        
-        // ANÁLISE HISTÓRICA REMOVIDA - funções relacionadas excluídas para melhorar desempenho e evitar erros
-        
-        // =============================================
-        // TESTE DE CONEXÃO AO INICIAR
-        // =============================================
-        
-        // Testar conexão após inicialização
-        setTimeout(() => {
-            testSupabaseConnection();
-        }, 2000);
-        
+        setTimeout(() => testSupabaseConnection(), 2000);
     </script>
 </body>
 </html>

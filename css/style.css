@@ -662,3 +662,33 @@ img[src*="postimg.cc"] {
         height: 20%;
     }
 }
+
+/* Dica específica para desktop */
+@media (min-width: 769px) {
+    #deviceHint {
+        color: #6c757d;
+    }
+    #deviceHint:before {
+        content: "💻 ";
+    }
+}
+
+@media (max-width: 768px) {
+    #deviceHint:before {
+        content: "📱 ";
+    }
+}
+
+/* Esconder botão da câmera no desktop */
+@media (min-width: 769px) {
+    #scannerBtn {
+        display: none !important;
+    }
+}
+
+/* Mostrar apenas no mobile */
+@media (max-width: 768px) {
+    #scannerBtn {
+        display: inline-block !important;
+    }
+}

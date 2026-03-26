@@ -22,22 +22,20 @@ function isMobileDevice() {
 }
 
 function addScannerButton() {
-    // Só adicionar botão se for dispositivo móvel
+    // Primeiro, remover qualquer botão existente
+    const existingBtn = document.getElementById('scannerBtn');
+    if (existingBtn) {
+        existingBtn.remove();
+    }
+    
+    // Só adicionar se for mobile
     if (!isMobileDevice()) {
-        console.log('💻 Desktop detectado - botão da câmera não será exibido');
-        
-        // Se o botão já existir, removê-lo
-        const existingBtn = document.getElementById('scannerBtn');
-        if (existingBtn) {
-            existingBtn.remove();
-            console.log('🗑️ Botão da câmera removido (desktop)');
-        }
+        console.log('💻 Desktop detectado - botão da câmera removido');
         return;
     }
     
     const itemCodeInput = document.getElementById('itemCode');
     if (!itemCodeInput) return;
-    if (document.getElementById('scannerBtn')) return;
     
     const btn = document.createElement('button');
     btn.id = 'scannerBtn';

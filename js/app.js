@@ -130,3 +130,57 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSystem();
     setTimeout(() => testSupabaseConnection(), 2000);
 });
+// =============================================
+// INICIALIZAÇÃO DO MÓDULO COLABORATIVO
+// =============================================
+
+// Função para carregar sessões ativas
+async function loadActiveSessions() {
+    try {
+        const { data: sessions, error } = await supabaseClient
+            .from('counting_session')
+            .select('*, system_users(full_name)')
+            .eq('is_active', true)
+            .order('started_at', { ascending: false });
+        
+        const sessionsList = document.getElementById('activeSessionsList');
+        if (sessionsList) {
+            if (sessions && sessions.length > 0) {
+                sessionsList.innerHTML = sessions.map(s => 
+                    <div class="mb-2 p-2 border rounded">
+                        <div class="d-flex justify-content-between">
+                            <strong></strong>
+                            <button class="btn btn-sm btn-primary join-session" data-type="">
+                                Entrar
+                            </button>
+                        </div>
+                        <small class="text-muted">Iniciada por: </small>
+                        <br>
+                        <small></small>
+                    </div>
+                ).join('');
+                
+                // Adicionar eventos aos botões
+                document.querySelectorAll('.join-session').forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        const sessionType = this.getAttribute('data-type');
+                        await window.startCollaborativeSession(sessionType);
+                        switchView('collaborative');
+                    });
+                });
+            } else {
+                sessionsList.innerHTML = '<p class="text-muted">Nenhuma sessão ativa</p>';
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar sessões:', error);
+    }
+}
+
+// Chamar a função ao carregar
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(loadActiveSessions, 2000);
+});
+
+// Atualizar a cada 10 segundos
+setInterval(loadActiveSessions, 10000);

@@ -1,5 +1,5 @@
 // =============================================
-// SCANNER MODULE - Quagga (melhor para código de barras)
+// SCANNER MODULE - Quagga Otimizado para Mobile
 // =============================================
 
 let scannerActive = false;
@@ -30,26 +30,35 @@ function startScanner() {
     }
     
     const modalHtml = `
-        <div class="modal fade" id="scannerModal" tabindex="-1" data-bs-backdrop="static">
-            <div class="modal-dialog modal-lg">
+        <div class="modal fade" id="scannerModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-fullscreen">
                 <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title"><i class="fas fa-camera me-2"></i>Escanear Código de Barras</h5>
+                    <div class="modal-header bg-primary text-white py-2">
+                        <h5 class="modal-title fs-6">
+                            <i class="fas fa-camera me-2"></i>Escanear Código de Barras
+                        </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-0">
-                        <div id="scanner-container" style="width: 100%; min-height: 400px; background: #000; position: relative;">
+                        <div id="scanner-container" style="width: 100%; height: 70vh; background: #000; position: relative;">
                             <div id="scanner-video" style="width: 100%; height: 100%;"></div>
-                            <div id="scanner-guide" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 30%; border: 2px solid #00ff00; border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);"></div>
+                            <div id="scanner-guide"></div>
                         </div>
                         <div class="p-3 text-center bg-light">
-                            <p class="mb-0 text-muted">Posicione o código de barras dentro da área verde</p>
-                            <small class="text-muted">Formatos: EAN-13, EAN-8, UPC-A, Code128, Code39</small>
+                            <p class="mb-0 small">
+                                <i class="fas fa-info-circle text-primary me-1"></i>
+                                Posicione o código dentro da área verde
+                            </p>
+                            <small class="text-muted">EAN-13, EAN-8, UPC, Code128, Code39</small>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" id="stopScannerBtn"><i class="fas fa-stop me-1"></i>Parar</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-danger btn-sm" id="stopScannerBtn">
+                            <i class="fas fa-stop me-1"></i>Parar
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Fechar
+                        </button>
                     </div>
                 </div>
             </div>
@@ -61,60 +70,67 @@ function startScanner() {
     
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     
-    const modal = new bootstrap.Modal(document.getElementById('scannerModal'));
+    const modal = new bootstrap.Modal(document.getElementById('scannerModal'), {
+        backdrop: 'static',
+        keyboard: false
+    });
     modal.show();
     
-    Quagga.init({
-        inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector('#scanner-video'),
-            constraints: {
-                width: { min: 640 },
-                height: { min: 480 },
-                facingMode: "environment",
-                aspectRatio: { min: 1, max: 2 }
+    // Aguardar o modal abrir completamente
+    setTimeout(() => {
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: document.querySelector('#scanner-video'),
+                constraints: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: "environment"
+                }
+            },
+            decoder: {
+                readers: [
+                    "ean_reader",
+                    "ean_8_reader",
+                    "upc_reader",
+                    "upc_e_reader",
+                    "code_128_reader",
+                    "code_39_reader"
+                ]
+            },
+            locate: true,
+            numOfWorkers: navigator.hardwareConcurrency || 2
+        }, function(err) {
+            if (err) {
+                console.error('Erro ao iniciar scanner:', err);
+                alert('Erro ao acessar a câmera');
+                modal.hide();
+                return;
             }
-        },
-        decoder: {
-            readers: [
-                "ean_reader",
-                "ean_8_reader",
-                "upc_reader",
-                "upc_e_reader",
-                "code_128_reader",
-                "code_39_reader"
-            ]
-        },
-        locate: true,
-        numOfWorkers: 4
-    }, function(err) {
-        if (err) {
-            console.error('Erro ao iniciar scanner:', err);
-            alert('Erro ao acessar a câmera');
-            modal.hide();
-            return;
-        }
+            
+            Quagga.start();
+            scannerActive = true;
+            console.log('✅ Scanner iniciado');
+        });
         
-        Quagga.start();
-        scannerActive = true;
-        console.log('Scanner iniciado');
-    });
-    
-    Quagga.onDetected(function(result) {
-        const code = result.codeResult.code;
-        console.log('Código detectado:', code);
-        
-        const itemCodeInput = document.getElementById('itemCode');
-        if (itemCodeInput) {
-            itemCodeInput.value = code;
-            itemCodeInput.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-        
-        stopScanner();
-        modal.hide();
-        showNotification(`✅ Código: ${code}`, 'success');
-    });
+        Quagga.onDetected(function(result) {
+            if (result && result.codeResult && result.codeResult.code) {
+                const code = result.codeResult.code;
+                console.log('📦 Código detectado:', code);
+                
+                const itemCodeInput = document.getElementById('itemCode');
+                if (itemCodeInput) {
+                    itemCodeInput.value = code;
+                    itemCodeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                
+                stopScanner();
+                modal.hide();
+                showNotification(`✅ Código: ${code}`, 'success');
+            }
+        });
+    }, 500);
     
     document.getElementById('stopScannerBtn').addEventListener('click', function() {
         stopScanner();
@@ -132,7 +148,10 @@ function stopScanner() {
         try {
             Quagga.stop();
             scannerActive = false;
-        } catch(e) {}
+            console.log('✅ Scanner parado');
+        } catch(e) {
+            console.error('Erro ao parar scanner:', e);
+        }
     }
 }
 
@@ -141,8 +160,9 @@ function showNotification(message, type) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'info'} position-fixed top-0 start-50 translate-middle-x mt-3 shadow`;
     alertDiv.style.zIndex = 9999;
-    alertDiv.style.minWidth = '300px';
+    alertDiv.style.minWidth = '280px';
     alertDiv.style.textAlign = 'center';
+    alertDiv.style.fontSize = '0.9rem';
     alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}`;
     document.body.appendChild(alertDiv);
     setTimeout(() => alertDiv.remove(), 3000);

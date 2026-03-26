@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "name": "Estoque-On",
+  "description": "Sistema Gerencial de Controle de Estoque",
+  "lastUpdate": "2026-03-26",
+  "author": "Lucas Costa",
+  "features": [
+    "Contagem de inventário",
+    "Dashboard analítico",
+    "Gerenciamento de usuários",
+    "Importação de base de dados",
+    "Exportação para Excel"
+  ],
+  "modules": [
+    "auth",
+    "inventory",
+    "users",
+    "dashboard",
+    "database"
+  ]
+}

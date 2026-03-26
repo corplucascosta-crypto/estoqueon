@@ -1,8 +1,8 @@
 // =============================================
-// SCANNER MODULE - Html5Qrcode (funcional)
+// SCANNER MODULE - Versão Final
 // =============================================
 
-let html5QrCode = null;
+let html5QrCodeGlobal = null;
 let scannerActive = false;
 let lastCode = null;
 let lastCodeTime = 0;
@@ -27,31 +27,31 @@ function addScannerButton() {
     btn.type = 'button';
     btn.className = 'btn btn-outline-primary ms-2';
     btn.innerHTML = '<i class="fas fa-camera"></i>';
-    btn.title = 'Escanear cÃ³digo';
+    btn.title = 'Escanear código';
     btn.style.padding = '0.75rem 1rem';
     btn.onclick = startScanner;
     
     itemCodeInput.parentNode.insertBefore(btn, itemCodeInput.nextSibling);
-    console.log('ðŸ“± BotÃ£o scanner adicionado');
+    console.log('?? Botão scanner adicionado');
 }
 
 function startScanner() {
     if (scannerActive) return;
     
     if (typeof Html5Qrcode === 'undefined') {
-        alert('Scanner nÃ£o disponÃ­vel. Tente novamente.');
+        alert('Scanner não disponível. Tente novamente.');
         return;
     }
     
     lastCode = null;
     
-    const modalHtml = `
+    const modalHtml = 
         <div class="modal fade" id="scannerModal" tabindex="-1" data-bs-backdrop="static">
             <div class="modal-dialog modal-fullscreen">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white py-2">
                         <h5 class="modal-title fs-6">
-                            <i class="fas fa-camera me-2"></i>Escanear CÃ³digo
+                            <i class="fas fa-camera me-2"></i>Escanear Código
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
@@ -60,7 +60,7 @@ function startScanner() {
                         <div class="p-3 text-center bg-light">
                             <p class="mb-0 small">
                                 <i class="fas fa-info-circle text-primary me-1"></i>
-                                Posicione o cÃ³digo dentro da Ã¡rea de leitura
+                                Posicione o código dentro da área de leitura
                             </p>
                             <small class="text-muted">EAN-13 | EAN-8 | UPC | Code-128 | Code-39 | QR Code</small>
                         </div>
@@ -76,7 +76,7 @@ function startScanner() {
                 </div>
             </div>
         </div>
-    `;
+    ;
     
     const existingModal = document.getElementById('scannerModal');
     if (existingModal) existingModal.remove();
@@ -95,7 +95,7 @@ function startScanner() {
     document.getElementById('scannerModal').querySelector('.modal-body').appendChild(statusDiv);
     
     setTimeout(() => {
-        html5QrCode = new Html5Qrcode("qr-reader");
+        html5QrCodeGlobal = new Html5Qrcode("qr-reader");
         scannerActive = true;
         
         const config = {
@@ -114,7 +114,7 @@ function startScanner() {
             ]
         };
         
-        html5QrCode.start(
+        html5QrCodeGlobal.start(
             { facingMode: "environment" },
             config,
             (decodedText) => {
@@ -127,15 +127,14 @@ function startScanner() {
                 lastCode = decodedText;
                 lastCodeTime = now;
                 
-                console.log('ðŸ“¦ CÃ³digo detectado:', decodedText);
+                console.log('?? Código detectado:', decodedText);
                 
-                let codeType = 'CÃ³digo';
+                let codeType = 'Código';
                 if (/^\d{13}$/.test(decodedText)) codeType = 'EAN-13';
                 else if (/^\d{8}$/.test(decodedText)) codeType = 'EAN-8';
                 else if (/^\d{12}$/.test(decodedText)) codeType = 'UPC-A';
-                else if (decodedText.length > 5 && /^[A-Z0-9]+$/.test(decodedText)) codeType = 'Code-128/39';
                 
-                statusDiv.innerHTML = `âœ… ${codeType}: ${decodedText}`;
+                statusDiv.innerHTML = ? : ;
                 statusDiv.classList.add('bg-success');
                 
                 const itemCodeInput = document.getElementById('itemCode');
@@ -147,19 +146,19 @@ function startScanner() {
                 setTimeout(() => {
                     stopScanner();
                     modal.hide();
-                    showNotification(`âœ… ${codeType}: ${decodedText}`, 'success');
+                    showNotification(? : , 'success');
                 }, 1000);
             },
             (errorMessage) => {
                 if (errorMessage.includes('No')) {
-                    statusDiv.innerHTML = 'ðŸ“· Aproxime o cÃ³digo da cÃ¢mera';
+                    statusDiv.innerHTML = '?? Aproxime o código da câmera';
                 } else if (errorMessage.includes('not found')) {
-                    statusDiv.innerHTML = 'ðŸ” Centralize o cÃ³digo na Ã¡rea verde';
+                    statusDiv.innerHTML = '?? Centralize o código na área verde';
                 }
             }
         ).catch((err) => {
             console.error("Erro ao iniciar scanner:", err);
-            alert("NÃ£o foi possÃ­vel acessar a cÃ¢mera.\n\nVerifique as permissÃµes.");
+            alert("Não foi possível acessar a câmera.\n\nVerifique as permissões.");
             modal.hide();
         });
     }, 500);
@@ -176,8 +175,8 @@ function startScanner() {
 }
 
 function stopScanner() {
-    if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().catch(err => console.error("Erro ao parar:", err));
+    if (html5QrCodeGlobal && html5QrCodeGlobal.isScanning) {
+        html5QrCodeGlobal.stop().catch(err => console.error("Erro ao parar:", err));
     }
     scannerActive = false;
 }
@@ -185,12 +184,12 @@ function stopScanner() {
 function showNotification(message, type) {
     console.log(message);
     const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'info'} position-fixed top-0 start-50 translate-middle-x mt-3 shadow`;
+    alertDiv.className = lert alert- position-fixed top-0 start-50 translate-middle-x mt-3 shadow;
     alertDiv.style.zIndex = 9999;
     alertDiv.style.minWidth = '280px';
     alertDiv.style.textAlign = 'center';
     alertDiv.style.fontSize = '0.9rem';
-    alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}`;
+    alertDiv.innerHTML = <i class="fas fa- me-2"></i>;
     document.body.appendChild(alertDiv);
     setTimeout(() => alertDiv.remove(), 3000);
 }

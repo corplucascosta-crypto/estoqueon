@@ -1,5 +1,5 @@
 // =============================================
-// SCANNER MODULE - Html5Qrcode (Lê QR Code e Código de Barras)
+// SCANNER MODULE - Configuração Otimizada para EAN
 // =============================================
 
 let html5QrCode = null;
@@ -46,9 +46,9 @@ function startScanner() {
                         <div class="p-3 text-center bg-light">
                             <p class="mb-0 small">
                                 <i class="fas fa-info-circle text-primary me-1"></i>
-                                Posicione o QR Code ou código de barras
+                                Posicione o código dentro da área de leitura
                             </p>
-                            <small class="text-muted">QR Code | EAN | UPC | Code128 | Code39</small>
+                            <small class="text-muted">EAN-13 | EAN-8 | UPC-A | QR Code | Code128</small>
                         </div>
                     </div>
                     <div class="modal-footer py-2">
@@ -76,16 +76,26 @@ function startScanner() {
         html5QrCode = new Html5Qrcode("qr-reader");
         scannerActive = true;
         
+        const config = {
+            fps: 30,
+            qrbox: { width: 300, height: 150 },
+            aspectRatio: 1.777,
+            disableFlip: false,
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.UPC_E,
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.QR_CODE
+            ]
+        };
+        
         html5QrCode.start(
             { facingMode: "environment" },
-            {
-                fps: 15,
-                qrbox: { width: 280, height: 280 },
-                aspectRatio: 1.0,
-                disableFlip: false
-            },
+            config,
             (decodedText) => {
-                // Código detectado automaticamente
                 console.log('📦 Código detectado:', decodedText);
                 
                 const itemCodeInput = document.getElementById('itemCode');
@@ -94,7 +104,6 @@ function startScanner() {
                     itemCodeInput.dispatchEvent(new Event('input', { bubbles: true }));
                 }
                 
-                // Fecha automaticamente após leitura
                 stopScanner();
                 modal.hide();
                 showNotification(`✅ Código: ${decodedText}`, 'success');

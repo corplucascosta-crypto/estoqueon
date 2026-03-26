@@ -1,7 +1,8 @@
 // =============================================
-// SCANNER MODULE - Quagga (especialista em códigos lineares)
+// SCANNER MODULE - Html5Qrcode (funcional)
 // =============================================
 
+let html5QrCode = null;
 let scannerActive = false;
 let lastCode = null;
 let lastCodeTime = 0;
@@ -26,20 +27,23 @@ function addScannerButton() {
     btn.type = 'button';
     btn.className = 'btn btn-outline-primary ms-2';
     btn.innerHTML = '<i class="fas fa-camera"></i>';
-    btn.title = 'Escanear código de barras';
+    btn.title = 'Escanear código';
     btn.style.padding = '0.75rem 1rem';
     btn.onclick = startScanner;
     
     itemCodeInput.parentNode.insertBefore(btn, itemCodeInput.nextSibling);
+    console.log('📱 Botão scanner adicionado');
 }
 
 function startScanner() {
     if (scannerActive) return;
     
-    if (typeof Quagga === 'undefined') {
+    if (typeof Html5Qrcode === 'undefined') {
         alert('Scanner não disponível. Tente novamente.');
         return;
     }
+    
+    lastCode = null;
     
     const modalHtml = `
         <div class="modal fade" id="scannerModal" tabindex="-1" data-bs-backdrop="static">
@@ -47,21 +51,18 @@ function startScanner() {
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white py-2">
                         <h5 class="modal-title fs-6">
-                            <i class="fas fa-camera me-2"></i>Escanear Código de Barras
+                            <i class="fas fa-camera me-2"></i>Escanear Código
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-0">
-                        <div id="scanner-container" style="width: 100%; height: 75vh; background: #000; position: relative;">
-                            <div id="scanner-video" style="width: 100%; height: 100%;"></div>
-                            <div id="scanner-guide" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; height: 25%; border: 2px solid #00ff00; border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);"></div>
-                        </div>
+                        <div id="qr-reader" style="width: 100%; height: 70vh; background: #000;"></div>
                         <div class="p-3 text-center bg-light">
                             <p class="mb-0 small">
                                 <i class="fas fa-info-circle text-primary me-1"></i>
-                                Posicione o código dentro da área verde
+                                Posicione o código dentro da área de leitura
                             </p>
-                            <small class="text-muted">EAN-13 | EAN-8 | UPC | Code-11 | Code-39 | Code-93 | Code-128 | ITF-14 | DUN-14 | Codabar</small>
+                            <small class="text-muted">EAN-13 | EAN-8 | UPC | Code-128 | Code-39 | QR Code</small>
                         </div>
                     </div>
                     <div class="modal-footer py-2">
@@ -90,116 +91,82 @@ function startScanner() {
     statusDiv.className = 'position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill';
     statusDiv.style.zIndex = 1060;
     statusDiv.style.fontSize = '12px';
-    statusDiv.style.whiteSpace = 'nowrap';
-    statusDiv.innerHTML = '📷 Aguardando leitura...';
+    statusDiv.innerHTML = 'Aguardando leitura...';
     document.getElementById('scannerModal').querySelector('.modal-body').appendChild(statusDiv);
     
     setTimeout(() => {
-        Quagga.init({
-            inputStream: {
-                name: "Live",
-                type: "LiveStream",
-                target: document.querySelector('#scanner-video'),
-                constraints: {
-                    width: { min: 640, ideal: 1280 },
-                    height: { min: 480, ideal: 720 },
-                    facingMode: "environment",
-                    aspectRatio: { min: 1, max: 2 }
-                }
-            },
-            decoder: {
-                readers: [
-                    "ean_reader",
-                    "ean_8_reader",
-                    "upc_reader",
-                    "upc_e_reader",
-                    "code_128_reader",
-                    "code_39_reader",
-                    "code_93_reader",
-                    "codabar_reader",
-                    "code_11_reader",
-                    "itf_reader",
-                    "i2of5_reader"
-                ],
-                debug: {
-                    drawBoundingBox: true,
-                    showFrequency: false,
-                    drawScanline: true,
-                    showPattern: false
-                }
-            },
-            locate: true,
-            numOfWorkers: navigator.hardwareConcurrency || 2
-        }, function(err) {
-            if (err) {
-                console.error('Erro ao iniciar scanner:', err);
-                statusDiv.innerHTML = '❌ Erro ao acessar câmera';
-                return;
-            }
-            
-            Quagga.start();
-            scannerActive = true;
-            console.log('✅ Scanner iniciado');
-            statusDiv.innerHTML = '🔍 Aponte para o código de barras';
-        });
+        html5QrCode = new Html5Qrcode("qr-reader");
+        scannerActive = true;
         
-        Quagga.onDetected(function(result) {
-            if (result && result.codeResult && result.codeResult.code) {
-                const code = result.codeResult.code;
-                const format = result.codeResult.format || 'Desconhecido';
+        const config = {
+            fps: 30,
+            qrbox: { width: 280, height: 140 },
+            aspectRatio: 1.777,
+            disableFlip: false,
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.UPC_E,
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.QR_CODE
+            ]
+        };
+        
+        html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            (decodedText) => {
                 const now = Date.now();
                 
-                if (lastCode === code && (now - lastCodeTime) < 2000) {
+                if (lastCode === decodedText && (now - lastCodeTime) < 2000) {
                     return;
                 }
                 
-                lastCode = code;
+                lastCode = decodedText;
                 lastCodeTime = now;
                 
-                console.log('📦 Código detectado:', code, '| Formato:', format);
+                console.log('📦 Código detectado:', decodedText);
                 
-                let formatName = format;
-                if (format === 'code_11_reader') formatName = 'Code-11';
-                else if (format === 'itf_reader' || format === 'i2of5_reader') formatName = 'ITF-14/DUN-14';
-                else if (format === 'ean_reader') formatName = 'EAN-13';
-                else if (format === 'ean_8_reader') formatName = 'EAN-8';
-                else if (format === 'upc_reader') formatName = 'UPC-A';
-                else if (format === 'code_128_reader') formatName = 'Code-128';
-                else if (format === 'code_39_reader') formatName = 'Code-39';
-                else if (format === 'code_93_reader') formatName = 'Code-93';
-                else if (format === 'codabar_reader') formatName = 'Codabar';
+                let codeType = 'Código';
+                if (/^\d{13}$/.test(decodedText)) codeType = 'EAN-13';
+                else if (/^\d{8}$/.test(decodedText)) codeType = 'EAN-8';
+                else if (/^\d{12}$/.test(decodedText)) codeType = 'UPC-A';
+                else if (decodedText.length > 5 && /^[A-Z0-9]+$/.test(decodedText)) codeType = 'Code-128/39';
                 
-                statusDiv.innerHTML = `✅ ${formatName}: ${code}`;
+                statusDiv.innerHTML = `✅ ${codeType}: ${decodedText}`;
                 statusDiv.classList.add('bg-success');
                 
                 const itemCodeInput = document.getElementById('itemCode');
                 if (itemCodeInput) {
-                    itemCodeInput.value = code;
+                    itemCodeInput.value = decodedText;
                     itemCodeInput.dispatchEvent(new Event('input', { bubbles: true }));
                 }
                 
                 setTimeout(() => {
                     stopScanner();
-                    const modalEl = document.getElementById('scannerModal');
-                    if (modalEl) {
-                        const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                        if (modalInstance) modalInstance.hide();
-                        modalEl.remove();
-                    }
-                    showNotification(`✅ ${formatName}: ${code}`, 'success');
-                }, 800);
+                    modal.hide();
+                    showNotification(`✅ ${codeType}: ${decodedText}`, 'success');
+                }, 1000);
+            },
+            (errorMessage) => {
+                if (errorMessage.includes('No')) {
+                    statusDiv.innerHTML = '📷 Aproxime o código da câmera';
+                } else if (errorMessage.includes('not found')) {
+                    statusDiv.innerHTML = '🔍 Centralize o código na área verde';
+                }
             }
+        ).catch((err) => {
+            console.error("Erro ao iniciar scanner:", err);
+            alert("Não foi possível acessar a câmera.\n\nVerifique as permissões.");
+            modal.hide();
         });
     }, 500);
     
     document.getElementById('stopScannerBtn').addEventListener('click', function() {
         stopScanner();
-        const modalEl = document.getElementById('scannerModal');
-        if (modalEl) {
-            const modalInstance = bootstrap.Modal.getInstance(modalEl);
-            if (modalInstance) modalInstance.hide();
-            modalEl.remove();
-        }
+        modal.hide();
     });
     
     document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function() {
@@ -209,12 +176,8 @@ function startScanner() {
 }
 
 function stopScanner() {
-    if (scannerActive && typeof Quagga !== 'undefined') {
-        try {
-            Quagga.stop();
-        } catch(e) {
-            console.error('Erro ao parar scanner:', e);
-        }
+    if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().catch(err => console.error("Erro ao parar:", err));
     }
     scannerActive = false;
 }

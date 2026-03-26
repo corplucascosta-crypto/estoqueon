@@ -3,36 +3,90 @@
 // =============================================
 
 let scannerActive = false;
-let scannerStream = null;
+
+// Função para adicionar o botão de scanner
+function addScannerButton() {
+    console.log('🔍 Tentando adicionar botão scanner...');
+    
+    // Aguardar o DOM carregar
+    setTimeout(() => {
+        const inputGroup = document.querySelector('#itemCode');
+        if (!inputGroup) {
+            console.log('❌ Campo itemCode não encontrado');
+            return;
+        }
+        
+        // Verificar se o botão já existe
+        if (document.getElementById('scannerButton')) {
+            console.log('✅ Botão scanner já existe');
+            return;
+        }
+        
+        // Criar o botão
+        const scannerBtn = document.createElement('button');
+        scannerBtn.id = 'scannerButton';
+        scannerBtn.type = 'button';
+        scannerBtn.className = 'btn btn-outline-primary ms-2';
+        scannerBtn.innerHTML = '<i class="fas fa-camera"></i>';
+        scannerBtn.title = 'Escanear código de barras';
+        scannerBtn.style.padding = '0.75rem 1rem';
+        
+        scannerBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('📷 Botão scanner clicado');
+            if (checkCameraSupport()) {
+                startScanner();
+            } else {
+                showNotification('Seu dispositivo não suporta câmera', 'error');
+            }
+        });
+        
+        // Inserir após o input
+        inputGroup.insertAdjacentElement('afterend', scannerBtn);
+        console.log('✅ Botão scanner adicionado com sucesso');
+        
+    }, 1000);
+}
+
+// Verificar suporte a câmera
+function checkCameraSupport() {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
 
 // Iniciar scanner
-async function startScanner() {
-    // Verificar se já está ativo
-    if (scannerActive) {
-        showNotification('Scanner já está ativo', 'warning');
+function startScanner() {
+    console.log('📷 Iniciando scanner...');
+    
+    // Verificar se Quagga está disponível
+    if (typeof Quagga === 'undefined') {
+        console.error('❌ Quagga não carregado');
+        showNotification('Erro: Biblioteca do scanner não carregada', 'error');
         return;
     }
-
+    
     // Criar modal do scanner
     const scannerModalHtml = `
-        <div class="modal fade" id="scannerModal" tabindex="-1">
+        <div class="modal fade" id="scannerModal" tabindex="-1" data-bs-backdrop="static">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">
                             <i class="fas fa-camera me-2"></i>Escanear Código de Barras
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body p-0">
                         <div id="scanner-container" style="width: 100%; height: 400px; background: #000; position: relative;">
                             <div id="scanner-video" style="width: 100%; height: 100%;"></div>
-                            <div id="scanner-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 30%; border: 2px solid #00ff00; border-radius: 10px; pointer-events: none;"></div>
+                            <div id="scanner-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 25%; border: 2px solid #00ff00; border-radius: 10px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);"></div>
                         </div>
-                        <p class="text-center mt-3 text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Posicione o código de barras dentro da área verde
-                        </p>
+                        <div class="p-3 text-center bg-light">
+                            <p class="mb-0">
+                                <i class="fas fa-info-circle text-primary me-1"></i>
+                                Posicione o código de barras dentro da área verde
+                            </p>
+                            <small class="text-muted">Formatos suportados: EAN, UPC, Code128, Code39</small>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" id="stopScannerBtn">
@@ -46,21 +100,27 @@ async function startScanner() {
             </div>
         </div>
     `;
-
+    
+    // Remover modal existente se houver
+    const existingModal = document.getElementById('scannerModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
     // Adicionar modal ao body
     document.body.insertAdjacentHTML('beforeend', scannerModalHtml);
-
-    // Configurar QuaggaJS
+    
+    // Inicializar Quagga
     Quagga.init({
         inputStream: {
             name: "Live",
             type: "LiveStream",
             target: document.querySelector('#scanner-video'),
             constraints: {
-                width: { min: 640 },
-                height: { min: 480 },
+                width: { min: 640, ideal: 1280 },
+                height: { min: 480, ideal: 720 },
                 facingMode: "environment",
-                aspectRatio: { min: 1, max: 2 }
+                aspectRatio: { ideal: 1.333 }
             }
         },
         decoder: {
@@ -73,57 +133,75 @@ async function startScanner() {
                 "upc_reader",
                 "upc_e_reader",
                 "codabar_reader"
-            ]
+            ],
+            debug: {
+                drawBoundingBox: true,
+                showFrequency: false,
+                drawScanline: true,
+                showPattern: false
+            }
         },
         locate: true
     }, function(err) {
         if (err) {
-            console.error('Erro ao iniciar scanner:', err);
+            console.error('❌ Erro ao iniciar scanner:', err);
             showNotification('Erro ao acessar a câmera', 'error');
+            document.getElementById('scannerModal').remove();
             return;
         }
         
         Quagga.start();
         scannerActive = true;
+        console.log('✅ Scanner iniciado com sucesso');
         showNotification('Scanner iniciado. Aponte para o código de barras.', 'success');
     });
-
+    
     // Processar código detectado
     Quagga.onDetected(function(result) {
-        const code = result.codeResult.code;
-        console.log('Código detectado:', code);
-        
-        // Parar scanner
-        stopScanner();
-        
-        // Fechar modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('scannerModal'));
-        modal.hide();
-        
-        // Preencher campo de código
-        const itemCodeInput = document.getElementById('itemCode');
-        if (itemCodeInput) {
-            itemCodeInput.value = code;
-            // Disparar evento para buscar o item
-            const event = new Event('input', { bubbles: true });
-            itemCodeInput.dispatchEvent(event);
-            showNotification(`Código escaneado: ${code}`, 'success');
+        if (result && result.codeResult && result.codeResult.code) {
+            const code = result.codeResult.code;
+            console.log('📦 Código detectado:', code);
+            
+            // Parar scanner
+            stopScanner();
+            
+            // Fechar modal
+            const modalElement = document.getElementById('scannerModal');
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) modal.hide();
+                modalElement.remove();
+            }
+            
+            // Preencher campo de código
+            const itemCodeInput = document.getElementById('itemCode');
+            if (itemCodeInput) {
+                itemCodeInput.value = code;
+                // Disparar evento para buscar o item
+                const event = new Event('input', { bubbles: true });
+                itemCodeInput.dispatchEvent(event);
+                showNotification(`✅ Código escaneado: ${code}`, 'success');
+            }
         }
     });
-
+    
     // Botão parar scanner
     document.getElementById('stopScannerBtn').addEventListener('click', function() {
         stopScanner();
-        const modal = bootstrap.Modal.getInstance(document.getElementById('scannerModal'));
-        modal.hide();
+        const modalElement = document.getElementById('scannerModal');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) modal.hide();
+            modalElement.remove();
+        }
     });
-
+    
     // Quando fechar modal, parar scanner
     document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function() {
         stopScanner();
         this.remove();
     });
-
+    
     // Mostrar modal
     const modal = new bootstrap.Modal(document.getElementById('scannerModal'));
     modal.show();
@@ -131,47 +209,33 @@ async function startScanner() {
 
 // Parar scanner
 function stopScanner() {
-    if (scannerActive) {
+    if (scannerActive && typeof Quagga !== 'undefined') {
         try {
             Quagga.stop();
             scannerActive = false;
-            showNotification('Scanner parado', 'info');
+            console.log('✅ Scanner parado');
         } catch (err) {
             console.error('Erro ao parar scanner:', err);
         }
     }
 }
 
-// Verificar suporte a câmera
-function checkCameraSupport() {
-    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-}
-
-// Adicionar botão scanner na interface
-function addScannerButton() {
-    const container = document.querySelector('#inventoryForm .mb-4:first-child .input-group');
-    if (container && !document.getElementById('scannerButton')) {
-        const scannerBtn = document.createElement('button');
-        scannerBtn.id = 'scannerButton';
-        scannerBtn.type = 'button';
-        scannerBtn.className = 'btn btn-outline-primary';
-        scannerBtn.innerHTML = '<i class="fas fa-camera"></i>';
-        scannerBtn.title = 'Escanear código de barras';
-        scannerBtn.style.marginLeft = '5px';
-        
-        scannerBtn.addEventListener('click', function() {
-            if (checkCameraSupport()) {
-                startScanner();
-            } else {
-                showNotification('Seu dispositivo não suporta câmera', 'error');
-            }
-        });
-        
-        container.appendChild(scannerBtn);
+// Função para mostrar notificação (caso não exista)
+function showNotification(message, type = 'info') {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    // Se a função global existir, usar ela
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(message, type);
     }
 }
 
-// Inicializar scanner quando a página carregar
+// Inicializar quando o DOM carregar
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(addScannerButton, 1000);
+    console.log('🚀 Inicializando módulo scanner...');
+    addScannerButton();
+});
+
+// Também tentar adicionar após mudança de tela
+document.addEventListener('viewChanged', function() {
+    setTimeout(addScannerButton, 500);
 });

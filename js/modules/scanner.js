@@ -1,177 +1,118 @@
-// Scanner Module - Versão Corrigida
+﻿// Scanner Module - Versão Limpa
 (function() {
-    let html5QrCodeInstance = null;
-    let isScannerActive = false;
-    let lastDetectedCode = null;
-    let lastDetectionTime = 0;
+    let scanner = null;
+    let scanning = false;
+    let lastCode = null;
+    let lastTime = 0;
 
     function isMobile() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        let ua = navigator.userAgent;
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth <= 768;
     }
 
-    function addCameraButton() {
-        const existingBtn = document.getElementById('cameraScannerBtn');
-        if (existingBtn) existingBtn.remove();
-        
+    function addButton() {
+        let btn = document.getElementById('scanBtn');
+        if (btn) btn.remove();
         if (!isMobile()) return;
         
-        const codeInput = document.getElementById('itemCode');
-        if (!codeInput) return;
+        let input = document.getElementById('itemCode');
+        if (!input) return;
         
-        const btn = document.createElement('button');
-        btn.id = 'cameraScannerBtn';
+        btn = document.createElement('button');
+        btn.id = 'scanBtn';
         btn.type = 'button';
         btn.className = 'btn btn-outline-primary ms-2';
-        btn.innerHTML = '<i class="fas fa-camera"></i>';
-        btn.title = 'Escanear código';
-        btn.style.padding = '0.75rem 1rem';
-        btn.onclick = startCameraScanner;
-        
-        codeInput.parentNode.insertBefore(btn, codeInput.nextSibling);
-        console.log('Botão da câmera adicionado');
+        btn.innerHTML = '<i class=\"fas fa-camera\"></i>';
+        btn.onclick = startScan;
+        input.parentNode.insertBefore(btn, input.nextSibling);
     }
 
-    function startCameraScanner() {
-        if (isScannerActive) return;
-        
+    function startScan() {
+        if (scanning) return;
         if (typeof Html5Qrcode === 'undefined') {
-            alert('Biblioteca do scanner não carregada');
+            alert('Scanner nao disponivel');
             return;
         }
         
-        const modalHtml = `
-            <div class="modal fade" id="cameraModal" tabindex="-1" data-bs-backdrop="static">
-                <div class="modal-dialog modal-fullscreen">
-                    <div class="modal-content">
-                        <div class="modal-header bg-primary text-white py-2">
-                            <h5 class="modal-title fs-6"><i class="fas fa-camera me-2"></i>Escanear Código</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body p-0">
-                            <div id="qr-reader-area" style="width: 100%; height: 70vh; background: #000;"></div>
-                            <div class="p-3 text-center bg-light">
-                                <p class="mb-0 small">Posicione o código dentro da área de leitura</p>
-                                <small class="text-muted">EAN-13 | EAN-8 | UPC | Code-128 | Code-39 | QR Code</small>
-                            </div>
-                        </div>
-                        <div class="modal-footer py-2">
-                            <button type="button" class="btn btn-danger btn-sm" id="stopCameraBtn"><i class="fas fa-stop me-1"></i>Parar</button>
-                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        let modalDiv = document.createElement('div');
+        modalDiv.className = 'modal fade';
+        modalDiv.id = 'scanModal';
+        modalDiv.setAttribute('tabindex', '-1');
+        modalDiv.setAttribute('data-bs-backdrop', 'static');
+        modalDiv.innerHTML = '<div class=\"modal-dialog modal-fullscreen\"><div class=\"modal-content\"><div class=\"modal-header bg-primary text-white py-2\"><h5 class=\"modal-title fs-6\"><i class=\"fas fa-camera me-2\"></i>Escanear Codigo</h5><button type=\"button\" class=\"btn-close btn-close-white\" data-bs-dismiss=\"modal\"></button></div><div class=\"modal-body p-0\"><div id=\"qrReader\" style=\"width:100%;height:70vh;background:#000;\"></div><div class=\"p-3 text-center bg-light\"><p class=\"mb-0 small\">Posicione o codigo na area de leitura</p><small>EAN-13 | EAN-8 | UPC | Code-128 | Code-39 | QR Code</small></div></div><div class=\"modal-footer py-2\"><button type=\"button\" class=\"btn btn-danger btn-sm\" id=\"stopScanBtn\">Parar</button><button type=\"button\" class=\"btn btn-secondary btn-sm\" data-bs-dismiss=\"modal\">Fechar</button></div></div></div>';
         
-        const existingModal = document.getElementById('cameraModal');
-        if (existingModal) existingModal.remove();
+        let existing = document.getElementById('scanModal');
+        if (existing) existing.remove();
+        document.body.appendChild(modalDiv);
         
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-        
-        const modal = new bootstrap.Modal(document.getElementById('cameraModal'));
+        let modal = new bootstrap.Modal(document.getElementById('scanModal'));
         modal.show();
         
-        const statusDiv = document.createElement('div');
-        statusDiv.id = 'scannerStatusMsg';
-        statusDiv.className = 'position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill';
-        statusDiv.style.zIndex = 1060;
-        statusDiv.style.fontSize = '12px';
-        statusDiv.innerHTML = 'Aguardando leitura...';
-        document.getElementById('cameraModal').querySelector('.modal-body').appendChild(statusDiv);
+        let status = document.createElement('div');
+        status.id = 'scanStatus';
+        status.className = 'position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill';
+        status.style.zIndex = 1060;
+        status.innerHTML = 'Aguardando leitura...';
+        document.getElementById('scanModal').querySelector('.modal-body').appendChild(status);
         
-        setTimeout(() => {
-            html5QrCodeInstance = new Html5Qrcode("qr-reader-area");
-            isScannerActive = true;
+        setTimeout(function() {
+            scanner = new Html5Qrcode('qrReader');
+            scanning = true;
             
-            const config = {
+            scanner.start({ facingMode: 'environment' }, {
                 fps: 30,
-                qrbox: { width: 280, height: 140 },
-                aspectRatio: 1.777,
-                disableFlip: false,
-                formatsToSupport: [
-                    Html5QrcodeSupportedFormats.EAN_13,
-                    Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.UPC_A,
-                    Html5QrcodeSupportedFormats.UPC_E,
-                    Html5QrcodeSupportedFormats.CODE_128,
-                    Html5QrcodeSupportedFormats.CODE_39,
-                    Html5QrcodeSupportedFormats.QR_CODE
-                ]
-            };
-            
-            html5QrCodeInstance.start(
-                { facingMode: "environment" },
-                config,
-                (decodedText) => {
-                    const now = Date.now();
-                    if (lastDetectedCode === decodedText && (now - lastDetectionTime) < 2000) return;
-                    
-                    lastDetectedCode = decodedText;
-                    lastDetectionTime = now;
-                    
-                    statusDiv.innerHTML = `✅ Código: ${decodedText}`;
-                    statusDiv.classList.add('bg-success');
-                    
-                    const codeInput = document.getElementById('itemCode');
-                    if (codeInput) {
-                        codeInput.value = decodedText;
-                        codeInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
-                    
-                    setTimeout(() => {
-                        stopCameraScanner();
-                        modal.hide();
-                    }, 800);
-                },
-                (errorMsg) => {
-                    if (errorMsg.includes('No')) statusDiv.innerHTML = '📷 Aproxime o código';
-                    else if (errorMsg.includes('not found')) statusDiv.innerHTML = '🔍 Centralize na área verde';
+                qrbox: { width: 280, height: 140 }
+            }, function(text) {
+                let now = Date.now();
+                if (lastCode === text && now - lastTime < 2000) return;
+                lastCode = text;
+                lastTime = now;
+                
+                status.innerHTML = 'Codigo: ' + text;
+                status.classList.add('bg-success');
+                
+                let input = document.getElementById('itemCode');
+                if (input) {
+                    input.value = text;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
                 }
-            ).catch((err) => {
-                console.error("Erro:", err);
-                alert("Não foi possível acessar a câmera");
+                
+                setTimeout(function() {
+                    stopScan();
+                    modal.hide();
+                }, 800);
+            }, function(err) {
+                if (err && err.indexOf('No') >= 0) status.innerHTML = 'Aproxime o codigo';
+                else status.innerHTML = 'Centralize na area verde';
+            }).catch(function(err) {
+                alert('Erro ao acessar camera');
                 modal.hide();
             });
         }, 500);
         
-        document.getElementById('stopCameraBtn').addEventListener('click', function() {
-            stopCameraScanner();
+        document.getElementById('stopScanBtn').onclick = function() {
+            stopScan();
             modal.hide();
-        });
+        };
         
-        document.getElementById('cameraModal').addEventListener('hidden.bs.modal', function() {
-            stopCameraScanner();
+        document.getElementById('scanModal').addEventListener('hidden.bs.modal', function() {
+            stopScan();
             this.remove();
         });
     }
 
-    function stopCameraScanner() {
-        if (html5QrCodeInstance && html5QrCodeInstance.isScanning) {
-            html5QrCodeInstance.stop().catch(() => {});
+    function stopScan() {
+        if (scanner && scanner.isScanning) {
+            scanner.stop().catch(function() {});
         }
-        isScannerActive = false;
-        html5QrCodeInstance = null;
+        scanning = false;
+        scanner = null;
     }
 
-    function showMsg(message, type) {
-        console.log(message);
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'info'} position-fixed top-0 start-50 translate-middle-x mt-3 shadow`;
-        alertDiv.style.zIndex = 9999;
-        alertDiv.style.minWidth = '280px';
-        alertDiv.style.textAlign = 'center';
-        alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}`;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
-    }
-
-    window.startCameraScanner = startCameraScanner;
-    window.showScannerMessage = showMsg;
-    
     document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(addCameraButton, 500);
+        setTimeout(addButton, 500);
         window.addEventListener('resize', function() {
-            setTimeout(addCameraButton, 100);
+            setTimeout(addButton, 100);
         });
     });
 })();

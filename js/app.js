@@ -1,9 +1,5 @@
 ﻿// Estoque-On - Main Application
-let inventoryItems = [];
-let systemUsers = [];
-let isAdmin = false;
-let currentUser = null;
-let currentEditingUserId = null;
+// As variáveis globais já estão definidas em supabase.js
 
 function showNotification(msg, type) {
     console.log(msg);

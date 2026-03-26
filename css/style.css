@@ -601,3 +601,64 @@ img[src*="postimg.cc"] {
     height: 300px;
     margin-bottom: 20px;
 }
+
+/* Scanner Modal - Responsivo para Mobile */
+#scannerModal .modal-dialog {
+    margin: 0;
+    max-width: 100%;
+}
+
+#scannerModal .modal-content {
+    height: 100vh;
+    border-radius: 0;
+}
+
+#scanner-container {
+    height: calc(100vh - 120px) !important;
+    background: #000;
+    position: relative;
+}
+
+#scanner-video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+}
+
+#scanner-guide {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 25%;
+    border: 2px solid #00ff00;
+    border-radius: 8px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+    pointer-events: none;
+    z-index: 10;
+}
+
+@media (max-width: 768px) {
+    #scannerModal .modal-header {
+        padding: 0.75rem;
+    }
+    
+    #scannerModal .modal-header h5 {
+        font-size: 1rem;
+    }
+    
+    #scannerModal .modal-footer {
+        padding: 0.75rem;
+    }
+    
+    #scannerModal .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    #scanner-guide {
+        width: 90%;
+        height: 20%;
+    }
+}

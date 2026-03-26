@@ -461,7 +461,61 @@
             </div>
         </div>
 
-        <div id="usersView" class="view-container">
+        <div id="collaborativeView" class="view-container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Contagem Colaborativa - <span id="sessionType">Nenhuma sessão ativa</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="collaborativeSummary" class="mb-3"></div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Total</th>
+                                    <th>Valor Total</th>
+                                    <th>Contagens</th>
+                                    <th>Contribuidores</th>
+                                    <th>Última</th>
+                                </tr>
+                            </thead>
+                            <tbody id="collaborativeTable">
+                                <tr><td colspan="7" class="text-center py-4">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-danger" id="finalizeSessionBtn">
+                        <i class="fas fa-check-circle me-1"></i>Finalizar Sessão
+                    </button>
+                    <button class="btn btn-success" id="exportCollabBtn">
+                        <i class="fas fa-file-excel me-1"></i>Exportar Relatório
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Sessões Ativas</h5>
+                </div>
+                <div class="card-body" id="activeSessionsList">
+                    <p class="text-muted">Nenhuma sessão ativa</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="usersView" class="view-container">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="section-title">
                     <i class="fas fa-users-cog me-2"></i>Gerenciamento de UsuÃ¡rios
@@ -754,7 +808,9 @@
 <script src="js/modules/dashboard.js"></script>
 <script src="js/modules/database.js"></script>
 <script src="js/modules/scanner.js"></script>
-<script src="js/app.js"></script>
+    <script src="js/modules/scanner.js"></script>
+    <script src="js/modules/collaborative.js"></script>
+    <script src="js/app.js"></script>
 
 <!-- Scanner Library - Html5Qrcode (LÃª QR Code e CÃ³digo de Barras) -->
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>

@@ -592,3 +592,62 @@ async function clearAllData() {
     bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
     showNotification('Todos os dados foram limpos!', 'success');
 }
+// =============================================
+// INTEGRAÇÃO COM CONTAGEM COLABORATIVA
+// =============================================
+
+// Sobrescrever a função addNewInventoryItem
+const originalAddNewInventoryItem = addNewInventoryItem;
+window.addNewInventoryItem = async function(countedQuantity) {
+    if (!currentItemCode) {
+        showNotification('Código do item não foi validado', 'error');
+        return;
+    }
+    
+    if (!currentCountingType) {
+        showNotification('?? Selecione um tipo de contagem', 'warning');
+        document.getElementById('countingType').focus();
+        return;
+    }
+    
+    let itemDescription = 'Item não identificado';
+    const itemDescriptionDisplay = document.getElementById('itemDescriptionDisplay');
+    
+    try {
+        const descriptionElement = itemDescriptionDisplay.querySelector('strong');
+        if (descriptionElement && descriptionElement.textContent) {
+            itemDescription = descriptionElement.textContent.trim();
+        }
+    } catch (error) {}
+    
+    if (itemDescription === 'Item não identificado') {
+        try {
+            const item = await findItemByCode(currentItemCode);
+            if (item && item.descricao) itemDescription = item.descricao;
+        } catch (error) {}
+    }
+    
+    let unitValue = 0;
+    try {
+        const item = await findItemByCode(currentItemCode);
+        if (item && item.valor) unitValue = item.valor;
+    } catch (error) {}
+    
+    // Usar contagem colaborativa
+    if (typeof window.addCollaborativeItem === 'function') {
+        const success = await window.addCollaborativeItem(
+            currentItemCode,
+            itemDescription,
+            countedQuantity,
+            unitValue
+        );
+        
+        if (success) {
+            resetFormAfterSubmission();
+            if (typeof updateDashboard === 'function') updateDashboard();
+        }
+    } else {
+        // Fallback para contagem local
+        await originalAddNewInventoryItem(countedQuantity);
+    }
+};

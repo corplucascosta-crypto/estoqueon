@@ -150,18 +150,22 @@
                             </div>
                             
                             <div class="mb-4">
-                                <label for="itemCode" class="form-label required-field">Código do Item</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                                    <input type="text" class="form-control" id="itemCode" required 
-                                           placeholder="Digite ou escaneie o código" autocomplete="off"
-                                           autofocus>
-                                    <span class="input-group-text" id="loadingIndicator">
-                                        <div class="loading-spinner" id="codeLoading"></div>
-                                    </span>
-                                </div>
-                                <div class="form-text text-muted mt-1">Digite o código DUN (14 dígitos), EAN (13 ou 8 dígitos) ou use o botão de câmera ao lado</div>
-                            </div>
+    <label for="itemCode" class="form-label required-field">Código do Item</label>
+    <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+        <input type="text" class="form-control" id="itemCode" required 
+               placeholder="Digite ou escaneie o código" autocomplete="off"
+               autofocus>
+        <button type="button" class="btn btn-outline-primary" id="scannerManualBtn" 
+                style="padding: 0.75rem 1rem;" title="Escanear código de barras">
+            <i class="fas fa-camera"></i>
+        </button>
+        <span class="input-group-text" id="loadingIndicator">
+            <div class="loading-spinner" id="codeLoading"></div>
+        </span>
+    </div>
+    <div class="form-text text-muted mt-1">Digite o código ou clique na câmera para escanear</div>
+</div>
                             
                             <div class="mb-4">
                                 <label class="form-label">Descrição do Item</label>

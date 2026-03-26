@@ -1,5 +1,5 @@
 // =============================================
-// SCANNER MODULE - Apenas para dispositivos móveis
+// SCANNER MODULE - Todos os formatos de código
 // =============================================
 
 let html5QrCode = null;
@@ -11,24 +11,15 @@ let lastCodeTime = 0;
 function isMobileDevice() {
     const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isSmallScreen = window.innerWidth <= 768;
-    
-    console.log('📱 Detectando dispositivo:', {
-        userAgent: isMobileUA,
-        screenWidth: window.innerWidth,
-        isMobile: isMobileUA || isSmallScreen
-    });
-    
     return isMobileUA || isSmallScreen;
 }
 
 function addScannerButton() {
-    // Primeiro, remover qualquer botão existente
     const existingBtn = document.getElementById('scannerBtn');
     if (existingBtn) {
         existingBtn.remove();
     }
     
-    // Só adicionar se for mobile
     if (!isMobileDevice()) {
         console.log('💻 Desktop detectado - botão da câmera removido');
         return;
@@ -42,7 +33,7 @@ function addScannerButton() {
     btn.type = 'button';
     btn.className = 'btn btn-outline-primary ms-2';
     btn.innerHTML = '<i class="fas fa-camera"></i>';
-    btn.title = 'Escanear código com a câmera';
+    btn.title = 'Escanear código';
     btn.style.padding = '0.75rem 1rem';
     btn.onclick = startScanner;
     
@@ -77,7 +68,7 @@ function startScanner() {
                                 <i class="fas fa-info-circle text-primary me-1"></i>
                                 Posicione o código dentro da área de leitura
                             </p>
-                            <small class="text-muted">EAN-13 | EAN-8 | UPC-A | QR Code | Code128</small>
+                            <small class="text-muted">EAN-13 | EAN-8 | UPC-A | UPC-E | DUN-14 | ITF-14 | GS1-128 | Code128 | Code39 | QR Code | Data Matrix</small>
                         </div>
                     </div>
                     <div class="modal-footer py-2">
@@ -115,17 +106,29 @@ function startScanner() {
         
         const config = {
             fps: 30,
-            qrbox: { width: 280, height: 140 },
+            qrbox: { width: 300, height: 150 },
             aspectRatio: 1.777,
             disableFlip: false,
             formatsToSupport: [
+                // Códigos de barras lineares
                 Html5QrcodeSupportedFormats.EAN_13,
                 Html5QrcodeSupportedFormats.EAN_8,
                 Html5QrcodeSupportedFormats.UPC_A,
                 Html5QrcodeSupportedFormats.UPC_E,
                 Html5QrcodeSupportedFormats.CODE_128,
                 Html5QrcodeSupportedFormats.CODE_39,
-                Html5QrcodeSupportedFormats.QR_CODE
+                Html5QrcodeSupportedFormats.CODE_93,
+                Html5QrcodeSupportedFormats.CODABAR,
+                Html5QrcodeSupportedFormats.ITF,
+                // GS1 e DUN
+                Html5QrcodeSupportedFormats.RSS_14,
+                Html5QrcodeSupportedFormats.RSS_EXPANDED,
+                // Códigos 2D
+                Html5QrcodeSupportedFormats.QR_CODE,
+                Html5QrcodeSupportedFormats.DATA_MATRIX,
+                Html5QrcodeSupportedFormats.AZTEC,
+                Html5QrcodeSupportedFormats.PDF_417,
+                Html5QrcodeSupportedFormats.MAXICODE
             ]
         };
         
@@ -143,7 +146,18 @@ function startScanner() {
                 lastCodeTime = now;
                 
                 console.log('📦 Código detectado:', decodedText);
-                statusDiv.innerHTML = `✅ Código lido: ${decodedText}`;
+                
+                // Identificar tipo de código
+                let codeType = 'Desconhecido';
+                if (/^\d{13}$/.test(decodedText)) codeType = 'EAN-13';
+                else if (/^\d{8}$/.test(decodedText)) codeType = 'EAN-8';
+                else if (/^\d{12}$/.test(decodedText)) codeType = 'UPC-A';
+                else if (/^\d{14}$/.test(decodedText)) codeType = 'DUN-14 / ITF-14';
+                else if (/^\d{6,8}$/.test(decodedText)) codeType = 'UPC-E';
+                else if (/^[A-Z0-9]+$/.test(decodedText)) codeType = 'Code128/39';
+                else if (decodedText.includes('http')) codeType = 'URL/QR Code';
+                
+                statusDiv.innerHTML = `✅ ${codeType}: ${decodedText}`;
                 statusDiv.classList.add('bg-success');
                 
                 const itemCodeInput = document.getElementById('itemCode');
@@ -155,7 +169,7 @@ function startScanner() {
                 setTimeout(() => {
                     stopScanner();
                     modal.hide();
-                    showNotification(`✅ Código: ${decodedText}`, 'success');
+                    showNotification(`✅ ${codeType}: ${decodedText}`, 'success');
                 }, 1000);
             },
             (errorMessage) => {
@@ -203,10 +217,8 @@ function showNotification(message, type) {
     setTimeout(() => alertDiv.remove(), 3000);
 }
 
-// Inicializar
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(addScannerButton, 500);
-    // Se a tela for redimensionada, verificar novamente
     window.addEventListener('resize', function() {
         setTimeout(addScannerButton, 100);
     });

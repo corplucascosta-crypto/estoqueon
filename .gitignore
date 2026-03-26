@@ -25,3 +25,16 @@ Thumbs.db
 # Ambiente
 .env
 .env.local
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Assets (keep structure only)
+assets/images/*.jpg
+assets/images/*.png
+assets/images/*.svg
+!assets/images/.gitkeep
+assets/icons/*.ico
+!assets/icons/.gitkeep

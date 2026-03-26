@@ -1,5 +1,5 @@
 // =============================================
-// SCANNER MODULE - Versão com fechamento automático
+// SCANNER MODULE - Apenas para dispositivos móveis
 // =============================================
 
 let html5QrCode = null;
@@ -7,7 +7,34 @@ let scannerActive = false;
 let lastCode = null;
 let lastCodeTime = 0;
 
+// Detectar se é dispositivo móvel
+function isMobileDevice() {
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isSmallScreen = window.innerWidth <= 768;
+    
+    console.log('📱 Detectando dispositivo:', {
+        userAgent: isMobileUA,
+        screenWidth: window.innerWidth,
+        isMobile: isMobileUA || isSmallScreen
+    });
+    
+    return isMobileUA || isSmallScreen;
+}
+
 function addScannerButton() {
+    // Só adicionar botão se for dispositivo móvel
+    if (!isMobileDevice()) {
+        console.log('💻 Desktop detectado - botão da câmera não será exibido');
+        
+        // Se o botão já existir, removê-lo
+        const existingBtn = document.getElementById('scannerBtn');
+        if (existingBtn) {
+            existingBtn.remove();
+            console.log('🗑️ Botão da câmera removido (desktop)');
+        }
+        return;
+    }
+    
     const itemCodeInput = document.getElementById('itemCode');
     if (!itemCodeInput) return;
     if (document.getElementById('scannerBtn')) return;
@@ -17,12 +44,12 @@ function addScannerButton() {
     btn.type = 'button';
     btn.className = 'btn btn-outline-primary ms-2';
     btn.innerHTML = '<i class="fas fa-camera"></i>';
-    btn.title = 'Escanear código';
+    btn.title = 'Escanear código com a câmera';
     btn.style.padding = '0.75rem 1rem';
     btn.onclick = startScanner;
     
     itemCodeInput.parentNode.insertBefore(btn, itemCodeInput.nextSibling);
-    console.log('✅ Botão scanner adicionado');
+    console.log('📱 Mobile detectado - botão scanner adicionado');
 }
 
 function startScanner() {
@@ -76,7 +103,6 @@ function startScanner() {
     const modal = new bootstrap.Modal(document.getElementById('scannerModal'));
     modal.show();
     
-    // Criar elemento de status
     const statusDiv = document.createElement('div');
     statusDiv.id = 'scannerStatus';
     statusDiv.className = 'position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill';
@@ -111,7 +137,6 @@ function startScanner() {
             (decodedText) => {
                 const now = Date.now();
                 
-                // Evitar múltiplas leituras do mesmo código
                 if (lastCode === decodedText && (now - lastCodeTime) < 2000) {
                     return;
                 }
@@ -123,14 +148,12 @@ function startScanner() {
                 statusDiv.innerHTML = `✅ Código lido: ${decodedText}`;
                 statusDiv.classList.add('bg-success');
                 
-                // Preencher campo
                 const itemCodeInput = document.getElementById('itemCode');
                 if (itemCodeInput) {
                     itemCodeInput.value = decodedText;
                     itemCodeInput.dispatchEvent(new Event('input', { bubbles: true }));
                 }
                 
-                // Fechar após 1 segundo para mostrar o código lido
                 setTimeout(() => {
                     stopScanner();
                     modal.hide();
@@ -138,7 +161,6 @@ function startScanner() {
                 }, 1000);
             },
             (errorMessage) => {
-                // Atualizar status para feedback
                 if (errorMessage.includes('No')) {
                     statusDiv.innerHTML = '📷 Aproxime o código da câmera';
                 } else if (errorMessage.includes('not found')) {
@@ -183,6 +205,11 @@ function showNotification(message, type) {
     setTimeout(() => alertDiv.remove(), 3000);
 }
 
+// Inicializar
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(addScannerButton, 500);
+    // Se a tela for redimensionada, verificar novamente
+    window.addEventListener('resize', function() {
+        setTimeout(addScannerButton, 100);
+    });
 });

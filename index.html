@@ -150,18 +150,22 @@
                             </div>
                             
                             <div class="mb-4">
-                                <label for="itemCode" class="form-label required-field">Código do Item</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                                    <input type="text" class="form-control" id="itemCode" required 
-                                           placeholder="Digite ou escaneie o código" autocomplete="off"
-                                           autofocus>
-                                    <span class="input-group-text" id="loadingIndicator">
-                                        <div class="loading-spinner" id="codeLoading"></div>
-                                    </span>
-                                </div>
-                                <div class="form-text text-muted mt-1">Digite o código DUN (14 dígitos), EAN (13 ou 8 dígitos) ou use o botão de câmera ao lado</div>
-                            </div>
+    <label for="itemCode" class="form-label required-field">Código do Item</label>
+    <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+        <input type="text" class="form-control" id="itemCode" required 
+               placeholder="Digite ou escaneie o código" autocomplete="off"
+               autofocus>
+        <button type="button" class="btn btn-outline-primary" id="scannerManualBtn" 
+                style="padding: 0.75rem 1rem;" title="Escanear código de barras">
+            <i class="fas fa-camera"></i>
+        </button>
+        <span class="input-group-text" id="loadingIndicator">
+            <div class="loading-spinner" id="codeLoading"></div>
+        </span>
+    </div>
+    <div class="form-text text-muted mt-1">Digite o código ou clique na câmera para escanear</div>
+</div>
                             
                             <div class="mb-4">
                                 <label class="form-label">Descrição do Item</label>
@@ -742,14 +746,101 @@
     <script src="js/lib/quagga.min.js"></script>
 
     <!-- JavaScript Modules -->
-    <script src="js/config/supabase.js"></script>
-    <script src="js/utils/helpers.js"></script>
-    <script src="js/modules/auth.js"></script>
-    <script src="js/modules/inventory.js"></script>
-    <script src="js/modules/users.js"></script>
-    <script src="js/modules/dashboard.js"></script>
-    <script src="js/modules/database.js"></script>
-    <script src="js/modules/scanner.js"></script>
-    <script src="js/app.js"></script>
+<script src="js/config/supabase.js"></script>
+<script src="js/utils/helpers.js"></script>
+<script src="js/modules/auth.js"></script>
+<script src="js/modules/inventory.js"></script>
+<script src="js/modules/users.js"></script>
+<script src="js/modules/dashboard.js"></script>
+<script src="js/modules/database.js"></script>
+<script src="js/modules/scanner.js"></script>
+<script src="js/app.js"></script>
+
+<!-- Scanner com HTML5 QR Code -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+    let html5QrCode = null;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const scannerBtn = document.getElementById('scannerManualBtn');
+        if (scannerBtn) {
+            scannerBtn.addEventListener('click', startScanner);
+        }
+    });
+    
+    function startScanner() {
+        // Criar modal
+        const modalHtml = `
+            <div class="modal fade" id="qrScannerModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title"><i class="fas fa-camera me-2"></i>Escanear Código</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="qr-reader" style="width: 100%;"></div>
+                            <div id="qr-reader-results" class="mt-2 text-center"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" id="stopScannerBtn"><i class="fas fa-stop me-1"></i>Parar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        const modal = new bootstrap.Modal(document.getElementById('qrScannerModal'));
+        modal.show();
+        
+        html5QrCode = new Html5Qrcode("qr-reader");
+        
+        html5QrCode.start(
+            { facingMode: "environment" },
+            {
+                fps: 10,
+                qrbox: { width: 250, height: 250 }
+            },
+            (decodedText) => {
+                // Código detectado
+                document.getElementById('itemCode').value = decodedText;
+                document.getElementById('itemCode').dispatchEvent(new Event('input', { bubbles: true }));
+                stopScanner();
+                modal.hide();
+                showNotification(`Código escaneado: ${decodedText}`, 'success');
+            },
+            (errorMessage) => {
+                // console.log(errorMessage);
+            }
+        ).catch((err) => {
+            console.error("Erro ao iniciar scanner:", err);
+            alert("Não foi possível acessar a câmera. Verifique as permissões.");
+        });
+        
+        document.getElementById('stopScannerBtn').addEventListener('click', stopScanner);
+        document.getElementById('qrScannerModal').addEventListener('hidden.bs.modal', stopScanner);
+    }
+    
+    function stopScanner() {
+        if (html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => {
+                document.getElementById('qrScannerModal')?.remove();
+            }).catch((err) => console.error("Erro ao parar:", err));
+        } else {
+            document.getElementById('qrScannerModal')?.remove();
+        }
+    }
+    
+    function showNotification(message, type) {
+        console.log(message);
+        alert(message);
+    }
+</script>
+
+<!-- HTML5 QR Code Scanner -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </body>
 </html>

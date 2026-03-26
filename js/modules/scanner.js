@@ -1,9 +1,11 @@
 // =============================================
-// SCANNER MODULE - Configuração Otimizada para EAN
+// SCANNER MODULE - Versão com fechamento automático
 // =============================================
 
 let html5QrCode = null;
 let scannerActive = false;
+let lastCode = null;
+let lastCodeTime = 0;
 
 function addScannerButton() {
     const itemCodeInput = document.getElementById('itemCode');
@@ -30,6 +32,8 @@ function startScanner() {
         alert('Scanner não disponível. Tente novamente.');
         return;
     }
+    
+    lastCode = null;
     
     const modalHtml = `
         <div class="modal fade" id="scannerModal" tabindex="-1" data-bs-backdrop="static">
@@ -72,13 +76,22 @@ function startScanner() {
     const modal = new bootstrap.Modal(document.getElementById('scannerModal'));
     modal.show();
     
+    // Criar elemento de status
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'scannerStatus';
+    statusDiv.className = 'position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill';
+    statusDiv.style.zIndex = 1060;
+    statusDiv.style.fontSize = '12px';
+    statusDiv.innerHTML = 'Aguardando leitura...';
+    document.getElementById('scannerModal').querySelector('.modal-body').appendChild(statusDiv);
+    
     setTimeout(() => {
         html5QrCode = new Html5Qrcode("qr-reader");
         scannerActive = true;
         
         const config = {
             fps: 30,
-            qrbox: { width: 300, height: 150 },
+            qrbox: { width: 280, height: 140 },
             aspectRatio: 1.777,
             disableFlip: false,
             formatsToSupport: [
@@ -96,20 +109,41 @@ function startScanner() {
             { facingMode: "environment" },
             config,
             (decodedText) => {
-                console.log('📦 Código detectado:', decodedText);
+                const now = Date.now();
                 
+                // Evitar múltiplas leituras do mesmo código
+                if (lastCode === decodedText && (now - lastCodeTime) < 2000) {
+                    return;
+                }
+                
+                lastCode = decodedText;
+                lastCodeTime = now;
+                
+                console.log('📦 Código detectado:', decodedText);
+                statusDiv.innerHTML = `✅ Código lido: ${decodedText}`;
+                statusDiv.classList.add('bg-success');
+                
+                // Preencher campo
                 const itemCodeInput = document.getElementById('itemCode');
                 if (itemCodeInput) {
                     itemCodeInput.value = decodedText;
                     itemCodeInput.dispatchEvent(new Event('input', { bubbles: true }));
                 }
                 
-                stopScanner();
-                modal.hide();
-                showNotification(`✅ Código: ${decodedText}`, 'success');
+                // Fechar após 1 segundo para mostrar o código lido
+                setTimeout(() => {
+                    stopScanner();
+                    modal.hide();
+                    showNotification(`✅ Código: ${decodedText}`, 'success');
+                }, 1000);
             },
             (errorMessage) => {
-                // Erros de leitura - ignorar
+                // Atualizar status para feedback
+                if (errorMessage.includes('No')) {
+                    statusDiv.innerHTML = '📷 Aproxime o código da câmera';
+                } else if (errorMessage.includes('not found')) {
+                    statusDiv.innerHTML = '🔍 Centralize o código na área verde';
+                }
             }
         ).catch((err) => {
             console.error("Erro ao iniciar scanner:", err);

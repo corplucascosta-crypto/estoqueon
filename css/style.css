@@ -649,3 +649,23 @@ body {
 img[src*="postimg.cc"] {
     background: transparent !important;
 }
+
+/* Remover fundo branco do logo */
+.navbar-brand img,
+img[src*="postimg.cc"],
+img[alt="ASSAI"] {
+    background-color: transparent !important;
+    background: transparent !important;
+    mix-blend-mode: normal;
+    filter: brightness(1) contrast(1);
+    opacity: 1;
+}
+
+/* Garantir que não haja fundo em nenhum lugar */
+.navbar-brand {
+    background: transparent !important;
+}
+
+.navbar {
+    background: linear-gradient(135deg, #64748b, #475569) !important;
+}

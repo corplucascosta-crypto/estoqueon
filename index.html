@@ -801,23 +801,64 @@
         </div>
     </div>
 
-    <!-- Admin History View - Apenas para Admin -->
+    <!-- Admin History View - Layout igual ao Gerenciamento de Usuários -->
 <div id="adminHistoryView" class="view-container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="section-title">
             <i class="fas fa-chart-line me-2"></i>Histórico Completo (Todos os Usuários)
         </h2>
         <button class="btn btn-success" id="exportAllBtn">
-            <i class="fas fa-file-excel me-1"></i>Exportar Todos
+            <i class="fas fa-file-excel me-2"></i>Exportar Todos
         </button>
     </div>
-    
-    <div id="adminHistorySummary" class="mb-4"></div>
-    
+
+    <!-- Cards de Resumo - Layout Horizontal -->
+<div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
+                <h6 class="text-muted mb-1">Total Contagens</h6>
+                <h3 class="mb-0 fw-bold text-primary" id="adminTotalItems">0</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body">
+                <i class="fas fa-barcode fa-2x text-success mb-2"></i>
+                <h6 class="text-muted mb-1">Itens Únicos</h6>
+                <h3 class="mb-0 fw-bold text-success" id="adminUniqueItems">0</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body">
+                <i class="fas fa-users fa-2x text-info mb-2"></i>
+                <h6 class="text-muted mb-1">Colaboradores</h6>
+                <h3 class="mb-0 fw-bold text-info" id="adminUniqueUsers">0</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body">
+                <i class="fas fa-boxes fa-2x text-warning mb-2"></i>
+                <h6 class="text-muted mb-1">Total Unidades</h6>
+                <h3 class="mb-0 fw-bold text-warning" id="adminTotalQuantity">0</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Card da Tabela -->
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h5 class="mb-0">Todas as Contagens</h5>
-            <div class="d-flex gap-2 flex-wrap">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 d-flex align-items-center">
+                <i class="fas fa-table me-2"></i>Todas as Contagens
+            </h5>
+            <div class="d-flex gap-2">
                 <input type="text" class="form-control form-control-sm" id="adminSearchInput" placeholder="Buscar código/descrição..." style="width: 200px;">
                 <select class="form-select form-select-sm" id="adminTypeFilter" style="width: 120px;">
                     <option value="">Todos os tipos</option>
@@ -867,10 +908,7 @@
     </div>
 </div>
 
-    <!-- ZXing Library - Mesma tecnologia do Google Lens -->
-    <script src="https://unpkg.com/@zxing/library@0.19.1/index.min.js"></script>
-
-    <!-- Scanner Library - Html5Qrcode CDN oficial -->
+    <!-- Html5Qrcode - Biblioteca de scanner confiável -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
      <!-- Configuração Supabase -->

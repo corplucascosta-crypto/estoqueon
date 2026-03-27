@@ -165,6 +165,7 @@ async function switchView(viewName) {
                 break;
             default:
                 console.log('View carregada:', viewName);
+    
         }
     } else {
         console.warn('View não encontrada:', viewName + 'View');

@@ -57,7 +57,7 @@ async function startZXingScanner() {
     openScannerModal();
 }
 
-function openScannerModal() {
+async function openScannerModal() {
     const modalHtml = `
         <div class="modal fade" id="zxingModal" tabindex="-1" data-bs-backdrop="static">
             <div class="modal-dialog modal-fullscreen">

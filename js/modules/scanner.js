@@ -33,19 +33,19 @@ function addScannerButton() {
     console.log('✅ Botão câmera adicionado');
 }
 
-async function startZXingScanner() {
+function startZXingScanner() {
     if (isScanning) return;
     
     // Aguardar ZXing carregar
     if (typeof ZXing === 'undefined') {
         console.log('Aguardando ZXing carregar...');
-        const checkInterval = setInterval(() => {
+        const checkInterval = setInterval(function() {
             if (typeof ZXing !== 'undefined') {
                 clearInterval(checkInterval);
                 openScannerModal();
             }
         }, 500);
-        setTimeout(() => {
+        setTimeout(function() {
             clearInterval(checkInterval);
             if (typeof ZXing === 'undefined') {
                 alert('Carregando scanner... Tente novamente em alguns segundos.');
@@ -57,7 +57,7 @@ async function startZXingScanner() {
     openScannerModal();
 }
 
-async function openScannerModal() {
+function openScannerModal() {
     const modalHtml = `
         <div class="modal fade" id="zxingModal" tabindex="-1" data-bs-backdrop="static">
             <div class="modal-dialog modal-fullscreen">
@@ -98,13 +98,13 @@ async function openScannerModal() {
     const video = document.getElementById('zxingVideo');
     const statusDiv = document.getElementById('zxingStatus');
     
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'environment' }
-        });
+    // Iniciar câmera
+    navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+    }).then(function(stream) {
         video.srcObject = stream;
         videoStream = stream;
-        await video.play();
+        video.play();
         
         isScanning = true;
         
@@ -135,8 +135,11 @@ async function openScannerModal() {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        async function scanFrame() {
-            if (!isScanning || video.paused || video.ended) return;
+        function scanFrame() {
+            if (!isScanning || video.paused || video.ended) {
+                if (isScanning) requestAnimationFrame(scanFrame);
+                return;
+            }
             
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
                 canvas.width = video.videoWidth;
@@ -144,7 +147,6 @@ async function openScannerModal() {
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
                 try {
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const luminanceSource = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
                     const binaryBitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminanceSource));
                     
@@ -161,12 +163,12 @@ async function openScannerModal() {
                             console.log('📦 Código detectado:', code);
                             
                             let format = 'Código';
-                            if (code.match(/^\d{13}$/)) format = 'EAN-13';
-                            else if (code.match(/^\d{8}$/)) format = 'EAN-8';
-                            else if (code.match(/^\d{12}$/)) format = 'UPC-A';
-                            else if (code.match(/^\d{14}$/)) format = 'ITF-14';
+                            if (/^\d{13}$/.test(code)) format = 'EAN-13';
+                            else if (/^\d{8}$/.test(code)) format = 'EAN-8';
+                            else if (/^\d{12}$/.test(code)) format = 'UPC-A';
+                            else if (/^\d{14}$/.test(code)) format = 'ITF-14';
                             
-                            statusDiv.innerHTML = `✅ ${format}: ${code}`;
+                            statusDiv.innerHTML = '✅ ' + format + ': ' + code;
                             statusDiv.classList.add('bg-success');
                             
                             const input = document.getElementById('itemCode');
@@ -175,18 +177,19 @@ async function openScannerModal() {
                                 input.dispatchEvent(new Event('input', { bubbles: true }));
                             }
                             
-                            setTimeout(() => {
+                            setTimeout(function() {
                                 stopScanner();
                                 modal.hide();
-                                showNotification(`✅ ${code}`, 'success');
+                                showNotification('✅ ' + code, 'success');
                             }, 800);
                         }
                     } else {
-                        statusDiv.innerHTML = '🔍 Centralize o código';
-                        statusDiv.classList.remove('bg-success');
+                        if (statusDiv.innerHTML !== '🔍 Centralize o código') {
+                            statusDiv.innerHTML = '🔍 Centralize o código';
+                            statusDiv.classList.remove('bg-success');
+                        }
                     }
                 } catch (e) {
-                    // Nenhum código detectado
                     if (statusDiv.innerHTML !== '📷 Aproxime o código') {
                         statusDiv.innerHTML = '📷 Aproxime o código';
                         statusDiv.classList.remove('bg-success');
@@ -201,14 +204,14 @@ async function openScannerModal() {
         
         scanFrame();
         
-    } catch (err) {
+    }).catch(function(err) {
         console.error('Erro ao acessar câmera:', err);
         statusDiv.innerHTML = '❌ Erro na câmera';
-        setTimeout(() => {
+        setTimeout(function() {
             alert('Não foi possível acessar a câmera. Verifique as permissões.');
             modal.hide();
         }, 500);
-    }
+    });
     
     document.getElementById('zxingStopBtn').onclick = function() {
         stopScanner();
@@ -228,7 +231,7 @@ function stopScanner() {
         animationId = null;
     }
     if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
+        videoStream.getTracks().forEach(function(track) { track.stop(); });
         videoStream = null;
     }
     codeReader = null;
@@ -237,14 +240,14 @@ function stopScanner() {
 function showNotification(message, type) {
     console.log(message);
     const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'info'} position-fixed top-0 start-50 translate-middle-x mt-3 shadow`;
+    alertDiv.className = 'alert alert-' + (type === 'success' ? 'success' : 'info') + ' position-fixed top-0 start-50 translate-middle-x mt-3 shadow';
     alertDiv.style.zIndex = 9999;
     alertDiv.style.minWidth = '280px';
     alertDiv.style.textAlign = 'center';
     alertDiv.style.fontSize = '0.9rem';
-    alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}`;
+    alertDiv.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'info-circle') + ' me-2"></i>' + message;
     document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 3000);
+    setTimeout(function() { alertDiv.remove(); }, 3000);
 }
 
 document.addEventListener('DOMContentLoaded', function() {

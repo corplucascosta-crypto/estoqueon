@@ -342,7 +342,7 @@ async function replaceExistingCount() {
     showNotification('Contagem substituída com sucesso!', 'success');
 }
 
-// Add new inventory item - VERSÃO ESTÁVEL
+// Add new inventory item - Versão corrigida com valores padrão
 async function addNewInventoryItem(countedQuantity) {
     console.log('📝 addNewInventoryItem chamada com:', countedQuantity);
     
@@ -377,20 +377,21 @@ async function addNewInventoryItem(countedQuantity) {
     let unitValue = 0;
     try {
         const item = await findItemByCode(currentItemCode);
-        if (item && item.valor) unitValue = item.valor;
+        if (item && item.valor) unitValue = parseFloat(item.valor) || 0;
+        if (item && item.VALOR) unitValue = parseFloat(item.VALOR) || 0;
     } catch (error) {}
     
-    // CRIAR NOVO ITEM LOCALMENTE
+    // CRIAR NOVO ITEM LOCALMENTE com valores padrão
     const newItem = {
         code: currentItemCode,
-        description: itemDescription,
+        description: itemDescription || 'Sem descrição',
         systemQuantity: 0,
-        countedQuantity: countedQuantity,
+        countedQuantity: parseInt(countedQuantity) || 0,
         unitValue: unitValue,
         counts: 1,
         countingType: currentCountingType,
         date: new Date().toISOString(),
-        history: [{ date: new Date().toISOString(), quantity: countedQuantity, type: currentCountingType }]
+        history: [{ date: new Date().toISOString(), quantity: parseInt(countedQuantity) || 0, type: currentCountingType }]
     };
     
     inventoryItems.push(newItem);
@@ -450,33 +451,41 @@ async function handleFinalizeCountingSession() {
     }
 }
 
-// Render inventory table
+// Render inventory table - Versão corrigida
 function renderInventoryTable() {
     const inventoryTable = document.getElementById('inventoryTable');
     
     if (!inventoryItems || inventoryItems.length === 0) {
-        inventoryTable.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4"><i class="fas fa-box-open fa-2x mb-2 d-block"></i>Nenhum item contado ainda</td></tr>`;
+        inventoryTable.innerHTML = `一线<td colspan="10" class="text-center text-muted py-4"><i class="fas fa-box-open fa-2x mb-2 d-block"></i>Nenhum item contado ainda</td>`;
         return;
     }
     
     inventoryTable.innerHTML = inventoryItems.map((item, index) => {
-        const difference = item.countedQuantity - item.systemQuantity;
+        // Garantir que os valores existem
+        const systemQty = item.systemQuantity || 0;
+        const countedQty = item.countedQuantity || 0;
+        const unitVal = item.unitValue || 0;
+        const counts = item.counts || 1;
+        const codeType = item.countingType || 'N/A';
+        
+        const difference = countedQty - systemQty;
         const differenceClass = difference === 0 ? '' : (difference > 0 ? 'positive-diff' : 'negative-diff');
-        const totalValue = item.countedQuantity * item.unitValue;
+        const totalValue = countedQty * unitVal;
+        
         const typeColors = { 'Avaria': 'danger', 'RH': 'warning', 'Auditoria': 'info', 'Reposição': 'success', 'Outro': 'secondary' };
-        const typeColor = typeColors[item.countingType] || 'secondary';
+        const typeColor = typeColors[codeType] || 'secondary';
         
         return `
             <tr>
-                <td><span class="badge bg-${typeColor}">${item.countingType || 'N/A'}</span></td>
-                <td>${item.code}</td>
-                <td>${item.description}</td>
-                <td>${item.systemQuantity}</td>
-                <td>${item.countedQuantity}</td>
+                <td><span class="badge bg-${typeColor}">${codeType}</span></td>
+                <td>${item.code || ''}</td>
+                <td>${item.description || ''}</td>
+                <td>${systemQty}</td>
+                <td>${countedQty}</td>
                 <td class="${differenceClass}">${difference > 0 ? '+' : ''}${difference}</td>
-                <td>R$ ${item.unitValue.toFixed(2)}</td>
+                <td>R$ ${unitVal.toFixed(2)}</td>
                 <td>R$ ${totalValue.toFixed(2)}</td>
-                <td>${item.counts}</td>
+                <td>${counts}</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary view-history" data-index="${index}" title="Ver histórico"><i class="fas fa-history"></i></button>
                     ${isAdmin ? `<button class="btn btn-sm btn-outline-danger delete-item" data-index="${index}" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}

@@ -41,27 +41,36 @@ async function loadUserData() {
     }
 }
 
-// Save inventory data to Supabase
+// Save inventory data to Supabase - Versão corrigida
 async function saveInventoryData() {
     try {
+        // Primeiro, salvar no localStorage como backup
         if (currentUser?.id) {
             localStorage.setItem(`inventoryItems_${currentUser.id}`, JSON.stringify(inventoryItems));
+            console.log('💾 Dados salvos no localStorage para usuário:', currentUser.id);
         }
         
+        // Se estiver online e usuário logado, salvar no Supabase
         if (navigator.onLine && currentUser && currentUser.id) {
+            console.log('☁️ Sincronizando com Supabase...', inventoryItems.length, 'itens');
+            
             for (const item of inventoryItems) {
                 try {
                     const payload = {
                         code: item.code,
-                        description: item.description,
+                        description: item.description || 'Sem descrição',
                         system_quantity: item.systemQuantity || 0,
                         counted_quantity: item.countedQuantity || 0,
                         unit_value: item.unitValue || 0,
                         counts: item.counts || 1,
+                        counting_type: item.countingType || 'Outro',
                         user_id: currentUser.id,
                         created_at: item.date || new Date().toISOString()
                     };
                     
+                    console.log('📤 Salvando item:', payload.code, 'para usuário:', payload.user_id);
+                    
+                    // Verificar se o item já existe para este usuário
                     const { data: existing, error: checkError } = await supabaseClient
                         .from('inventory_items')
                         .select('id')
@@ -69,15 +78,42 @@ async function saveInventoryData() {
                         .eq('code', payload.code)
                         .maybeSingle();
                     
+                    if (checkError) {
+                        console.warn('Erro ao verificar existência:', checkError);
+                    }
+                    
                     if (existing && existing.id) {
-                        await supabaseClient.from('inventory_items').update(payload).eq('id', existing.id);
+                        // Atualizar item existente
+                        const { error: updateError } = await supabaseClient
+                            .from('inventory_items')
+                            .update(payload)
+                            .eq('id', existing.id);
+                        
+                        if (updateError) {
+                            console.error('Erro ao atualizar:', updateError);
+                        } else {
+                            console.log('✅ Item atualizado:', payload.code);
+                        }
                     } else {
-                        await supabaseClient.from('inventory_items').insert(payload);
+                        // Inserir novo item
+                        const { error: insertError } = await supabaseClient
+                            .from('inventory_items')
+                            .insert(payload);
+                        
+                        if (insertError) {
+                            console.error('Erro ao inserir:', insertError);
+                        } else {
+                            console.log('✅ Item inserido:', payload.code);
+                        }
                     }
                 } catch (itemError) {
-                    console.warn('⚠️ Erro ao sincronizar item:', item.code, itemError);
+                    console.error('⚠️ Erro ao sincronizar item:', item.code, itemError);
                 }
             }
+            
+            console.log('✅ Sincronização concluída');
+        } else {
+            console.log('📴 Offline ou sem usuário - dados salvos apenas localmente');
         }
     } catch (error) {
         console.error('Erro ao salvar dados:', error);

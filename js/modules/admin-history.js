@@ -2,7 +2,10 @@
 // ADMIN HISTORY MODULE - Visualizar todas as contagens
 // =============================================
 
-let allInventoryItems = [];
+// Usar variável global, não redeclarar
+if (typeof window.allInventoryItems === 'undefined') {
+    window.allInventoryItems = [];
+}
 
 // Carregar todas as contagens de todos os usuários (apenas para Admin)
 async function loadAllInventoryData() {
@@ -12,6 +15,8 @@ async function loadAllInventoryData() {
     }
     
     try {
+        console.log('📊 Carregando todas as contagens...');
+        
         const { data: inventoryData, error } = await supabaseClient
             .from('inventory_items')
             .select('*, system_users(full_name, email)')
@@ -19,7 +24,7 @@ async function loadAllInventoryData() {
         
         if (error) throw error;
         
-        allInventoryItems = (inventoryData || []).map(item => ({
+        window.allInventoryItems = (inventoryData || []).map(item => ({
             id: item.id,
             code: item.code || '',
             description: item.description || 'Sem descrição',
@@ -33,10 +38,9 @@ async function loadAllInventoryData() {
             userEmail: item.system_users?.email || ''
         }));
         
+        console.log(`✅ ${window.allInventoryItems.length} contagens carregadas`);
         renderAdminHistoryTable();
         updateAdminSummary();
-        
-        console.log(`📊 ${allInventoryItems.length} contagens carregadas`);
         
     } catch (error) {
         console.error('Erro ao carregar todas as contagens:', error);
@@ -49,19 +53,19 @@ function renderAdminHistoryTable() {
     const tableBody = document.getElementById('adminHistoryTable');
     if (!tableBody) return;
     
-    if (!allInventoryItems || allInventoryItems.length === 0) {
+    if (!window.allInventoryItems || window.allInventoryItems.length === 0) {
         tableBody.innerHTML = `
             <tr>
                 <td colspan="10" class="text-center text-muted py-4">
                     <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
                     Nenhuma contagem registrada
-                </td>
-            </tr>
+                 </td>
+             </tr>
         `;
         return;
     }
     
-    tableBody.innerHTML = allInventoryItems.map((item, index) => {
+    tableBody.innerHTML = window.allInventoryItems.map((item, index) => {
         const systemQty = item.systemQuantity || 0;
         const countedQty = item.countedQuantity || 0;
         const difference = countedQty - systemQty;
@@ -94,10 +98,10 @@ function renderAdminHistoryTable() {
 
 // Atualizar resumo do Admin
 function updateAdminSummary() {
-    const totalItems = allInventoryItems.length;
-    const uniqueItems = [...new Set(allInventoryItems.map(i => i.code))].length;
-    const uniqueUsers = [...new Set(allInventoryItems.map(i => i.userName))].length;
-    const totalQuantity = allInventoryItems.reduce((sum, i) => sum + (i.countedQuantity || 0), 0);
+    const totalItems = window.allInventoryItems.length;
+    const uniqueItems = [...new Set(window.allInventoryItems.map(i => i.code))].length;
+    const uniqueUsers = [...new Set(window.allInventoryItems.map(i => i.userName))].length;
+    const totalQuantity = window.allInventoryItems.reduce((sum, i) => sum + (i.countedQuantity || 0), 0);
     
     const summaryHtml = `
         <div class="row text-center">
@@ -134,14 +138,14 @@ function updateAdminSummary() {
 
 // Exportar todas as contagens para Excel (Admin)
 async function exportAllInventoryData() {
-    if (!allInventoryItems || allInventoryItems.length === 0) {
+    if (!window.allInventoryItems || window.allInventoryItems.length === 0) {
         showNotification('Não há dados para exportar', 'warning');
         return;
     }
     
     const data = [['Usuário', 'Tipo', 'Código', 'Descrição', 'Qtd Sistema', 'Qtd Contada', 'Diferença', 'Valor Unit.', 'Valor Total', 'Contagens', 'Data']];
     
-    allInventoryItems.forEach(item => {
+    window.allInventoryItems.forEach(item => {
         const systemQty = item.systemQuantity || 0;
         const countedQty = item.countedQuantity || 0;
         const difference = countedQty - systemQty;
@@ -177,7 +181,7 @@ function filterAdminHistory() {
     const typeFilter = document.getElementById('adminTypeFilter')?.value || '';
     const userFilter = document.getElementById('adminUserFilter')?.value || '';
     
-    const filteredItems = allInventoryItems.filter(item => {
+    const filteredItems = window.allInventoryItems.filter(item => {
         const matchesSearch = item.code.toLowerCase().includes(searchTerm) || 
                              item.description.toLowerCase().includes(searchTerm);
         const matchesType = !typeFilter || item.countingType === typeFilter;

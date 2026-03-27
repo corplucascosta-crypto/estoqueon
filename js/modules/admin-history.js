@@ -1,8 +1,11 @@
 // =============================================
-// ADMIN HISTORY MODULE - Versão Final
+// ADMIN HISTORY MODULE - Versão Corrigida
 // =============================================
 
-let allData = [];
+// Usar variável global para evitar duplicação
+if (typeof window.allHistoryData === 'undefined') {
+    window.allHistoryData = [];
+}
 
 window.loadAllInventoryData = async function() {
     if (!currentUser || currentUser.role !== 'admin') {
@@ -28,7 +31,7 @@ window.loadAllInventoryData = async function() {
         
         console.log('✅ Dados recebidos:', data ? data.length : 0);
         
-        allData = (data || []).map(item => ({
+        window.allHistoryData = (data || []).map(item => ({
             id: item.id,
             code: item.code || '',
             description: item.description || 'Sem descrição',
@@ -42,10 +45,10 @@ window.loadAllInventoryData = async function() {
             userEmail: item.system_users?.email || ''
         }));
         
-        renderTable();
-        updateSummary();
+        renderAdminTable();
+        updateAdminSummary();
         
-        console.log('✅ Tabela renderizada com', allData.length, 'itens');
+        console.log('✅ Tabela renderizada com', window.allHistoryData.length, 'itens');
         
     } catch (error) {
         console.error('Erro ao carregar:', error);
@@ -53,12 +56,15 @@ window.loadAllInventoryData = async function() {
     }
 };
 
-function renderTable() {
+function renderAdminTable() {
     const tableBody = document.getElementById('adminHistoryTable');
+    const recordCount = document.getElementById('adminRecordCount');
     
     if (!tableBody) return;
     
-    if (allData.length === 0) {
+    const data = window.allHistoryData;
+    
+    if (data.length === 0) {
         tableBody.innerHTML = `
             <tr>
                 <td colspan="10" class="text-center text-muted py-4">
@@ -67,10 +73,15 @@ function renderTable() {
                  </td>
              </tr>
         `;
+        if (recordCount) recordCount.innerHTML = '';
         return;
     }
     
-    tableBody.innerHTML = allData.map(item => {
+    if (recordCount) {
+        recordCount.innerHTML = `<i class="fas fa-database me-1"></i> ${data.length} registro(s) encontrado(s)`;
+    }
+    
+    tableBody.innerHTML = data.map(item => {
         const systemQty = item.systemQuantity || 0;
         const countedQty = item.countedQuantity || 0;
         const diff = countedQty - systemQty;
@@ -79,11 +90,7 @@ function renderTable() {
         const totalValue = countedQty * (item.unitValue || 0);
         const date = new Date(item.date).toLocaleString('pt-BR');
         
-        const typeColors = { 
-            'Avaria': 'danger', 
-            'RH': 'warning', 
-            'Outro': 'secondary' 
-        };
+        const typeColors = { 'Avaria': 'danger', 'RH': 'warning', 'Outro': 'secondary' };
         const typeColor = typeColors[item.countingType] || 'secondary';
         
         return `
@@ -109,13 +116,13 @@ function renderTable() {
     }).join('');
 }
 
-function updateSummary() {
-    const totalItems = allData.length;
-    const uniqueItems = [...new Set(allData.map(i => i.code))].length;
-    const uniqueUsers = [...new Set(allData.map(i => i.userName))].length;
-    const totalQuantity = allData.reduce((sum, i) => sum + (i.countedQuantity || 0), 0);
+function updateAdminSummary() {
+    const data = window.allHistoryData;
+    const totalItems = data.length;
+    const uniqueItems = [...new Set(data.map(i => i.code))].length;
+    const uniqueUsers = [...new Set(data.map(i => i.userName))].length;
+    const totalQuantity = data.reduce((sum, i) => sum + (i.countedQuantity || 0), 0);
     
-    // Atualizar os valores nos cards
     const totalItemsEl = document.getElementById('adminTotalItems');
     const uniqueItemsEl = document.getElementById('adminUniqueItems');
     const uniqueUsersEl = document.getElementById('adminUniqueUsers');
@@ -128,21 +135,45 @@ function updateSummary() {
 }
 
 window.exportAllInventoryData = async function() {
-    if (allData.length === 0) {
+    const data = window.allHistoryData;
+    
+    if (data.length === 0) {
         showNotification('Não há dados para exportar', 'warning');
         return;
     }
     
-    const data = [['Usuário', 'Tipo', 'Código', 'Descrição', 'Qtd Sistema', 'Qtd Contada', 'Diferença', 'Valor Unit.', 'Valor Total', 'Contagens', 'Data']];
+    const startDate = document.getElementById('exportStartDate')?.value;
+    const endDate = document.getElementById('exportEndDate')?.value;
     
-    allData.forEach(item => {
+    let filteredData = [...data];
+    
+    if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        filteredData = filteredData.filter(item => new Date(item.date) >= start);
+    }
+    
+    if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filteredData = filteredData.filter(item => new Date(item.date) <= end);
+    }
+    
+    if (filteredData.length === 0) {
+        showNotification('Nenhum dado no período selecionado', 'warning');
+        return;
+    }
+    
+    const excelData = [['Usuário', 'Tipo', 'Código', 'Descrição', 'Qtd Sistema', 'Qtd Contada', 'Diferença', 'Valor Unit.', 'Valor Total', 'Contagens', 'Data']];
+    
+    filteredData.forEach(item => {
         const systemQty = item.systemQuantity || 0;
         const countedQty = item.countedQuantity || 0;
         const diff = countedQty - systemQty;
         const totalValue = countedQty * (item.unitValue || 0);
         const date = new Date(item.date).toLocaleString('pt-BR');
         
-        data.push([
+        excelData.push([
             item.userName,
             item.countingType,
             item.code,
@@ -157,12 +188,14 @@ window.exportAllInventoryData = async function() {
         ]);
     });
     
-    const ws = XLSX.utils.aoa_to_sheet(data);
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Todas_Contagens');
-    XLSX.writeFile(wb, `contagens_completas_${new Date().toISOString().slice(0, 19)}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, 'Contagens');
     
-    showNotification('Relatório exportado com sucesso!', 'success');
+    const fileName = `contagens_${startDate || 'inicio'}_${endDate || 'hoje'}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    
+    showNotification(`${filteredData.length} registros exportados!`, 'success');
 };
 
 window.filterAdminHistory = function() {
@@ -170,7 +203,9 @@ window.filterAdminHistory = function() {
     const typeFilter = document.getElementById('adminTypeFilter')?.value || '';
     const userFilter = document.getElementById('adminUserFilter')?.value || '';
     
-    const filteredItems = allData.filter(item => {
+    const data = window.allHistoryData;
+    
+    const filteredItems = data.filter(item => {
         const matchesSearch = item.code.toLowerCase().includes(searchTerm) || 
                              item.description.toLowerCase().includes(searchTerm);
         const matchesType = !typeFilter || item.countingType === typeFilter;
@@ -179,6 +214,7 @@ window.filterAdminHistory = function() {
     });
     
     const tableBody = document.getElementById('adminHistoryTable');
+    const recordCount = document.getElementById('adminRecordCount');
     
     if (!tableBody) return;
     
@@ -191,7 +227,12 @@ window.filterAdminHistory = function() {
                 </td>
             </tr>
         `;
+        if (recordCount) recordCount.innerHTML = '0 registro(s) encontrado(s)';
         return;
+    }
+    
+    if (recordCount) {
+        recordCount.innerHTML = `<i class="fas fa-database me-1"></i> ${filteredItems.length} registro(s) encontrado(s)`;
     }
     
     tableBody.innerHTML = filteredItems.map(item => {
@@ -251,66 +292,3 @@ window.loadAdminUserFilter = async function() {
 };
 
 console.log('✅ admin-history.js carregado');
-
-window.exportAllInventoryData = async function() {
-    if (allData.length === 0) {
-        showNotification('Não há dados para exportar', 'warning');
-        return;
-    }
-    
-    // Obter datas de filtro
-    const startDate = document.getElementById('exportStartDate')?.value;
-    const endDate = document.getElementById('exportEndDate')?.value;
-    
-    let filteredData = [...allData];
-    
-    if (startDate) {
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        filteredData = filteredData.filter(item => new Date(item.date) >= start);
-    }
-    
-    if (endDate) {
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        filteredData = filteredData.filter(item => new Date(item.date) <= end);
-    }
-    
-    if (filteredData.length === 0) {
-        showNotification('Nenhum dado no período selecionado', 'warning');
-        return;
-    }
-    
-    const data = [['Usuário', 'Tipo', 'Código', 'Descrição', 'Qtd Sistema', 'Qtd Contada', 'Diferença', 'Valor Unit.', 'Valor Total', 'Contagens', 'Data']];
-    
-    filteredData.forEach(item => {
-        const systemQty = item.systemQuantity || 0;
-        const countedQty = item.countedQuantity || 0;
-        const diff = countedQty - systemQty;
-        const totalValue = countedQty * (item.unitValue || 0);
-        const date = new Date(item.date).toLocaleString('pt-BR');
-        
-        data.push([
-            item.userName,
-            item.countingType,
-            item.code,
-            item.description,
-            systemQty,
-            countedQty,
-            diff,
-            item.unitValue || 0,
-            totalValue,
-            item.counts,
-            date
-        ]);
-    });
-    
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Contagens_Periodo');
-    
-    const fileName = `contagens_${startDate || 'inicio'}_${endDate || 'hoje'}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-    
-    showNotification(`${filteredData.length} registros exportados com sucesso!`, 'success');
-};

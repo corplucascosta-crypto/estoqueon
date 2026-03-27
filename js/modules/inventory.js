@@ -1,5 +1,5 @@
 // =============================================
-// INVENTORY MODULE
+// INVENTORY MODULE - Vers√£o Est√°vel (sem colaborativa)
 // =============================================
 
 // Load user data from Supabase
@@ -271,6 +271,11 @@ async function processInventoryItem() {
     const countedQuantityInput = document.getElementById('countedQuantity');
     const countedQuantity = parseInt(countedQuantityInput.value);
     
+    if (isNaN(countedQuantity) || countedQuantity <= 0) {
+        showNotification('Digite uma quantidade v√°lida', 'warning');
+        return;
+    }
+    
     if (countedQuantity > 999999) {
         showNotification('Quantidade muito alta! Verifique o valor.', 'warning');
         return;
@@ -337,8 +342,10 @@ async function replaceExistingCount() {
     showNotification('Contagem substitu√≠da com sucesso!', 'success');
 }
 
-// Add new inventory item
+// Add new inventory item - VERS√ÉO EST√ÅVEL
 async function addNewInventoryItem(countedQuantity) {
+    console.log('üìù addNewInventoryItem chamada com:', countedQuantity);
+    
     if (!currentItemCode) {
         showNotification('C√≥digo do item n√£o foi validado', 'error');
         return;
@@ -367,12 +374,19 @@ async function addNewInventoryItem(countedQuantity) {
         } catch (error) {}
     }
     
+    let unitValue = 0;
+    try {
+        const item = await findItemByCode(currentItemCode);
+        if (item && item.valor) unitValue = item.valor;
+    } catch (error) {}
+    
+    // CRIAR NOVO ITEM LOCALMENTE
     const newItem = {
         code: currentItemCode,
         description: itemDescription,
         systemQuantity: 0,
         countedQuantity: countedQuantity,
-        unitValue: 0,
+        unitValue: unitValue,
         counts: 1,
         countingType: currentCountingType,
         date: new Date().toISOString(),
@@ -380,11 +394,14 @@ async function addNewInventoryItem(countedQuantity) {
     };
     
     inventoryItems.push(newItem);
+    console.log('‚úÖ Item adicionado ao array:', inventoryItems.length);
+    
     await saveInventoryData();
     resetFormAfterSubmission();
     renderInventoryTable();
     updateSummary();
     if (typeof updateDashboard === 'function') updateDashboard();
+    
     showNotification(`‚úÖ "${itemDescription}" registrado com sucesso!`, 'success');
 }
 
@@ -437,7 +454,7 @@ async function handleFinalizeCountingSession() {
 function renderInventoryTable() {
     const inventoryTable = document.getElementById('inventoryTable');
     
-    if (inventoryItems.length === 0) {
+    if (!inventoryItems || inventoryItems.length === 0) {
         inventoryTable.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4"><i class="fas fa-box-open fa-2x mb-2 d-block"></i>Nenhum item contado ainda</td></tr>`;
         return;
     }
@@ -592,62 +609,3 @@ async function clearAllData() {
     bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
     showNotification('Todos os dados foram limpos!', 'success');
 }
-// =============================================
-// INTEGRA«√O COM CONTAGEM COLABORATIVA
-// =============================================
-
-// Sobrescrever a funÁ„o addNewInventoryItem
-const originalAddNewInventoryItem = addNewInventoryItem;
-window.addNewInventoryItem = async function(countedQuantity) {
-    if (!currentItemCode) {
-        showNotification('CÛdigo do item n„o foi validado', 'error');
-        return;
-    }
-    
-    if (!currentCountingType) {
-        showNotification('?? Selecione um tipo de contagem', 'warning');
-        document.getElementById('countingType').focus();
-        return;
-    }
-    
-    let itemDescription = 'Item n„o identificado';
-    const itemDescriptionDisplay = document.getElementById('itemDescriptionDisplay');
-    
-    try {
-        const descriptionElement = itemDescriptionDisplay.querySelector('strong');
-        if (descriptionElement && descriptionElement.textContent) {
-            itemDescription = descriptionElement.textContent.trim();
-        }
-    } catch (error) {}
-    
-    if (itemDescription === 'Item n„o identificado') {
-        try {
-            const item = await findItemByCode(currentItemCode);
-            if (item && item.descricao) itemDescription = item.descricao;
-        } catch (error) {}
-    }
-    
-    let unitValue = 0;
-    try {
-        const item = await findItemByCode(currentItemCode);
-        if (item && item.valor) unitValue = item.valor;
-    } catch (error) {}
-    
-    // Usar contagem colaborativa
-    if (typeof window.addCollaborativeItem === 'function') {
-        const success = await window.addCollaborativeItem(
-            currentItemCode,
-            itemDescription,
-            countedQuantity,
-            unitValue
-        );
-        
-        if (success) {
-            resetFormAfterSubmission();
-            if (typeof updateDashboard === 'function') updateDashboard();
-        }
-    } else {
-        // Fallback para contagem local
-        await originalAddNewInventoryItem(countedQuantity);
-    }
-};

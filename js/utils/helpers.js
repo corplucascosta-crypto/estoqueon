@@ -1,10 +1,18 @@
 // =============================================
-// UTILITY FUNCTIONS
+// UTILITY FUNCTIONS - Helpers
 // =============================================
 
 // Show notification (console only for now)
 function showNotification(message, type = 'info') {
     console.log(`[${type.toUpperCase()}] ${message}`);
+    // Também mostrar no console para debug
+    if (type === 'error') {
+        console.error(message);
+    } else if (type === 'warning') {
+        console.warn(message);
+    } else {
+        console.log(message);
+    }
 }
 
 // Role badge classes
@@ -78,13 +86,17 @@ function checkAdminStatus() {
             adminOnlyElements.forEach(el => el.style.display = 'none');
             managerOnlyElements.forEach(el => el.style.display = 'none');
         }
-        document.getElementById('logoutBtn').style.display = 'block';
-        document.getElementById('loginBtn').style.display = 'none';
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        if (logoutBtn) logoutBtn.style.display = 'block';
+        if (loginBtn) loginBtn.style.display = 'none';
     } else {
         adminOnlyElements.forEach(el => el.style.setProperty('display', 'none', 'important'));
         managerOnlyElements.forEach(el => el.style.setProperty('display', 'none', 'important'));
-        document.getElementById('logoutBtn').style.display = 'none';
-        document.getElementById('loginBtn').style.display = 'block';
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'block';
     }
 }
 
@@ -94,45 +106,84 @@ function updateUserStatus() {
     const userName = document.getElementById('userName');
     const userRoleBadge = document.getElementById('userRoleBadge');
     
-    if (currentUser) {
+    if (currentUser && userStatus) {
         userName.textContent = currentUser.full_name;
         userRoleBadge.textContent = getRoleDisplayName(currentUser.role);
         userRoleBadge.className = `user-role-badge badge ${getRoleBadgeClass(currentUser.role)}`;
         userStatus.style.display = 'block';
-    } else {
+    } else if (userStatus) {
         userStatus.style.display = 'none';
     }
 }
 
-// Switch between views
+// Switch between views - VERSÃO COMPLETA COM ADMIN HISTORY
 async function switchView(viewName) {
-    document.querySelectorAll('.view-container').forEach(view => view.classList.remove('active'));
-    document.querySelectorAll('.view-switch').forEach(link => link.classList.remove('active'));
+    // Esconder todas as views
+    document.querySelectorAll('.view-container').forEach(view => {
+        view.classList.remove('active');
+    });
     
+    // Remover active de todos os links
+    document.querySelectorAll('.view-switch').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Mostrar view selecionada
     const targetView = document.getElementById(viewName + 'View');
     if (targetView) {
         targetView.classList.add('active');
-        const activeLink = document.querySelector(`.view-switch[data-view="${viewName}"]`);
-        if (activeLink) activeLink.classList.add('active');
         
+        // Ativar link correspondente
+        const activeLink = document.querySelector(`.view-switch[data-view="${viewName}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+        
+        // Ações específicas por tela
         switch(viewName) {
             case 'counting':
                 setTimeout(() => {
-                    const input = document.getElementById('itemCode');
-                    if (input) input.focus();
+                    const itemCodeInput = document.getElementById('itemCode');
+                    if (itemCodeInput) itemCodeInput.focus();
                 }, 100);
                 break;
             case 'history':
-                if (typeof renderInventoryTable === 'function') renderInventoryTable();
-                if (typeof updateSummary === 'function') updateSummary();
+                if (typeof renderInventoryTable === 'function') {
+                    renderInventoryTable();
+                }
+                if (typeof updateSummary === 'function') {
+                    updateSummary();
+                }
                 break;
             case 'dashboard':
-                if (typeof updateDashboard === 'function') updateDashboard();
+                if (typeof updateDashboard === 'function') {
+                    updateDashboard();
+                }
                 break;
             case 'users':
-                if (typeof loadUsers === 'function') loadUsers();
+                if (typeof loadUsers === 'function') {
+                    loadUsers();
+                }
                 break;
+            case 'adminHistory':
+                // Carregar dados do histórico geral automaticamente
+                console.log('📊 Carregando histórico geral...');
+                if (typeof loadAllInventoryData === 'function') {
+                    await loadAllInventoryData();
+                } else {
+                    console.warn('loadAllInventoryData não está disponível');
+                }
+                if (typeof loadAdminUserFilter === 'function') {
+                    await loadAdminUserFilter();
+                } else {
+                    console.warn('loadAdminUserFilter não está disponível');
+                }
+                break;
+            default:
+                console.log('View carregada:', viewName);
         }
+    } else {
+        console.warn('View não encontrada:', viewName + 'View');
     }
 }
 
@@ -140,5 +191,39 @@ async function switchView(viewName) {
 function handleViewSwitch(e) {
     e.preventDefault();
     const targetView = this.getAttribute('data-view');
-    switchView(targetView);
+    if (targetView) {
+        switchView(targetView);
+    }
 }
+
+// Função para criar alerta visual (fallback)
+function createAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+    alertDiv.style.zIndex = 9999;
+    alertDiv.style.minWidth = '300px';
+    alertDiv.style.textAlign = 'center';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
+
+// Exportar funções globais
+window.showNotification = showNotification;
+window.getRoleBadgeClass = getRoleBadgeClass;
+window.getRoleColorClass = getRoleColorClass;
+window.getRoleIcon = getRoleIcon;
+window.getRoleDisplayName = getRoleDisplayName;
+window.updateUI = updateUI;
+window.checkAdminStatus = checkAdminStatus;
+window.updateUserStatus = updateUserStatus;
+window.switchView = switchView;
+window.handleViewSwitch = handleViewSwitch;
+window.createAlert = createAlert;
+
+console.log('✅ helpers.js carregado');

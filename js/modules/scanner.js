@@ -4,8 +4,7 @@
 
 let videoStream = null;
 let isScanning = false;
-let animationId = null;
-let codeReader = null;
+let zxingReady = false;
 
 function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
@@ -25,46 +24,46 @@ function addScannerButton() {
     btn.type = 'button';
     btn.className = 'btn btn-outline-primary ms-2';
     btn.innerHTML = '<i class="fas fa-camera"></i>';
-    btn.title = 'Escanear código';
+    btn.title = 'Escanear código (Google Lens)';
     btn.style.padding = '0.75rem 1rem';
-    btn.onclick = startZXingScanner;
+    btn.onclick = function() { startScanner(); };
     
     inputElement.parentNode.insertBefore(btn, inputElement.nextSibling);
     console.log('✅ Botão câmera adicionado');
 }
 
-function startZXingScanner() {
+function startScanner() {
     if (isScanning) return;
     
-    // Aguardar ZXing carregar
+    // Verificar se ZXing está disponível
     if (typeof ZXing === 'undefined') {
         console.log('Aguardando ZXing carregar...');
-        const checkInterval = setInterval(function() {
+        const checkInterval = setInterval(() => {
             if (typeof ZXing !== 'undefined') {
                 clearInterval(checkInterval);
-                openScannerModal();
+                openZXingScanner();
             }
-        }, 500);
-        setTimeout(function() {
+        }, 200);
+        setTimeout(() => {
             clearInterval(checkInterval);
             if (typeof ZXing === 'undefined') {
-                alert('Carregando scanner... Tente novamente em alguns segundos.');
+                alert('Scanner carregando... Por favor, aguarde alguns segundos e tente novamente.');
             }
         }, 5000);
         return;
     }
     
-    openScannerModal();
+    openZXingScanner();
 }
 
-function openScannerModal() {
+function openZXingScanner() {
     const modalHtml = `
         <div class="modal fade" id="zxingModal" tabindex="-1" data-bs-backdrop="static">
             <div class="modal-dialog modal-fullscreen">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white py-2">
                         <h5 class="modal-title fs-6">
-                            <i class="fas fa-camera me-2"></i>Escanear Código
+                            <i class="fas fa-camera me-2"></i>Google Lens Scanner
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
@@ -98,17 +97,15 @@ function openScannerModal() {
     const video = document.getElementById('zxingVideo');
     const statusDiv = document.getElementById('zxingStatus');
     
-    // Iniciar câmera
     navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' }
     }).then(function(stream) {
         video.srcObject = stream;
         videoStream = stream;
         video.play();
-        
         isScanning = true;
         
-        // Configurar ZXing
+        // Configurar leitor ZXing
         const hints = new Map();
         const formats = [
             ZXing.BarcodeFormat.EAN_13,
@@ -120,20 +117,19 @@ function openScannerModal() {
             ZXing.BarcodeFormat.CODE_93,
             ZXing.BarcodeFormat.QR_CODE,
             ZXing.BarcodeFormat.DATA_MATRIX,
-            ZXing.BarcodeFormat.ITF,
-            ZXing.BarcodeFormat.CODABAR
+            ZXing.BarcodeFormat.ITF
         ];
         hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
         hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
         
-        codeReader = new ZXing.MultiFormatReader();
-        codeReader.setHints(hints);
-        
-        let lastCode = '';
-        let lastTime = 0;
+        const reader = new ZXing.MultiFormatReader();
+        reader.setHints(hints);
         
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
+        
+        let lastCode = '';
+        let lastTime = 0;
         
         function scanFrame() {
             if (!isScanning || video.paused || video.ended) {
@@ -141,7 +137,7 @@ function openScannerModal() {
                 return;
             }
             
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -149,8 +145,7 @@ function openScannerModal() {
                 try {
                     const luminanceSource = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
                     const binaryBitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminanceSource));
-                    
-                    const result = codeReader.decodeWithState(binaryBitmap);
+                    const result = reader.decodeWithState(binaryBitmap);
                     
                     if (result && result.getText()) {
                         const code = result.getText();
@@ -180,7 +175,7 @@ function openScannerModal() {
                             setTimeout(function() {
                                 stopScanner();
                                 modal.hide();
-                                showNotification('✅ ' + code, 'success');
+                                showNotification('✅ Código lido: ' + code, 'success');
                             }, 800);
                         }
                     } else {
@@ -205,7 +200,7 @@ function openScannerModal() {
         scanFrame();
         
     }).catch(function(err) {
-        console.error('Erro ao acessar câmera:', err);
+        console.error('Erro na câmera:', err);
         statusDiv.innerHTML = '❌ Erro na câmera';
         setTimeout(function() {
             alert('Não foi possível acessar a câmera. Verifique as permissões.');
@@ -226,15 +221,10 @@ function openScannerModal() {
 
 function stopScanner() {
     isScanning = false;
-    if (animationId) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-    }
     if (videoStream) {
         videoStream.getTracks().forEach(function(track) { track.stop(); });
         videoStream = null;
     }
-    codeReader = null;
 }
 
 function showNotification(message, type) {

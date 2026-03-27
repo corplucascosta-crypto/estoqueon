@@ -1,9 +1,11 @@
 ﻿// =============================================
-// SCANNER MODULE - ZXing (Tecnologia Google Lens)
+// SCANNER MODULE - Html5Qrcode Otimizado
 // =============================================
 
-let scanner = null;
+let html5QrCode = null;
 let isScanning = false;
+let lastCode = '';
+let lastTime = 0;
 
 function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
@@ -26,42 +28,41 @@ function addScannerButton() {
     btn.title = 'Escanear código de barras';
     btn.style.padding = '0.75rem 1rem';
     btn.style.marginLeft = '5px';
-    btn.onclick = startZXingScanner;
+    btn.onclick = startScanner;
     
     inputGroup.appendChild(btn);
     console.log('✅ Botão scanner adicionado');
 }
 
-function startZXingScanner() {
+function startScanner() {
     if (isScanning) return;
     
-    // Verificar se a biblioteca está carregada
-    if (typeof ZXing === 'undefined') {
-        console.log('Carregando ZXing...');
-        loadZXingLibrary();
+    if (typeof Html5Qrcode === 'undefined') {
+        console.log('Carregando Html5Qrcode...');
+        loadHtml5Qrcode();
         return;
     }
     
-    openScannerModal();
+    openScanner();
 }
 
-function loadZXingLibrary() {
+function loadHtml5Qrcode() {
     const script = document.createElement('script');
-    script.src = 'https://unpkg.com/@zxing/library@0.19.1/index.min.js';
+    script.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
     script.onload = function() {
-        console.log('✅ ZXing carregado');
-        openScannerModal();
+        console.log('✅ Html5Qrcode carregado');
+        openScanner();
     };
     script.onerror = function() {
-        console.error('❌ Erro ao carregar ZXing');
-        alert('Erro ao carregar scanner. Tente novamente.');
+        console.error('❌ Erro ao carregar Html5Qrcode');
+        alert('Erro ao carregar scanner. Verifique sua conexão com a internet.');
     };
     document.head.appendChild(script);
 }
 
-function openScannerModal() {
+function openScanner() {
     const modalHtml = `
-        <div class="modal fade" id="zxingModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal fade" id="scannerModal" tabindex="-1" data-bs-backdrop="static">
             <div class="modal-dialog modal-fullscreen">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white py-2">
@@ -71,15 +72,14 @@ function openScannerModal() {
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-0 position-relative">
-                        <video id="zxing-video" autoplay playsinline style="width: 100%; height: 70vh; object-fit: cover; background: #000;"></video>
-                        <canvas id="zxing-canvas" style="display: none;"></canvas>
-                        <div id="zxing-guide" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 25%; border: 2px solid #00ff00; border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);"></div>
-                        <div id="zxing-status" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill" style="z-index: 1060; font-size: 12px;">
-                            Aguardando leitura...
+                        <div id="qr-reader" style="width: 100%; height: 70vh; background: #000;"></div>
+                        <div id="scanner-guide" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; height: 25%; border: 2px solid #00ff00; border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); z-index: 10;"></div>
+                        <div id="scanner-status" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill" style="z-index: 1060; font-size: 12px;">
+                            📷 Aproxime o código
                         </div>
                     </div>
                     <div class="modal-footer py-2">
-                        <button type="button" class="btn btn-danger btn-sm" id="zxing-stop-btn">
+                        <button type="button" class="btn btn-danger btn-sm" id="stopScannerBtn">
                             <i class="fas fa-stop me-1"></i>Parar
                         </button>
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
@@ -91,134 +91,97 @@ function openScannerModal() {
         </div>
     `;
     
-    const existingModal = document.getElementById('zxingModal');
+    const existingModal = document.getElementById('scannerModal');
     if (existingModal) existingModal.remove();
     
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     
-    const modal = new bootstrap.Modal(document.getElementById('zxingModal'));
+    const modal = new bootstrap.Modal(document.getElementById('scannerModal'));
     modal.show();
     
-    const video = document.getElementById('zxing-video');
-    const statusDiv = document.getElementById('zxing-status');
+    const statusDiv = document.getElementById('scanner-status');
     
-    // Solicitar acesso à câmera
-    navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-    }).then(stream => {
-        video.srcObject = stream;
-        video.play();
+    setTimeout(() => {
+        html5QrCode = new Html5Qrcode("qr-reader");
+        isScanning = true;
         
-        // Iniciar scanner
-        startVideoScanning(video, statusDiv, modal);
+        const config = {
+            fps: 30,
+            qrbox: { width: 300, height: 150 },
+            aspectRatio: 1.777,
+            disableFlip: false,
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.UPC_E,
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.QR_CODE
+            ]
+        };
         
-    }).catch(err => {
-        console.error('Erro ao acessar câmera:', err);
-        statusDiv.innerHTML = '❌ Erro ao acessar câmera';
-        statusDiv.classList.add('bg-danger');
+        html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            (decodedText) => {
+                const now = Date.now();
+                if (lastCode === decodedText && (now - lastTime) < 2000) return;
+                
+                lastCode = decodedText;
+                lastTime = now;
+                
+                console.log('📦 Código detectado:', decodedText);
+                statusDiv.innerHTML = `✅ ${decodedText}`;
+                statusDiv.classList.add('bg-success');
+                
+                const itemCodeInput = document.getElementById('itemCode');
+                if (itemCodeInput) {
+                    itemCodeInput.value = decodedText;
+                    itemCodeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                
+                setTimeout(() => {
+                    stopScanner();
+                    modal.hide();
+                    showNotification(`✅ Código: ${decodedText}`, 'success');
+                }, 800);
+            },
+            (errorMessage) => {
+                if (errorMessage && errorMessage.includes('No')) {
+                    statusDiv.innerHTML = '📷 Aproxime o código';
+                } else if (errorMessage && errorMessage.includes('not found')) {
+                    statusDiv.innerHTML = '🔍 Centralize na área verde';
+                } else {
+                    statusDiv.innerHTML = '📷 Posicione o código';
+                }
+                statusDiv.classList.remove('bg-success');
+            }
+        ).catch((err) => {
+            console.error('Erro:', err);
+            statusDiv.innerHTML = '❌ Erro na câmera';
+            alert('Não foi possível acessar a câmera. Verifique as permissões.');
+            modal.hide();
+        });
+    }, 500);
+    
+    document.getElementById('stopScannerBtn').addEventListener('click', function() {
+        stopScanner();
+        modal.hide();
     });
     
-    document.getElementById('zxing-stop-btn').onclick = function() {
-        stopScanning(video);
-        modal.hide();
-    };
-    
-    document.getElementById('zxingModal').addEventListener('hidden.bs.modal', function() {
-        stopScanning(video);
+    document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function() {
+        stopScanner();
         this.remove();
     });
 }
 
-function startVideoScanning(video, statusDiv, modal) {
-    isScanning = true;
-    
-    // Criar canvas para capturar frames
-    const canvas = document.getElementById('zxing-canvas');
-    const context = canvas.getContext('2d');
-    
-    let lastCode = '';
-    let lastTime = 0;
-    
-    function scanFrame() {
-        if (!isScanning) return;
-        
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            
-            // Usar o ZXing para decodificar
-            try {
-                const codeReader = new ZXing.BrowserMultiFormatReader();
-                const hints = new Map();
-                hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-                    ZXing.BarcodeFormat.EAN_13,
-                    ZXing.BarcodeFormat.EAN_8,
-                    ZXing.BarcodeFormat.UPC_A,
-                    ZXing.BarcodeFormat.UPC_E,
-                    ZXing.BarcodeFormat.CODE_128,
-                    ZXing.BarcodeFormat.CODE_39,
-                    ZXing.BarcodeFormat.QR_CODE
-                ]);
-                
-                codeReader.decodeFromImageElement(canvas, hints)
-                    .then(result => {
-                        const code = result.getText();
-                        const now = Date.now();
-                        
-                        if (lastCode !== code || (now - lastTime) > 2000) {
-                            lastCode = code;
-                            lastTime = now;
-                            
-                            console.log('📦 Código detectado:', code);
-                            statusDiv.innerHTML = `✅ Código: ${code}`;
-                            statusDiv.classList.add('bg-success');
-                            
-                            // Preencher campo
-                            const itemCodeInput = document.getElementById('itemCode');
-                            if (itemCodeInput) {
-                                itemCodeInput.value = code;
-                                itemCodeInput.dispatchEvent(new Event('input', { bubbles: true }));
-                            }
-                            
-                            // Fechar após 1 segundo
-                            setTimeout(() => {
-                                stopScanning(video);
-                                modal.hide();
-                                showNotification(`✅ Código escaneado: ${code}`, 'success');
-                            }, 1000);
-                        }
-                    })
-                    .catch(() => {});
-            } catch(e) {
-                // Erro ao decodificar
-            }
-        }
-        
-        requestAnimationFrame(scanFrame);
+function stopScanner() {
+    if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().catch(() => {});
     }
-    
-    // Aguardar vídeo carregar
-    video.addEventListener('loadeddata', () => {
-        requestAnimationFrame(scanFrame);
-    });
-    
-    // Timeout para evitar loop infinito
-    setTimeout(() => {
-        if (isScanning && statusDiv.innerHTML === 'Aguardando leitura...') {
-            statusDiv.innerHTML = '📷 Aproxime o código da câmera';
-        }
-    }, 3000);
-}
-
-function stopScanning(video) {
     isScanning = false;
-    if (video && video.srcObject) {
-        video.srcObject.getTracks().forEach(track => track.stop());
-        video.srcObject = null;
-    }
+    html5QrCode = null;
 }
 
 function showNotification(message, type) {

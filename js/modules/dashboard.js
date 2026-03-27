@@ -168,13 +168,13 @@ function exportDashboardData() {
 }
 
 // =============================================
-// GRÁFICO DE PRODUTIVIDADE
+// GRÁFICO DE PRODUTIVIDADE - Versão separada
 // =============================================
 
 let productivityChart = null;
 
 async function loadProductivityData() {
-    if (!currentUser || currentUser.role !== 'admin') return;
+    if (!currentUser) return;
     
     try {
         const { data: items, error } = await supabaseClient
@@ -199,6 +199,7 @@ async function loadProductivityData() {
         const counts = users.map(u => userStats[u].count);
         
         renderProductivityChart(users, totals, counts);
+        renderRankings(users, totals, counts, userStats);
         
     } catch (error) {
         console.error('Erro ao carregar dados de produtividade:', error);
@@ -222,7 +223,8 @@ function renderProductivityChart(users, totals, counts) {
                     backgroundColor: 'rgba(100, 116, 139, 0.7)',
                     borderColor: '#64748b',
                     borderWidth: 1,
-                    yAxisID: 'y'
+                    yAxisID: 'y',
+                    borderRadius: 8
                 },
                 {
                     label: 'Número de Contagens',
@@ -230,24 +232,90 @@ function renderProductivityChart(users, totals, counts) {
                     backgroundColor: 'rgba(134, 239, 172, 0.7)',
                     borderColor: '#86efac',
                     borderWidth: 1,
-                    yAxisID: 'y1'
+                    yAxisID: 'y1',
+                    borderRadius: 8
                 }
             ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             plugins: {
                 legend: { position: 'top' },
-                title: { display: true, text: 'Produtividade por Usuário' }
+                tooltip: { mode: 'index', intersect: false },
+                title: { display: false }
             },
             scales: {
-                y: { beginAtZero: true, title: { display: true, text: 'Unidades' } },
-                y1: { position: 'right', beginAtZero: true, title: { display: true, text: 'Contagens' } }
+                y: { 
+                    beginAtZero: true, 
+                    title: { display: true, text: 'Unidades', font: { weight: 'bold' } },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                y1: { 
+                    position: 'right', 
+                    beginAtZero: true, 
+                    title: { display: true, text: 'Contagens', font: { weight: 'bold' } },
+                    grid: { drawOnChartArea: false }
+                }
             }
         }
     });
 }
+
+function renderRankings(users, totals, counts, userStats) {
+    // Ranking por unidades
+    const rankingUnits = users
+        .map((user, i) => ({ user, total: totals[i] }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 5);
+    
+    const rankingContainerUnits = document.getElementById('rankingByUnits');
+    if (rankingContainerUnits) {
+        rankingContainerUnits.innerHTML = rankingUnits.map((item, idx) => `
+            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                <div>
+                    <span class="badge bg-${idx === 0 ? 'warning' : idx === 1 ? 'secondary' : idx === 2 ? 'danger' : 'light'} me-2">
+                        ${idx + 1}º
+                    </span>
+                    <strong>${item.user}</strong>
+                </div>
+                <div class="text-success fw-bold">${item.total} unidades</div>
+            </div>
+        `).join('');
+        
+        if (rankingUnits.length === 0) {
+            rankingContainerUnits.innerHTML = '<p class="text-muted text-center">Nenhum dado disponível</p>';
+        }
+    }
+    
+    // Ranking por contagens
+    const rankingCounts = users
+        .map((user, i) => ({ user, count: counts[i] }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+    
+    const rankingContainerCounts = document.getElementById('rankingByCounts');
+    if (rankingContainerCounts) {
+        rankingContainerCounts.innerHTML = rankingCounts.map((item, idx) => `
+            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                <div>
+                    <span class="badge bg-${idx === 0 ? 'warning' : idx === 1 ? 'secondary' : idx === 2 ? 'danger' : 'light'} me-2">
+                        ${idx + 1}º
+                    </span>
+                    <strong>${item.user}</strong>
+                </div>
+                <div class="text-info fw-bold">${item.count} contagens</div>
+            </div>
+        `).join('');
+        
+        if (rankingCounts.length === 0) {
+            rankingContainerCounts.innerHTML = '<p class="text-muted text-center">Nenhum dado disponível</p>';
+        }
+    }
+}
+
+// Exportar para uso global
+window.loadProductivityData = loadProductivityData;
 
 // Adicionar no updateDashboard
 const originalUpdateDashboard = window.updateDashboard;

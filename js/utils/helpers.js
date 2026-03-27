@@ -2,20 +2,15 @@
 // UTILITY FUNCTIONS - Helpers
 // =============================================
 
-// Show notification (console only for now)
 function showNotification(message, type = 'info') {
     console.log(`[${type.toUpperCase()}] ${message}`);
-    // Também mostrar no console para debug
     if (type === 'error') {
         console.error(message);
     } else if (type === 'warning') {
         console.warn(message);
-    } else {
-        console.log(message);
     }
 }
 
-// Role badge classes
 function getRoleBadgeClass(role) {
     const classes = {
         'admin': 'bg-danger',
@@ -25,7 +20,6 @@ function getRoleBadgeClass(role) {
     return classes[role] || 'bg-secondary';
 }
 
-// Role color classes
 function getRoleColorClass(role) {
     const classes = {
         'admin': 'text-danger',
@@ -35,7 +29,6 @@ function getRoleColorClass(role) {
     return classes[role] || 'text-secondary';
 }
 
-// Role icons
 function getRoleIcon(role) {
     const icons = {
         'admin': 'fa-shield-alt',
@@ -45,7 +38,6 @@ function getRoleIcon(role) {
     return icons[role] || 'fa-user';
 }
 
-// Role display names
 function getRoleDisplayName(role) {
     const names = {
         'admin': 'Administrador',
@@ -55,13 +47,11 @@ function getRoleDisplayName(role) {
     return names[role] || role;
 }
 
-// Update UI based on user role
 function updateUI() {
     checkAdminStatus();
     updateUserStatus();
 }
 
-// Check admin status and show/hide elements
 function checkAdminStatus() {
     const adminOnlyElements = document.querySelectorAll('.admin-only');
     const managerOnlyElements = document.querySelectorAll('.manager-only');
@@ -100,7 +90,6 @@ function checkAdminStatus() {
     }
 }
 
-// Update user status display
 function updateUserStatus() {
     const userStatus = document.getElementById('userStatus');
     const userName = document.getElementById('userName');
@@ -116,30 +105,24 @@ function updateUserStatus() {
     }
 }
 
-// Switch between views - VERSÃO COMPLETA COM ADMIN HISTORY
 async function switchView(viewName) {
-    // Esconder todas as views
     document.querySelectorAll('.view-container').forEach(view => {
         view.classList.remove('active');
     });
     
-    // Remover active de todos os links
     document.querySelectorAll('.view-switch').forEach(link => {
         link.classList.remove('active');
     });
     
-    // Mostrar view selecionada
     const targetView = document.getElementById(viewName + 'View');
     if (targetView) {
         targetView.classList.add('active');
         
-        // Ativar link correspondente
         const activeLink = document.querySelector(`.view-switch[data-view="${viewName}"]`);
         if (activeLink) {
             activeLink.classList.add('active');
         }
         
-        // Ações específicas por tela
         switch(viewName) {
             case 'counting':
                 setTimeout(() => {
@@ -166,17 +149,18 @@ async function switchView(viewName) {
                 }
                 break;
             case 'adminHistory':
-                // Carregar dados do histórico geral automaticamente
                 console.log('📊 Carregando histórico geral...');
                 if (typeof loadAllInventoryData === 'function') {
                     await loadAllInventoryData();
-                } else {
-                    console.warn('loadAllInventoryData não está disponível');
                 }
                 if (typeof loadAdminUserFilter === 'function') {
                     await loadAdminUserFilter();
-                } else {
-                    console.warn('loadAdminUserFilter não está disponível');
+                }
+                break;
+            case 'productivity':
+                console.log('📈 Carregando gráfico de produtividade...');
+                if (typeof loadProductivityData === 'function') {
+                    await loadProductivityData();
                 }
                 break;
             default:
@@ -187,7 +171,6 @@ async function switchView(viewName) {
     }
 }
 
-// Handle view switch event
 function handleViewSwitch(e) {
     e.preventDefault();
     const targetView = this.getAttribute('data-view');
@@ -196,7 +179,6 @@ function handleViewSwitch(e) {
     }
 }
 
-// Função para criar alerta visual (fallback)
 function createAlert(message, type) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
@@ -213,7 +195,6 @@ function createAlert(message, type) {
     }, 3000);
 }
 
-// Exportar funções globais
 window.showNotification = showNotification;
 window.getRoleBadgeClass = getRoleBadgeClass;
 window.getRoleColorClass = getRoleColorClass;

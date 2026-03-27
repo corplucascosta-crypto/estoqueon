@@ -79,6 +79,11 @@
                             <i class="fas fa-user-shield"></i> Login
                         </a>
                     </li>
+                    <li class="nav-item">
+    <a class="nav-link view-switch admin-only" data-view="adminHistory" href="#">
+        <i class="fas fa-chart-line"></i> Histórico Geral
+    </a>
+</li>
                 </ul>
             </div>
         </div>
@@ -468,7 +473,7 @@
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">
                         <i class="fas fa-users me-2"></i>
-                        Contagem Colaborativa - <span id="sessionType">Nenhuma sess�o ativa</span>
+                        Contagem Colaborativa - <span id="sessionType">Nenhuma sess�o ativa</span>
                     </h5>
                 </div>
                 <div class="card-body">
@@ -477,13 +482,13 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>C�digo</th>
-                                    <th>Descri��o</th>
+                                    <th>C�digo</th>
+                                    <th>Descri��o</th>
                                     <th>Total</th>
                                     <th>Valor Total</th>
                                     <th>Contagens</th>
                                     <th>Contribuidores</th>
-                                    <th>�ltima</th>
+                                    <th>�ltima</th>
                                 </tr>
                             </thead>
                             <tbody id="collaborativeTable">
@@ -494,10 +499,10 @@
                 </div>
                 <div class="card-footer">
                     <button class="btn btn-danger" id="finalizeSessionBtn">
-                        <i class="fas fa-check-circle me-1"></i>Finalizar Sess�o
+                        <i class="fas fa-check-circle me-1"></i>Finalizar Sess�o
                     </button>
                     <button class="btn btn-success" id="exportCollabBtn">
-                        <i class="fas fa-file-excel me-1"></i>Exportar Relat�rio
+                        <i class="fas fa-file-excel me-1"></i>Exportar Relat�rio
                     </button>
                 </div>
             </div>
@@ -505,10 +510,10 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Sess�es Ativas</h5>
+                    <h5 class="mb-0">Sess�es Ativas</h5>
                 </div>
                 <div class="card-body" id="activeSessionsList">
-                    <p class="text-muted">Nenhuma sess�o ativa</p>
+                    <p class="text-muted">Nenhuma sess�o ativa</p>
                 </div>
             </div>
         </div>
@@ -796,6 +801,72 @@
         </div>
     </div>
 
+    <!-- Admin History View - Apenas para Admin -->
+<div id="adminHistoryView" class="view-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title">
+            <i class="fas fa-chart-line me-2"></i>Histórico Completo (Todos os Usuários)
+        </h2>
+        <button class="btn btn-success" id="exportAllBtn">
+            <i class="fas fa-file-excel me-1"></i>Exportar Todos
+        </button>
+    </div>
+    
+    <div id="adminHistorySummary" class="mb-4"></div>
+    
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0">Todas as Contagens</h5>
+            <div class="d-flex gap-2 flex-wrap">
+                <input type="text" class="form-control form-control-sm" id="adminSearchInput" placeholder="Buscar código/descrição..." style="width: 200px;">
+                <select class="form-select form-select-sm" id="adminTypeFilter" style="width: 120px;">
+                    <option value="">Todos os tipos</option>
+                    <option value="Avaria">Avaria</option>
+                    <option value="RH">RH</option>
+                    <option value="Outro">Outro</option>
+                </select>
+                <select class="form-select form-select-sm" id="adminUserFilter" style="width: 150px;">
+                    <option value="">Todos os usuários</option>
+                </select>
+                <button class="btn btn-sm btn-primary" id="adminFilterBtn">
+                    <i class="fas fa-search me-1"></i>Filtrar
+                </button>
+                <button class="btn btn-sm btn-secondary" id="adminResetBtn">
+                    <i class="fas fa-undo me-1"></i>Limpar
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Código</th>
+                            <th>Descrição</th>
+                            <th>Sistema</th>
+                            <th>Contado</th>
+                            <th>Diferença</th>
+                            <th>Valor Unit.</th>
+                            <th>Valor Total</th>
+                            <th>Contagens</th>
+                            <th>Usuário / Data</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminHistoryTable">
+                        <tr>
+                            <td colspan="10" class="text-center text-muted py-4">
+                                <i class="fas fa-spinner fa-spin me-2"></i>
+                                Carregando...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Scanner Library - Quagga -->
 <script src="js/lib/quagga.min.js"></script>
 
@@ -833,6 +904,7 @@
 <!-- Scanner Libraries -->
 <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="js/modules/admin-history.js"></script>
 
 </body>
 </html>

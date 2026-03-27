@@ -166,3 +166,149 @@ function updateDashboard() {
 function exportDashboardData() {
     showNotification('Funcionalidade de exportação do dashboard em desenvolvimento', 'info');
 }
+
+// =============================================
+// GRÁFICO DE PRODUTIVIDADE
+// =============================================
+
+let productivityChart = null;
+
+async function loadProductivityData() {
+    if (!currentUser || currentUser.role !== 'admin') return;
+    
+    try {
+        const { data: items, error } = await supabaseClient
+            .from('inventory_items')
+            .select('user_id, system_users(full_name), counted_quantity, created_at');
+        
+        if (error) throw error;
+        
+        // Agrupar por usuário
+        const userStats = {};
+        items.forEach(item => {
+            const userName = item.system_users?.full_name || 'Desconhecido';
+            if (!userStats[userName]) {
+                userStats[userName] = { total: 0, count: 0 };
+            }
+            userStats[userName].total += item.counted_quantity || 0;
+            userStats[userName].count++;
+        });
+        
+        const users = Object.keys(userStats);
+        const totals = users.map(u => userStats[u].total);
+        const counts = users.map(u => userStats[u].count);
+        
+        renderProductivityChart(users, totals, counts);
+        
+    } catch (error) {
+        console.error('Erro ao carregar dados de produtividade:', error);
+    }
+}
+
+function renderProductivityChart(users, totals, counts) {
+    const ctx = document.getElementById('productivityChart')?.getContext('2d');
+    if (!ctx) return;
+    
+    if (productivityChart) productivityChart.destroy();
+    
+    productivityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: users,
+            datasets: [
+                {
+                    label: 'Unidades Contadas',
+                    data: totals,
+                    backgroundColor: 'rgba(100, 116, 139, 0.7)',
+                    borderColor: '#64748b',
+                    borderWidth: 1,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Número de Contagens',
+                    data: counts,
+                    backgroundColor: 'rgba(134, 239, 172, 0.7)',
+                    borderColor: '#86efac',
+                    borderWidth: 1,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Produtividade por Usuário' }
+            },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Unidades' } },
+                y1: { position: 'right', beginAtZero: true, title: { display: true, text: 'Contagens' } }
+            }
+        }
+    });
+}
+
+// Adicionar no updateDashboard
+const originalUpdateDashboard = window.updateDashboard;
+window.updateDashboard = function() {
+    if (originalUpdateDashboard) originalUpdateDashboard();
+    loadProductivityData();
+};
+
+// =============================================
+// ALERTAS DE DIVERGÊNCIA
+// =============================================
+
+function checkDivergenceAlerts() {
+    const highDivergence = inventoryItems.filter(item => {
+        const diff = Math.abs(item.countedQuantity - item.systemQuantity);
+        return diff > 10 && (item.unitValue * diff) > 100;
+    });
+    
+    const alertContainer = document.getElementById('divergenceAlerts');
+    if (!alertContainer) return;
+    
+    if (highDivergence.length === 0) {
+        alertContainer.innerHTML = `
+            <div class="alert alert-success mb-3">
+                <i class="fas fa-check-circle me-2"></i>
+                Nenhuma divergência crítica identificada.
+            </div>
+        `;
+        return;
+    }
+    
+    alertContainer.innerHTML = `
+        <div class="alert alert-warning mb-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Atenção!</strong> ${highDivergence.length} item(s) com divergência significativa:
+        </div>
+        <div class="list-group mb-3">
+            ${highDivergence.map(item => `
+                <div class="list-group-item list-group-item-warning">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>${item.code}</strong> - ${item.description}
+                        </div>
+                        <div class="text-danger">
+                            Diferença: ${item.countedQuantity - item.systemQuantity > 0 ? '+' : ''}${item.countedQuantity - item.systemQuantity}
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        Sistema: ${item.systemQuantity} | Contado: ${item.countedQuantity}
+                        ${item.unitValue ? ` | Impacto: R$ ${((item.countedQuantity - item.systemQuantity) * item.unitValue).toFixed(2)}` : ''}
+                    </small>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// Adicionar no updateDashboard
+const originalUpdateDashboardDivergence = window.updateDashboard;
+window.updateDashboard = function() {
+    if (originalUpdateDashboardDivergence) originalUpdateDashboardDivergence();
+    checkDivergenceAlerts();
+    loadProductivityData();
+};

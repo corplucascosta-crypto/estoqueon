@@ -475,6 +475,21 @@ function resetFormAfterSubmission() {
     setTimeout(() => itemCodeInput.focus(), 100);
 }
 
+function resetFormAfterSubmission() {
+    const itemCodeInput = document.getElementById('itemCode');
+    const countedQuantityInput = document.getElementById('countedQuantity');
+    
+    itemCodeInput.value = '';
+    countedQuantityInput.value = '';
+    resetItemForm();
+    
+    // Foco automático no campo de código
+    setTimeout(() => {
+        itemCodeInput.focus();
+        itemCodeInput.select();
+    }, 100);
+}
+
 // Handle finalize counting session
 async function handleFinalizeCountingSession() {
     if (!countingSessionActive || inventoryItems.length === 0) {
@@ -685,4 +700,106 @@ async function clearAllData() {
     const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
     if (modal) modal.hide();
     showNotification('Todos os dados foram limpos!', 'success');
+}
+
+// =============================================
+// MODO RÁPIDO - Contagem por Lote
+// =============================================
+
+let quickModeActive = false;
+let quickModeBuffer = [];
+
+function toggleQuickMode() {
+    quickModeActive = !quickModeActive;
+    const btn = document.getElementById('quickModeBtn');
+    const status = document.getElementById('quickModeStatus');
+    
+    if (quickModeActive) {
+        btn?.classList.add('btn-warning');
+        btn?.classList.remove('btn-outline-secondary');
+        if (status) {
+            status.innerHTML = '<span class="badge bg-warning text-dark">⚡ Modo Rápido ATIVO</span>';
+            status.style.display = 'inline-block';
+        }
+        showNotification('Modo Rápido ativado! Escaneie vários itens do mesmo produto.', 'success');
+    } else {
+        btn?.classList.remove('btn-warning');
+        btn?.classList.add('btn-outline-secondary');
+        if (status) status.style.display = 'none';
+        showNotification('Modo Rápido desativado.', 'info');
+    }
+}
+
+async function addBatchItem(countedQuantity) {
+    if (!quickModeActive) return false;
+    
+    if (!currentItemCode) {
+        showNotification('Código do item não foi validado', 'error');
+        return false;
+    }
+    
+    quickModeBuffer.push({
+        code: currentItemCode,
+        quantity: countedQuantity,
+        timestamp: new Date().toISOString()
+    });
+    
+    showNotification(`📦 +${countedQuantity} adicionado ao lote (${quickModeBuffer.length} itens no lote)`, 'success');
+    
+    // Limpar e focar para próximo
+    document.getElementById('itemCode').value = '';
+    document.getElementById('countedQuantity').value = '';
+    document.getElementById('itemCode').focus();
+    
+    return true;
+}
+
+async function commitBatch() {
+    if (quickModeBuffer.length === 0) {
+        showNotification('Nenhum item no lote para salvar', 'warning');
+        return;
+    }
+    
+    showNotification(`💾 Salvando ${quickModeBuffer.length} itens...`, 'info');
+    
+    for (const batchItem of quickModeBuffer) {
+        // Buscar descrição do item
+        let description = 'Item não identificado';
+        let unitValue = 0;
+        try {
+            const item = await findItemByCode(batchItem.code);
+            if (item) {
+                description = item.descricao || item.DESCRICAO || 'Item não identificado';
+                unitValue = item.valor || item.VALOR || 0;
+            }
+        } catch(e) {}
+        
+        // Adicionar item
+        const newItem = {
+            code: batchItem.code,
+            description: description,
+            systemQuantity: 0,
+            countedQuantity: batchItem.quantity,
+            unitValue: unitValue,
+            counts: 1,
+            countingType: currentCountingType,
+            date: new Date().toISOString(),
+            history: [{ date: new Date().toISOString(), quantity: batchItem.quantity, type: currentCountingType }]
+        };
+        
+        const existingIndex = inventoryItems.findIndex(i => i.code === batchItem.code);
+        if (existingIndex !== -1) {
+            inventoryItems[existingIndex].countedQuantity += batchItem.quantity;
+            inventoryItems[existingIndex].counts += 1;
+        } else {
+            inventoryItems.push(newItem);
+        }
+    }
+    
+    await saveInventoryData();
+    renderInventoryTable();
+    updateSummary();
+    
+    showNotification(`✅ Lote salvo! ${quickModeBuffer.length} itens adicionados.`, 'success');
+    quickModeBuffer = [];
 }

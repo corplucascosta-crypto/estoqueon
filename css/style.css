@@ -1062,3 +1062,30 @@ img[src*="postimg.cc"] {
     padding: 2px 8px;
     border-radius: 20px;
 }
+
+/* Ajuste para o título na navbar */
+.navbar-brand span {
+    font-size: 1.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .navbar-brand span {
+        font-size: 0.9rem;
+        white-space: normal;
+        line-height: 1.2;
+        max-width: 150px;
+    }
+    
+    .navbar-brand img {
+        height: 30px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-brand span {
+        font-size: 0.8rem;
+        max-width: 120px;
+    }
+}

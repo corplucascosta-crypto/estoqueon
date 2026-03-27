@@ -544,3 +544,108 @@ body {
 .admin-only { display: none !important; }
 .manager-only { display: none !important; }
 .navbar-nav.visible { display: flex !important; }
+
+/* =============================================
+   TELA DE LOGIN
+   ============================================= */
+.login-container {
+    max-width: 440px;
+    width: 100%;
+    margin: 60px auto;
+    padding: 0 15px;
+}
+
+.login-container .card {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.login-container .card-header {
+    background: linear-gradient(135deg, #64748b, #475569) !important;
+    text-align: center;
+    padding: 2rem;
+}
+
+.login-container .card-header h4 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.login-container .card-header p {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-bottom: 0;
+}
+
+.login-container .card-body {
+    padding: 2rem;
+}
+
+.login-container .input-group-text {
+    background: #f0f0f0;
+    border: 2px solid #e0e0e0;
+    border-right: none;
+}
+
+.login-container .form-control {
+    border-left: none;
+}
+
+.login-container .form-control:focus {
+    border-color: #e0e0e0;
+    box-shadow: none;
+}
+
+.login-container .btn-primary {
+    background: linear-gradient(135deg, #64748b, #475569) !important;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.login-container .btn-outline-primary {
+    border: 2px solid #64748b;
+    background: transparent;
+    color: #64748b;
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 600;
+}
+
+.login-container .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #64748b, #475569);
+    border-color: transparent;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .login-container {
+        margin: 40px auto;
+    }
+    
+    .login-container .card-header {
+        padding: 1.5rem;
+    }
+    
+    .login-container .card-header h4 {
+        font-size: 1.2rem;
+    }
+    
+    .login-container .card-body {
+        padding: 1.5rem;
+    }
+}
+
+/* Logo com fundo transparente */
+.navbar-brand img {
+    background: transparent !important;
+    mix-blend-mode: normal;
+    filter: none;
+}
+
+img[src*="postimg.cc"] {
+    background: transparent !important;
+}

@@ -251,3 +251,66 @@ window.loadAdminUserFilter = async function() {
 };
 
 console.log('✅ admin-history.js carregado');
+
+window.exportAllInventoryData = async function() {
+    if (allData.length === 0) {
+        showNotification('Não há dados para exportar', 'warning');
+        return;
+    }
+    
+    // Obter datas de filtro
+    const startDate = document.getElementById('exportStartDate')?.value;
+    const endDate = document.getElementById('exportEndDate')?.value;
+    
+    let filteredData = [...allData];
+    
+    if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        filteredData = filteredData.filter(item => new Date(item.date) >= start);
+    }
+    
+    if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filteredData = filteredData.filter(item => new Date(item.date) <= end);
+    }
+    
+    if (filteredData.length === 0) {
+        showNotification('Nenhum dado no período selecionado', 'warning');
+        return;
+    }
+    
+    const data = [['Usuário', 'Tipo', 'Código', 'Descrição', 'Qtd Sistema', 'Qtd Contada', 'Diferença', 'Valor Unit.', 'Valor Total', 'Contagens', 'Data']];
+    
+    filteredData.forEach(item => {
+        const systemQty = item.systemQuantity || 0;
+        const countedQty = item.countedQuantity || 0;
+        const diff = countedQty - systemQty;
+        const totalValue = countedQty * (item.unitValue || 0);
+        const date = new Date(item.date).toLocaleString('pt-BR');
+        
+        data.push([
+            item.userName,
+            item.countingType,
+            item.code,
+            item.description,
+            systemQty,
+            countedQty,
+            diff,
+            item.unitValue || 0,
+            totalValue,
+            item.counts,
+            date
+        ]);
+    });
+    
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Contagens_Periodo');
+    
+    const fileName = `contagens_${startDate || 'inicio'}_${endDate || 'hoje'}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    
+    showNotification(`${filteredData.length} registros exportados com sucesso!`, 'success');
+};

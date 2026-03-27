@@ -1,14 +1,41 @@
 ﻿// =============================================
-// SCANNER MODULE - Otimizado para códigos pequenos
+// SCANNER MODULE - Com Flash, Vibração e Som
 // =============================================
 
 let html5QrCode = null;
 let isScanning = false;
 let lastCode = '';
 let lastTime = 0;
+let torchEnabled = false;
 
 function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+}
+
+function playBeep() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 880;
+        gainNode.gain.value = 0.3;
+        
+        oscillator.start();
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.3);
+        oscillator.stop(audioContext.currentTime + 0.3);
+    } catch(e) {
+        console.log('Som não disponível');
+    }
+}
+
+function vibrate() {
+    if ('vibrate' in navigator) {
+        navigator.vibrate(200);
+    }
 }
 
 function addScannerButton() {
@@ -70,6 +97,10 @@ function openScanner() {
                         <div id="qr-reader" style="width: 100%; height: 70vh; background: #000;"></div>
                         <div id="scanner-guide"></div>
                         <div id="scanner-status">📷 Aproxime o código</div>
+                        <button id="flashBtn" class="btn btn-light position-absolute bottom-0 end-0 m-3 rounded-circle shadow" 
+                                style="width: 50px; height: 50px; z-index: 30; display: none;">
+                            <i class="fas fa-bolt"></i>
+                        </button>
                     </div>
                     <div class="modal-footer py-2">
                         <button type="button" class="btn btn-danger btn-sm" id="stopScannerBtn">
@@ -92,12 +123,13 @@ function openScanner() {
     modal.show();
     
     const statusDiv = document.getElementById('scanner-status');
+    const flashBtn = document.getElementById('flashBtn');
+    let videoElement = null;
     
     setTimeout(() => {
         html5QrCode = new Html5Qrcode("qr-reader");
         isScanning = true;
         
-        // Configuração otimizada para ler códigos pequenos
         const config = {
             fps: 30,
             qrbox: { width: 320, height: 180 },
@@ -127,6 +159,10 @@ function openScanner() {
                 lastCode = decodedText;
                 lastTime = now;
                 
+                // Feedback: Som e Vibração
+                playBeep();
+                vibrate();
+                
                 console.log('📦 Código detectado:', decodedText);
                 
                 let format = 'Código';
@@ -155,12 +191,19 @@ function openScanner() {
                     statusDiv.innerHTML = '📷 Aproxime o código';
                 } else if (errorMessage && errorMessage.includes('not found')) {
                     statusDiv.innerHTML = '🔍 Centralize na área verde';
-                } else if (errorMessage && errorMessage.includes('format')) {
-                    statusDiv.innerHTML = '📦 Aguardando leitura...';
                 }
                 statusDiv.classList.remove('bg-success');
             }
-        ).catch((err) => {
+        ).then(() => {
+            // Tentar ativar flash se disponível
+            setTimeout(() => {
+                const video = document.querySelector('#qr-reader video');
+                if (video && video.srcObject) {
+                    videoElement = video;
+                    flashBtn.style.display = 'flex';
+                }
+            }, 1000);
+        }).catch((err) => {
             console.error('Erro:', err);
             statusDiv.innerHTML = '❌ Erro na câmera';
             setTimeout(() => {
@@ -169,6 +212,26 @@ function openScanner() {
             }, 1000);
         });
     }, 500);
+    
+    // Controle do flash
+    flashBtn.onclick = async function() {
+        if (videoElement && videoElement.srcObject) {
+            const track = videoElement.srcObject.getVideoTracks()[0];
+            if (track) {
+                const capabilities = track.getCapabilities();
+                if (capabilities.torch) {
+                    torchEnabled = !torchEnabled;
+                    await track.applyConstraints({
+                        advanced: [{ torch: torchEnabled }]
+                    });
+                    flashBtn.style.background = torchEnabled ? '#ffc107' : '#fff';
+                    flashBtn.style.color = torchEnabled ? '#000' : '#000';
+                } else {
+                    showNotification('Flash não disponível neste dispositivo', 'warning');
+                }
+            }
+        }
+    };
     
     document.getElementById('stopScannerBtn').onclick = function() {
         stopScanner();
@@ -187,6 +250,7 @@ function stopScanner() {
     }
     isScanning = false;
     html5QrCode = null;
+    torchEnabled = false;
 }
 
 function showNotification(message, type) {

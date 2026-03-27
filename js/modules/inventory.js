@@ -1,5 +1,5 @@
 // =============================================
-// INVENTORY MODULE - Versão Estável (sem colaborativa)
+// INVENTORY MODULE - Versão Estável Corrigida
 // =============================================
 
 // Load user data from Supabase
@@ -17,7 +17,18 @@ async function loadUserData() {
         
         if (inventoryError) throw inventoryError;
         
-        inventoryItems = inventoryData || [];
+        // Garantir que todos os itens tenham valores padrão
+        inventoryItems = (inventoryData || []).map(item => ({
+            code: item.code || '',
+            description: item.description || 'Sem descrição',
+            systemQuantity: item.system_quantity || 0,
+            countedQuantity: item.counted_quantity || 0,
+            unitValue: item.unit_value || 0,
+            counts: item.counts || 1,
+            countingType: item.counting_type || 'Outro',
+            date: item.created_at || new Date().toISOString(),
+            history: item.history || []
+        }));
         
         const localData = localStorage.getItem(`inventoryItems_${currentUser.id}`);
         if (!inventoryItems.length && localData) {
@@ -40,7 +51,17 @@ async function saveInventoryData() {
         if (navigator.onLine && currentUser && currentUser.id) {
             for (const item of inventoryItems) {
                 try {
-                    const payload = buildInventoryPayload(item);
+                    const payload = {
+                        code: item.code,
+                        description: item.description,
+                        system_quantity: item.systemQuantity || 0,
+                        counted_quantity: item.countedQuantity || 0,
+                        unit_value: item.unitValue || 0,
+                        counts: item.counts || 1,
+                        user_id: currentUser.id,
+                        created_at: item.date || new Date().toISOString()
+                    };
+                    
                     const { data: existing, error: checkError } = await supabaseClient
                         .from('inventory_items')
                         .select('id')
@@ -49,9 +70,7 @@ async function saveInventoryData() {
                         .maybeSingle();
                     
                     if (existing && existing.id) {
-                        const updatePayload = Object.assign({}, payload, { updated_at: new Date().toISOString() });
-                        delete updatePayload.created_at;
-                        await supabaseClient.from('inventory_items').update(updatePayload).eq('id', existing.id);
+                        await supabaseClient.from('inventory_items').update(payload).eq('id', existing.id);
                     } else {
                         await supabaseClient.from('inventory_items').insert(payload);
                     }
@@ -162,7 +181,7 @@ function handleItemCodeInput() {
 // Display item information
 function displayItemInfo(item) {
     const code = item.code || item.CODE || item.codigo || item.CODIGO;
-    const descricao = item.descricao || item.DESCRICAO;
+    const descricao = item.descricao || item.DESCRICAO || 'Produto sem descrição';
     const quantidade = item.quantidade || item.QUANTIDADE || 0;
     const valor = item.valor || item.VALOR || 0;
     const embalagem = item.embalagem || item.EMBALAGEM || 'N/A';
@@ -184,7 +203,7 @@ function displayItemInfo(item) {
     existingItemIndex = inventoryItems.findIndex(invItem => invItem.code === code);
     if (existingItemIndex !== -1) {
         const existingItem = inventoryItems[existingItemIndex];
-        itemDescriptionDisplay.innerHTML += `<div class="count-history"><small>Já contado: ${existingItem.countedQuantity} unidades (${existingItem.counts} vez(es))</small></div>`;
+        itemDescriptionDisplay.innerHTML += `<div class="count-history"><small>Já contado: ${existingItem.countedQuantity || 0} unidades (${existingItem.counts || 1} vez(es))</small></div>`;
     }
     
     currentItemCode = code;
@@ -281,7 +300,7 @@ async function processInventoryItem() {
         return;
     }
     
-    if (existingItemIndex !== -1) {
+    if (existingItemIndex !== -1 && inventoryItems[existingItemIndex]) {
         currentCountedQuantity = countedQuantity;
         showItemAlreadyCountedModal();
         return;
@@ -293,12 +312,14 @@ async function processInventoryItem() {
 // Show modal for already counted item
 function showItemAlreadyCountedModal() {
     const existingItem = inventoryItems[existingItemIndex];
+    if (!existingItem) return;
+    
     const existingCountsInfoEl = document.getElementById('existingCountsInfo');
     
     existingCountsInfoEl.innerHTML = `
-        <div class="count-history-item"><strong>Contagem atual:</strong> ${existingItem.countedQuantity} unidades<br><small>Contado ${existingItem.counts} vez(es)</small></div>
+        <div class="count-history-item"><strong>Contagem atual:</strong> ${existingItem.countedQuantity || 0} unidades<br><small>Contado ${existingItem.counts || 1} vez(es)</small></div>
         <div class="count-history-item"><strong>Nova contagem:</strong> ${currentCountedQuantity} unidades</div>
-        <div class="count-history-item bg-light p-2 rounded mt-2"><strong>Resultado se SOMAR:</strong> ${existingItem.countedQuantity + currentCountedQuantity} unidades</div>
+        <div class="count-history-item bg-light p-2 rounded mt-2"><strong>Resultado se SOMAR:</strong> ${(existingItem.countedQuantity || 0) + currentCountedQuantity} unidades</div>
     `;
     
     new bootstrap.Modal(document.getElementById('itemAlreadyCountedModal')).show();
@@ -307,12 +328,14 @@ function showItemAlreadyCountedModal() {
 // Add new count to existing item
 async function addNewCount() {
     const existingItem = inventoryItems[existingItemIndex];
-    const totalCounted = existingItem.countedQuantity + currentCountedQuantity;
+    if (!existingItem) return;
+    
+    const totalCounted = (existingItem.countedQuantity || 0) + currentCountedQuantity;
     
     inventoryItems[existingItemIndex] = {
         ...existingItem,
         countedQuantity: totalCounted,
-        counts: existingItem.counts + 1,
+        counts: (existingItem.counts || 1) + 1,
         history: [...(existingItem.history || []), { date: new Date().toISOString(), quantity: currentCountedQuantity, type: currentCountingType }]
     };
     
@@ -326,8 +349,11 @@ async function addNewCount() {
 
 // Replace existing count
 async function replaceExistingCount() {
+    const existingItem = inventoryItems[existingItemIndex];
+    if (!existingItem) return;
+    
     inventoryItems[existingItemIndex] = {
-        ...inventoryItems[existingItemIndex],
+        ...existingItem,
         countedQuantity: currentCountedQuantity,
         counts: 1,
         countingType: currentCountingType,
@@ -342,7 +368,7 @@ async function replaceExistingCount() {
     showNotification('Contagem substituída com sucesso!', 'success');
 }
 
-// Add new inventory item - Versão corrigida com valores padrão
+// Add new inventory item - Versão corrigida
 async function addNewInventoryItem(countedQuantity) {
     console.log('📝 addNewInventoryItem chamada com:', countedQuantity);
     
@@ -381,7 +407,6 @@ async function addNewInventoryItem(countedQuantity) {
         if (item && item.VALOR) unitValue = parseFloat(item.VALOR) || 0;
     } catch (error) {}
     
-    // CRIAR NOVO ITEM LOCALMENTE com valores padrão
     const newItem = {
         code: currentItemCode,
         description: itemDescription || 'Sem descrição',
@@ -451,22 +476,24 @@ async function handleFinalizeCountingSession() {
     }
 }
 
-// Render inventory table - Versão corrigida
+// Render inventory table - Versão corrigida com tratamento de undefined
 function renderInventoryTable() {
     const inventoryTable = document.getElementById('inventoryTable');
     
     if (!inventoryItems || inventoryItems.length === 0) {
-        inventoryTable.innerHTML = `一线<td colspan="10" class="text-center text-muted py-4"><i class="fas fa-box-open fa-2x mb-2 d-block"></i>Nenhum item contado ainda</td>`;
+        inventoryTable.innerHTML = `一线<td colspan="10" class="text-center text-muted py-4"><i class="fas fa-box-open fa-2x mb-2 d-block"></i>Nenhum item contado ainda</td></tr>`;
         return;
     }
     
     inventoryTable.innerHTML = inventoryItems.map((item, index) => {
-        // Garantir que os valores existem
-        const systemQty = item.systemQuantity || 0;
-        const countedQty = item.countedQuantity || 0;
-        const unitVal = item.unitValue || 0;
-        const counts = item.counts || 1;
+        // Garantir que todos os valores existem
+        const systemQty = item.systemQuantity !== undefined ? item.systemQuantity : 0;
+        const countedQty = item.countedQuantity !== undefined ? item.countedQuantity : 0;
+        const unitVal = item.unitValue !== undefined ? item.unitValue : 0;
+        const counts = item.counts !== undefined ? item.counts : 1;
         const codeType = item.countingType || 'N/A';
+        const code = item.code || '';
+        const description = item.description || 'Sem descrição';
         
         const difference = countedQty - systemQty;
         const differenceClass = difference === 0 ? '' : (difference > 0 ? 'positive-diff' : 'negative-diff');
@@ -478,8 +505,8 @@ function renderInventoryTable() {
         return `
             <tr>
                 <td><span class="badge bg-${typeColor}">${codeType}</span></td>
-                <td>${item.code || ''}</td>
-                <td>${item.description || ''}</td>
+                <td>${code}</td>
+                <td>${description}</td>
                 <td>${systemQty}</td>
                 <td>${countedQty}</td>
                 <td class="${differenceClass}">${difference > 0 ? '+' : ''}${difference}</td>
@@ -490,7 +517,7 @@ function renderInventoryTable() {
                     <button class="btn btn-sm btn-outline-primary view-history" data-index="${index}" title="Ver histórico"><i class="fas fa-history"></i></button>
                     ${isAdmin ? `<button class="btn btn-sm btn-outline-danger delete-item" data-index="${index}" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}
                 </td>
-            </tr>
+             </tr>
         `;
     }).join('');
     
@@ -515,6 +542,8 @@ function renderInventoryTable() {
 // View item history
 function viewItemHistory(index) {
     const item = inventoryItems[index];
+    if (!item) return;
+    
     let historyHTML = '';
     
     if (item.history && item.history.length > 0) {
@@ -528,7 +557,7 @@ function viewItemHistory(index) {
         historyHTML = '<p class="text-muted">Nenhum histórico disponível.</p>';
     }
     
-    alert(`Histórico de contagens para ${item.description} (${item.code}):\n\nQuantidade no sistema: ${item.systemQuantity}\nQuantidade contada: ${item.countedQuantity}\nDiferença: ${item.countedQuantity - item.systemQuantity}\n\nHistórico de contagens:\n${historyHTML.replace(/<[^>]*>/g, '')}`);
+    alert(`Histórico de contagens para ${item.description} (${item.code}):\n\nQuantidade no sistema: ${item.systemQuantity || 0}\nQuantidade contada: ${item.countedQuantity || 0}\nDiferença: ${(item.countedQuantity || 0) - (item.systemQuantity || 0)}\n\nHistórico de contagens:\n${historyHTML.replace(/<[^>]*>/g, '')}`);
 }
 
 // Filter inventory table
@@ -552,14 +581,14 @@ function filterInventoryTable() {
 // Update summary
 function updateSummary() {
     const totalItems = inventoryItems.length;
-    const matchingItems = inventoryItems.filter(item => item.countedQuantity === item.systemQuantity).length;
-    const positiveDiffItems = inventoryItems.filter(item => item.countedQuantity > item.systemQuantity).length;
-    const negativeDiffItems = inventoryItems.filter(item => item.countedQuantity < item.systemQuantity).length;
+    const matchingItems = inventoryItems.filter(item => (item.countedQuantity || 0) === (item.systemQuantity || 0)).length;
+    const positiveDiffItems = inventoryItems.filter(item => (item.countedQuantity || 0) > (item.systemQuantity || 0)).length;
+    const negativeDiffItems = inventoryItems.filter(item => (item.countedQuantity || 0) < (item.systemQuantity || 0)).length;
     
     let totalSystemValue = 0, totalCountedValue = 0;
     inventoryItems.forEach(item => {
-        totalSystemValue += item.systemQuantity * item.unitValue;
-        totalCountedValue += item.countedQuantity * item.unitValue;
+        totalSystemValue += (item.systemQuantity || 0) * (item.unitValue || 0);
+        totalCountedValue += (item.countedQuantity || 0) * (item.unitValue || 0);
     });
     
     const totalDifferenceValue = totalCountedValue - totalSystemValue;
@@ -585,10 +614,12 @@ function exportToExcel() {
     const data = [['Tipo Contagem', 'Código', 'Descrição', 'Quantidade Sistema', 'Quantidade Contada', 'Diferença', 'Valor Unitário', 'Valor Total', 'Contagens', 'Data']];
     
     inventoryItems.forEach(item => {
-        const difference = item.countedQuantity - item.systemQuantity;
-        const totalValue = item.countedQuantity * item.unitValue;
+        const systemQty = item.systemQuantity || 0;
+        const countedQty = item.countedQuantity || 0;
+        const difference = countedQty - systemQty;
+        const totalValue = countedQty * (item.unitValue || 0);
         const date = new Date(item.date).toLocaleDateString('pt-BR');
-        data.push([item.countingType || 'N/A', item.code, item.description, item.systemQuantity, item.countedQuantity, difference, item.unitValue, totalValue, item.counts, date]);
+        data.push([item.countingType || 'N/A', item.code, item.description, systemQty, countedQty, difference, item.unitValue || 0, totalValue, item.counts || 1, date]);
     });
     
     const ws = XLSX.utils.aoa_to_sheet(data);
@@ -615,6 +646,7 @@ async function clearAllData() {
     await saveInventoryData();
     renderInventoryTable();
     updateSummary();
-    bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+    const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+    if (modal) modal.hide();
     showNotification('Todos os dados foram limpos!', 'success');
 }

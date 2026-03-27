@@ -1,10 +1,10 @@
 ﻿// =============================================
-// SCANNER MODULE - ZXing (Tecnologia Google Lens)
+// SCANNER MODULE - BarcodeDetector API Nativa
 // =============================================
 
 let videoStream = null;
 let isScanning = false;
-let zxingReady = false;
+let animationId = null;
 
 function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
@@ -24,58 +24,42 @@ function addScannerButton() {
     btn.type = 'button';
     btn.className = 'btn btn-outline-primary ms-2';
     btn.innerHTML = '<i class="fas fa-camera"></i>';
-    btn.title = 'Escanear código (Google Lens)';
+    btn.title = 'Escanear código';
     btn.style.padding = '0.75rem 1rem';
-    btn.onclick = function() { startScanner(); };
+    btn.onclick = startScanner;
     
     inputElement.parentNode.insertBefore(btn, inputElement.nextSibling);
     console.log('✅ Botão câmera adicionado');
 }
 
-function startScanner() {
+async function startScanner() {
     if (isScanning) return;
     
-    // Verificar se ZXing está disponível
-    if (typeof ZXing === 'undefined') {
-        console.log('Aguardando ZXing carregar...');
-        const checkInterval = setInterval(() => {
-            if (typeof ZXing !== 'undefined') {
-                clearInterval(checkInterval);
-                openZXingScanner();
-            }
-        }, 200);
-        setTimeout(() => {
-            clearInterval(checkInterval);
-            if (typeof ZXing === 'undefined') {
-                alert('Scanner carregando... Por favor, aguarde alguns segundos e tente novamente.');
-            }
-        }, 5000);
+    // Verificar suporte
+    if (!('BarcodeDetector' in window)) {
+        alert('Seu navegador não suporta leitura de código de barras.\n\nUse Chrome no Android ou Safari no iOS.');
         return;
     }
     
-    openZXingScanner();
-}
-
-function openZXingScanner() {
     const modalHtml = `
-        <div class="modal fade" id="zxingModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal fade" id="scannerModal" tabindex="-1" data-bs-backdrop="static">
             <div class="modal-dialog modal-fullscreen">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white py-2">
                         <h5 class="modal-title fs-6">
-                            <i class="fas fa-camera me-2"></i>Google Lens Scanner
+                            <i class="fas fa-camera me-2"></i>Escanear Código
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-0 position-relative">
-                        <video id="zxingVideo" autoplay playsinline style="width: 100%; height: 70vh; object-fit: cover; background: #000;"></video>
-                        <div id="zxingGuide" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; height: 25%; border: 2px solid #00ff00; border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); z-index: 10;"></div>
-                        <div id="zxingStatus" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill" style="z-index: 1060; font-size: 14px;">
+                        <video id="scannerVideo" autoplay playsinline style="width: 100%; height: 70vh; object-fit: cover; background: #000;"></video>
+                        <div id="scannerGuide" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; height: 25%; border: 2px solid #00ff00; border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); z-index: 10;"></div>
+                        <div id="scannerStatus" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill" style="z-index: 1060; font-size: 14px;">
                             📷 Aproxime o código
                         </div>
                     </div>
                     <div class="modal-footer py-2">
-                        <button type="button" class="btn btn-danger btn-sm" id="zxingStopBtn">
+                        <button type="button" class="btn btn-danger btn-sm" id="stopScannerBtn">
                             <i class="fas fa-stop me-1"></i>Parar
                         </button>
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
@@ -87,43 +71,29 @@ function openZXingScanner() {
         </div>
     `;
     
-    const existingModal = document.getElementById('zxingModal');
+    const existingModal = document.getElementById('scannerModal');
     if (existingModal) existingModal.remove();
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     
-    const modal = new bootstrap.Modal(document.getElementById('zxingModal'));
+    const modal = new bootstrap.Modal(document.getElementById('scannerModal'));
     modal.show();
     
-    const video = document.getElementById('zxingVideo');
-    const statusDiv = document.getElementById('zxingStatus');
+    const video = document.getElementById('scannerVideo');
+    const statusDiv = document.getElementById('scannerStatus');
     
-    navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-    }).then(function(stream) {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
+        });
         video.srcObject = stream;
         videoStream = stream;
-        video.play();
+        await video.play();
+        
         isScanning = true;
         
-        // Configurar leitor ZXing
-        const hints = new Map();
-        const formats = [
-            ZXing.BarcodeFormat.EAN_13,
-            ZXing.BarcodeFormat.EAN_8,
-            ZXing.BarcodeFormat.UPC_A,
-            ZXing.BarcodeFormat.UPC_E,
-            ZXing.BarcodeFormat.CODE_128,
-            ZXing.BarcodeFormat.CODE_39,
-            ZXing.BarcodeFormat.CODE_93,
-            ZXing.BarcodeFormat.QR_CODE,
-            ZXing.BarcodeFormat.DATA_MATRIX,
-            ZXing.BarcodeFormat.ITF
-        ];
-        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-        hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-        
-        const reader = new ZXing.MultiFormatReader();
-        reader.setHints(hints);
+        const barcodeDetector = new BarcodeDetector({
+            formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'qr_code']
+        });
         
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -142,13 +112,9 @@ function openZXingScanner() {
                 canvas.height = video.videoHeight;
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
-                try {
-                    const luminanceSource = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
-                    const binaryBitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminanceSource));
-                    const result = reader.decodeWithState(binaryBitmap);
-                    
-                    if (result && result.getText()) {
-                        const code = result.getText();
+                barcodeDetector.detect(canvas).then(barcodes => {
+                    if (barcodes.length > 0) {
+                        const code = barcodes[0].rawValue;
                         const now = Date.now();
                         
                         if (lastCode !== code || (now - lastTime) > 2000) {
@@ -172,10 +138,10 @@ function openZXingScanner() {
                                 input.dispatchEvent(new Event('input', { bubbles: true }));
                             }
                             
-                            setTimeout(function() {
+                            setTimeout(() => {
                                 stopScanner();
                                 modal.hide();
-                                showNotification('✅ Código lido: ' + code, 'success');
+                                showNotification('✅ ' + format + ': ' + code, 'success');
                             }, 800);
                         }
                     } else {
@@ -184,12 +150,7 @@ function openZXingScanner() {
                             statusDiv.classList.remove('bg-success');
                         }
                     }
-                } catch (e) {
-                    if (statusDiv.innerHTML !== '📷 Aproxime o código') {
-                        statusDiv.innerHTML = '📷 Aproxime o código';
-                        statusDiv.classList.remove('bg-success');
-                    }
-                }
+                }).catch(() => {});
             }
             
             if (isScanning) {
@@ -199,21 +160,21 @@ function openZXingScanner() {
         
         scanFrame();
         
-    }).catch(function(err) {
-        console.error('Erro na câmera:', err);
+    } catch (err) {
+        console.error('Erro ao acessar câmera:', err);
         statusDiv.innerHTML = '❌ Erro na câmera';
-        setTimeout(function() {
-            alert('Não foi possível acessar a câmera. Verifique as permissões.');
+        setTimeout(() => {
+            alert('Não foi possível acessar a câmera.\nVerifique as permissões e tente novamente.');
             modal.hide();
         }, 500);
-    });
+    }
     
-    document.getElementById('zxingStopBtn').onclick = function() {
+    document.getElementById('stopScannerBtn').onclick = function() {
         stopScanner();
         modal.hide();
     };
     
-    document.getElementById('zxingModal').addEventListener('hidden.bs.modal', function() {
+    document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function() {
         stopScanner();
         this.remove();
     });
@@ -221,8 +182,12 @@ function openZXingScanner() {
 
 function stopScanner() {
     isScanning = false;
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
     if (videoStream) {
-        videoStream.getTracks().forEach(function(track) { track.stop(); });
+        videoStream.getTracks().forEach(track => track.stop());
         videoStream = null;
     }
 }
@@ -237,7 +202,7 @@ function showNotification(message, type) {
     alertDiv.style.fontSize = '0.9rem';
     alertDiv.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'info-circle') + ' me-2"></i>' + message;
     document.body.appendChild(alertDiv);
-    setTimeout(function() { alertDiv.remove(); }, 3000);
+    setTimeout(() => alertDiv.remove(), 3000);
 }
 
 document.addEventListener('DOMContentLoaded', function() {

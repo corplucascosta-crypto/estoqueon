@@ -19,71 +19,86 @@
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="https://i.postimg.cc/DZcN2F8p/Captura-de-tela-2026-03-17-084207.png" alt="ASSAI" style="height: 40px; margin-right: 10px;">
-                <span>Estoque-On</span>
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <span class="nav-link user-status" id="userStatus" style="display: none;">
-                            <i class="fas fa-user me-1"></i>
-                            <span id="userName">Usuário</span>
-                            <span class="user-role-badge badge bg-info" id="userRoleBadge">Role</span>
-                        </span>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link active view-switch" data-view="counting" href="#">
-                            <i class="fas fa-clipboard-check"></i> Contagem
-                        </a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link view-switch manager-only" data-view="history" href="#">
-                            <i class="fas fa-history"></i> Histórico
-                        </a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link view-switch manager-only" data-view="dashboard" href="#">
-                            <i class="fas fa-chart-line"></i> Dashboard
-                        </a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link admin-only" href="#" data-bs-toggle="modal" data-bs-target="#importModal">
-                            <i class="fas fa-database"></i> Base de Dados
-                        </a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link view-switch admin-only" data-view="users" href="#">
-                            <i class="fas fa-users-cog"></i> Usuários
-                        </a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="logoutBtn" style="display: none;">
-                            <i class="fas fa-sign-out-alt"></i> Sair
-                        </a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="loginBtn">
-                            <i class="fas fa-user-shield"></i> Login
-                        </a>
-                    </li>
-                    <li class="nav-item">
-    <a class="nav-link view-switch admin-only" data-view="adminHistory" href="#">
-        <i class="fas fa-chart-line"></i> Histórico Geral
-    </a>
-</li>
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <img src="https://i.postimg.cc/DZcN2F8p/Captura-de-tela-2026-03-17-084207.png" alt="ASSAI" style="height: 40px; margin-right: 10px;">
+            <span>Estoque-On</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Status do usuário logado -->
+                <li class="nav-item">
+                    <span class="nav-link user-status" id="userStatus" style="display: none;">
+                        <i class="fas fa-user me-1"></i>
+                        <span id="userName">Usuário</span>
+                        <span class="user-role-badge badge bg-info" id="userRoleBadge">Role</span>
+                    </span>
+                </li>
+                
+                <!-- Menu com ícones apenas -->
+                <li class="nav-item">
+                    <a class="nav-link view-switch" data-view="counting" href="#" title="Contagem">
+                        <i class="fas fa-clipboard-check fa-lg"></i>
+                        <span class="menu-text">Contagem</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link view-switch manager-only" data-view="history" href="#" title="Histórico">
+                        <i class="fas fa-history fa-lg"></i>
+                        <span class="menu-text">Histórico</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link view-switch manager-only" data-view="dashboard" href="#" title="Dashboard">
+                        <i class="fas fa-chart-line fa-lg"></i>
+                        <span class="menu-text">Dashboard</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link admin-only" href="#" data-bs-toggle="modal" data-bs-target="#importModal" title="Base de Dados">
+                        <i class="fas fa-database fa-lg"></i>
+                        <span class="menu-text">Base de Dados</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link view-switch admin-only" data-view="users" href="#" title="Usuários">
+                        <i class="fas fa-users-cog fa-lg"></i>
+                        <span class="menu-text">Usuários</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link view-switch admin-only" data-view="adminHistory" href="#" title="Histórico Geral">
+                        <i class="fas fa-chart-line fa-lg"></i>
+                        <span class="menu-text">Histórico Geral</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="logoutBtn" style="display: none;" title="Sair">
+                        <i class="fas fa-sign-out-alt fa-lg"></i>
+                        <span class="menu-text">Sair</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="loginBtn" title="Login">
+                        <i class="fas fa-user-shield fa-lg"></i>
+                        <span class="menu-text">Login</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
                 </ul>
             </div>
         </div>

@@ -1,5 +1,5 @@
 ﻿// =============================================
-// SCANNER MODULE - Html5Qrcode (Funciona em iOS e Android)
+// SCANNER MODULE - Otimizado para códigos pequenos
 // =============================================
 
 let html5QrCode = null;
@@ -25,20 +25,18 @@ function addScannerButton() {
     btn.type = 'button';
     btn.className = 'btn btn-outline-primary ms-2';
     btn.innerHTML = '<i class="fas fa-camera"></i>';
-    btn.title = 'Escanear código de barras';
+    btn.title = 'Escanear código';
     btn.style.padding = '0.75rem 1rem';
     btn.style.fontSize = '1.2rem';
     btn.onclick = startScanner;
     
     inputElement.parentNode.insertBefore(btn, inputElement.nextSibling);
-    console.log('✅ Botão scanner adicionado');
 }
 
 function startScanner() {
     if (isScanning) return;
     
     if (typeof Html5Qrcode === 'undefined') {
-        console.log('Aguardando biblioteca carregar...');
         const checkInterval = setInterval(() => {
             if (typeof Html5Qrcode !== 'undefined') {
                 clearInterval(checkInterval);
@@ -70,10 +68,8 @@ function openScanner() {
                     </div>
                     <div class="modal-body p-0 position-relative">
                         <div id="qr-reader" style="width: 100%; height: 70vh; background: #000;"></div>
-                        <div id="scanner-guide" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; height: 25%; border: 2px solid #00ff00; border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); z-index: 10;"></div>
-                        <div id="scanner-status" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill" style="z-index: 1060; font-size: 14px; white-space: nowrap;">
-                            📷 Aproxime o código
-                        </div>
+                        <div id="scanner-guide"></div>
+                        <div id="scanner-status">📷 Aproxime o código</div>
                     </div>
                     <div class="modal-footer py-2">
                         <button type="button" class="btn btn-danger btn-sm" id="stopScannerBtn">
@@ -101,9 +97,10 @@ function openScanner() {
         html5QrCode = new Html5Qrcode("qr-reader");
         isScanning = true;
         
+        // Configuração otimizada para ler códigos pequenos
         const config = {
-            fps: 25,
-            qrbox: { width: 280, height: 140 },
+            fps: 30,
+            qrbox: { width: 320, height: 180 },
             aspectRatio: 1.777,
             disableFlip: false,
             formatsToSupport: [
@@ -136,8 +133,7 @@ function openScanner() {
                 if (/^\d{13}$/.test(decodedText)) format = 'EAN-13';
                 else if (/^\d{8}$/.test(decodedText)) format = 'EAN-8';
                 else if (/^\d{12}$/.test(decodedText)) format = 'UPC-A';
-                else if (/^\d{14}$/.test(decodedText)) format = 'ITF-14';
-                else if (/^[A-Z0-9]+$/.test(decodedText) && decodedText.length > 5) format = 'Code128/39';
+                else if (/^\d{14}$/.test(decodedText)) format = 'DUN-14/ITF-14';
                 
                 statusDiv.innerHTML = `✅ ${format}: ${decodedText}`;
                 statusDiv.classList.add('bg-success');
@@ -159,16 +155,16 @@ function openScanner() {
                     statusDiv.innerHTML = '📷 Aproxime o código';
                 } else if (errorMessage && errorMessage.includes('not found')) {
                     statusDiv.innerHTML = '🔍 Centralize na área verde';
-                } else {
-                    statusDiv.innerHTML = '📷 Posicione o código';
+                } else if (errorMessage && errorMessage.includes('format')) {
+                    statusDiv.innerHTML = '📦 Aguardando leitura...';
                 }
                 statusDiv.classList.remove('bg-success');
             }
         ).catch((err) => {
-            console.error('Erro ao iniciar scanner:', err);
+            console.error('Erro:', err);
             statusDiv.innerHTML = '❌ Erro na câmera';
             setTimeout(() => {
-                alert('Não foi possível acessar a câmera.\nVerifique as permissões e tente novamente.');
+                alert('Não foi possível acessar a câmera.\nVerifique as permissões.');
                 modal.hide();
             }, 1000);
         });

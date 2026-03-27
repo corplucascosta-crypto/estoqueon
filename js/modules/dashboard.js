@@ -373,10 +373,3 @@ function checkDivergenceAlerts() {
     `;
 }
 
-// Adicionar no updateDashboard
-const originalUpdateDashboardDivergence = window.updateDashboard;
-window.updateDashboard = function() {
-    if (originalUpdateDashboardDivergence) originalUpdateDashboardDivergence();
-    checkDivergenceAlerts();
-    loadProductivityData();
-};

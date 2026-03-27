@@ -1,5 +1,5 @@
 // =============================================
-// ADMIN HISTORY MODULE - Versão Completa
+// ADMIN HISTORY MODULE - Versão Final
 // =============================================
 
 let allData = [];
@@ -55,26 +55,19 @@ window.loadAllInventoryData = async function() {
 
 function renderTable() {
     const tableBody = document.getElementById('adminHistoryTable');
-    const recordCount = document.getElementById('adminRecordCount');
     
     if (!tableBody) return;
     
     if (allData.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="10" class="text-center text-muted py-5">
+                <td colspan="10" class="text-center text-muted py-4">
                     <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
                     Nenhuma contagem registrada
-                </td>
-            </tr>
+                 </td>
+             </tr>
         `;
-        if (recordCount) recordCount.innerHTML = '';
         return;
-    }
-    
-    // Atualizar contador de registros
-    if (recordCount) {
-        recordCount.innerHTML = `<i class="fas fa-database me-1"></i> ${allData.length} registro(s) encontrado(s)`;
     }
     
     tableBody.innerHTML = allData.map(item => {
@@ -94,12 +87,10 @@ function renderTable() {
         const typeColor = typeColors[item.countingType] || 'secondary';
         
         return `
-            <tr onclick="showItemDetails('${item.id}')" style="cursor: pointer;">
-                <td class="text-center">
-                    <span class="badge bg-${typeColor}">${item.countingType}</span>
-                </td>
-                <td class="fw-semibold">${item.code}</td>
-                <td class="text-truncate" style="max-width: 200px;" title="${item.description}">${item.description}</td>
+            <tr>
+                <td><span class="badge bg-${typeColor}">${item.countingType}</span></td>
+                <td><strong>${item.code}</strong></td>
+                <td style="max-width: 250px; white-space: normal; word-break: break-word;">${item.description}</td>
                 <td class="text-center">${systemQty}</td>
                 <td class="text-center fw-bold">${countedQty}</td>
                 <td class="text-center ${diffClass}">${diffSign}${diff}</td>
@@ -107,9 +98,10 @@ function renderTable() {
                 <td class="text-end">R$ ${totalValue.toFixed(2)}</td>
                 <td class="text-center">${item.counts}</td>
                 <td>
-                    <div class="d-flex flex-column">
-                        <small class="fw-semibold">${item.userName}</small>
-                        <small class="text-muted" style="font-size: 0.7rem;">${date}</small>
+                    <div>
+                        <strong>${item.userName}</strong>
+                        <br>
+                        <small class="text-muted">${date}</small>
                     </div>
                 </td>
             </tr>
@@ -123,47 +115,16 @@ function updateSummary() {
     const uniqueUsers = [...new Set(allData.map(i => i.userName))].length;
     const totalQuantity = allData.reduce((sum, i) => sum + (i.countedQuantity || 0), 0);
     
-    const summaryHtml = `
-        <div class="col-md-3 col-sm-6">
-            <div class="card bg-primary bg-opacity-10 border-0 h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
-                    <h6 class="text-muted mb-1">Total Contagens</h6>
-                    <h3 class="mb-0 fw-bold">${totalItems}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="card bg-success bg-opacity-10 border-0 h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-barcode fa-2x text-success mb-2"></i>
-                    <h6 class="text-muted mb-1">Itens Únicos</h6>
-                    <h3 class="mb-0 fw-bold">${uniqueItems}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="card bg-info bg-opacity-10 border-0 h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-users fa-2x text-info mb-2"></i>
-                    <h6 class="text-muted mb-1">Colaboradores</h6>
-                    <h3 class="mb-0 fw-bold">${uniqueUsers}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="card bg-warning bg-opacity-10 border-0 h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-boxes fa-2x text-warning mb-2"></i>
-                    <h6 class="text-muted mb-1">Total Unidades</h6>
-                    <h3 class="mb-0 fw-bold">${totalQuantity}</h3>
-                </div>
-            </div>
-        </div>
-    `;
+    // Atualizar os valores nos cards
+    const totalItemsEl = document.getElementById('adminTotalItems');
+    const uniqueItemsEl = document.getElementById('adminUniqueItems');
+    const uniqueUsersEl = document.getElementById('adminUniqueUsers');
+    const totalQuantityEl = document.getElementById('adminTotalQuantity');
     
-    const summaryDiv = document.getElementById('adminHistorySummary');
-    if (summaryDiv) summaryDiv.innerHTML = summaryHtml;
+    if (totalItemsEl) totalItemsEl.textContent = totalItems;
+    if (uniqueItemsEl) uniqueItemsEl.textContent = uniqueItems;
+    if (uniqueUsersEl) uniqueUsersEl.textContent = uniqueUsers;
+    if (totalQuantityEl) totalQuantityEl.textContent = totalQuantity;
 }
 
 window.exportAllInventoryData = async function() {
@@ -218,26 +179,19 @@ window.filterAdminHistory = function() {
     });
     
     const tableBody = document.getElementById('adminHistoryTable');
-    const recordCount = document.getElementById('adminRecordCount');
     
     if (!tableBody) return;
     
     if (filteredItems.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="10" class="text-center text-muted py-5">
+                <td colspan="10" class="text-center text-muted py-4">
                     <i class="fas fa-search fa-2x mb-2 d-block"></i>
                     Nenhum resultado encontrado
                 </td>
             </tr>
         `;
-        if (recordCount) recordCount.innerHTML = '0 registro(s) encontrado(s)';
         return;
-    }
-    
-    // Atualizar contador
-    if (recordCount) {
-        recordCount.innerHTML = `<i class="fas fa-database me-1"></i> ${filteredItems.length} registro(s) encontrado(s)`;
     }
     
     tableBody.innerHTML = filteredItems.map(item => {
@@ -253,10 +207,10 @@ window.filterAdminHistory = function() {
         const typeColor = typeColors[item.countingType] || 'secondary';
         
         return `
-            <tr onclick="showItemDetails('${item.id}')" style="cursor: pointer;">
-                <td class="text-center"><span class="badge bg-${typeColor}">${item.countingType}</span></td>
-                <td class="fw-semibold">${item.code}</td>
-                <td class="text-truncate" style="max-width: 200px;" title="${item.description}">${item.description}</td>
+            <tr>
+                <td><span class="badge bg-${typeColor}">${item.countingType}</span></td>
+                <td><strong>${item.code}</strong></td>
+                <td style="max-width: 250px; white-space: normal; word-break: break-word;">${item.description}</td>
                 <td class="text-center">${systemQty}</td>
                 <td class="text-center fw-bold">${countedQty}</td>
                 <td class="text-center ${diffClass}">${diffSign}${diff}</td>
@@ -264,9 +218,10 @@ window.filterAdminHistory = function() {
                 <td class="text-end">R$ ${totalValue.toFixed(2)}</td>
                 <td class="text-center">${item.counts}</td>
                 <td>
-                    <div class="d-flex flex-column">
-                        <small class="fw-semibold">${item.userName}</small>
-                        <small class="text-muted" style="font-size: 0.7rem;">${date}</small>
+                    <div>
+                        <strong>${item.userName}</strong>
+                        <br>
+                        <small class="text-muted">${date}</small>
                     </div>
                 </td>
             </tr>
@@ -287,19 +242,11 @@ window.loadAdminUserFilter = async function() {
         
         const userFilter = document.getElementById('adminUserFilter');
         if (userFilter && users) {
-            userFilter.innerHTML = '<option value="">👥 Todos os usuários</option>' +
-                users.map(u => `<option value="${u.full_name}">👤 ${u.full_name}</option>`).join('');
+            userFilter.innerHTML = '<option value="">Todos os usuários</option>' +
+                users.map(u => `<option value="${u.full_name}">${u.full_name}</option>`).join('');
         }
     } catch (error) {
         console.error('Erro ao carregar usuários:', error);
-    }
-};
-
-// Função para mostrar detalhes do item (opcional)
-window.showItemDetails = function(itemId) {
-    const item = allData.find(i => i.id === itemId);
-    if (item) {
-        alert(`📦 ${item.code}\n\nDescrição: ${item.description}\nQuantidade: ${item.countedQuantity}\nValor Unit: R$ ${(item.unitValue || 0).toFixed(2)}\nValor Total: R$ ${(item.countedQuantity * (item.unitValue || 0)).toFixed(2)}\nUsuário: ${item.userName}\nData: ${new Date(item.date).toLocaleString('pt-BR')}`);
     }
 };
 

@@ -132,6 +132,11 @@ async function switchView(viewName) {
             case 'users':
                 if (typeof loadUsers === 'function') loadUsers();
                 break;
+            case 'productivity':
+                if (typeof loadProductivityData === 'function') {
+                    loadProductivityData();
+                }
+                break;    
         }
     }
 }

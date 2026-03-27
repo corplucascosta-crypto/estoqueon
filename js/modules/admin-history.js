@@ -1,11 +1,15 @@
-﻿// Admin History Module
+// Admin History Module - Versão Corrigida
 (function() {
     let allData = [];
 
     window.loadAllInventoryData = async function() {
-        if (!currentUser || currentUser.role !== 'admin') return;
+        if (!currentUser || currentUser.role !== 'admin') {
+            console.log('Apenas admin pode ver todas as contagens');
+            return;
+        }
         
         try {
+            console.log('Carregando todas as contagens...');
             const { data, error } = await supabaseClient
                 .from('inventory_items')
                 .select('*, system_users(full_name, email)')
@@ -29,8 +33,9 @@
             
             renderTable();
             updateSummary();
+            console.log(allData.length + ' contagens carregadas');
         } catch (error) {
-            console.error('Erro:', error);
+            console.error('Erro ao carregar:', error);
         }
     };
 
@@ -39,122 +44,181 @@
         if (!tableBody) return;
         
         if (allData.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="10" class="text-center">Nenhuma contagem registrada</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4">Nenhuma contagem registrada</td></tr>';
             return;
         }
         
         tableBody.innerHTML = allData.map(item => {
-            const diff = (item.countedQuantity || 0) - (item.systemQuantity || 0);
-            const total = (item.countedQuantity || 0) * (item.unitValue || 0);
+            const systemQty = item.systemQuantity || 0;
+            const countedQty = item.countedQuantity || 0;
+            const diff = countedQty - systemQty;
+            const diffClass = diff === 0 ? '' : (diff > 0 ? 'positive-diff' : 'negative-diff');
+            const totalValue = countedQty * (item.unitValue || 0);
             const date = new Date(item.date).toLocaleString('pt-BR');
-            const typeColor = { 'Avaria': 'danger', 'RH': 'warning', 'Outro': 'secondary' }[item.countingType] || 'secondary';
             
-            return 
+            const typeColors = { 'Avaria': 'danger', 'RH': 'warning', 'Outro': 'secondary' };
+            const typeColor = typeColors[item.countingType] || 'secondary';
+            
+            return `
                 <tr>
-                    <td><span class="badge bg-"></span></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class=""></td>
-                    <td>R$ </td>
-                    <td>R$ </td>
-                    <td></td>
-                    <td><small></small><br><small></small></td>
+                    <td><span class="badge bg-${typeColor}">${item.countingType}</span></td>
+                    <td>${item.code}</td>
+                    <td>${item.description}</td>
+                    <td>${systemQty}</td>
+                    <td>${countedQty}</td>
+                    <td class="${diffClass}">${diff > 0 ? '+' : ''}${diff}</td>
+                    <td>R$ ${(item.unitValue || 0).toFixed(2)}</td>
+                    <td>R$ ${totalValue.toFixed(2)}</td>
+                    <td>${item.counts}</td>
+                    <td><small>${item.userName}</small><br><small class="text-muted">${date}</small></td>
                 </tr>
-            ;
+            `;
         }).join('');
     }
 
     function updateSummary() {
-        const total = allData.length;
+        const totalItems = allData.length;
         const uniqueItems = [...new Set(allData.map(i => i.code))].length;
-        const users = [...new Set(allData.map(i => i.userName))].length;
-        const quantity = allData.reduce((s, i) => s + (i.countedQuantity || 0), 0);
+        const uniqueUsers = [...new Set(allData.map(i => i.userName))].length;
+        const totalQuantity = allData.reduce((sum, i) => sum + (i.countedQuantity || 0), 0);
         
-        const html = 
+        const summaryHtml = `
             <div class="row text-center">
-                <div class="col-3"><div class="border p-2"><small>Contagens</small><h5></h5></div></div>
-                <div class="col-3"><div class="border p-2"><small>Itens</small><h5></h5></div></div>
-                <div class="col-3"><div class="border p-2"><small>Usuários</small><h5></h5></div></div>
-                <div class="col-3"><div class="border p-2"><small>Unidades</small><h5></h5></div></div>
+                <div class="col-3">
+                    <div class="border rounded p-2">
+                        <small class="text-muted">Total Contagens</small>
+                        <h5 class="mb-0">${totalItems}</h5>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="border rounded p-2">
+                        <small class="text-muted">Itens Únicos</small>
+                        <h5 class="mb-0">${uniqueItems}</h5>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="border rounded p-2">
+                        <small class="text-muted">Colaboradores</small>
+                        <h5 class="mb-0">${uniqueUsers}</h5>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="border rounded p-2">
+                        <small class="text-muted">Total Unidades</small>
+                        <h5 class="mb-0">${totalQuantity}</h5>
+                    </div>
+                </div>
             </div>
-        ;
+        `;
+        
         const summaryDiv = document.getElementById('adminHistorySummary');
-        if (summaryDiv) summaryDiv.innerHTML = html;
+        if (summaryDiv) summaryDiv.innerHTML = summaryHtml;
     }
 
     window.exportAllInventoryData = async function() {
-        if (allData.length === 0) return;
+        if (allData.length === 0) {
+            showNotification('Não há dados para exportar', 'warning');
+            return;
+        }
         
-        const data = [['Usuário', 'Tipo', 'Código', 'Descrição', 'Qtd Sistema', 'Qtd Contada', 'Diferença', 'Valor', 'Total', 'Data']];
+        const data = [['Usuário', 'Tipo', 'Código', 'Descrição', 'Qtd Sistema', 'Qtd Contada', 'Diferença', 'Valor Unit.', 'Valor Total', 'Contagens', 'Data']];
+        
         allData.forEach(item => {
-            const diff = (item.countedQuantity || 0) - (item.systemQuantity || 0);
+            const systemQty = item.systemQuantity || 0;
+            const countedQty = item.countedQuantity || 0;
+            const diff = countedQty - systemQty;
+            const totalValue = countedQty * (item.unitValue || 0);
+            const date = new Date(item.date).toLocaleString('pt-BR');
+            
             data.push([
-                item.userName, item.countingType, item.code, item.description,
-                item.systemQuantity || 0, item.countedQuantity || 0, diff,
-                item.unitValue || 0, (item.countedQuantity || 0) * (item.unitValue || 0),
-                new Date(item.date).toLocaleString('pt-BR')
+                item.userName,
+                item.countingType,
+                item.code,
+                item.description,
+                systemQty,
+                countedQty,
+                diff,
+                item.unitValue || 0,
+                totalValue,
+                item.counts,
+                date
             ]);
         });
         
         const ws = XLSX.utils.aoa_to_sheet(data);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Contagens');
-        XLSX.writeFile(wb, contagens_.xlsx);
-        showNotification('Exportado!', 'success');
+        XLSX.utils.book_append_sheet(wb, ws, 'Todas_Contagens');
+        XLSX.writeFile(wb, `contagens_completas_${new Date().toISOString().slice(0, 19)}.xlsx`);
+        
+        showNotification('Relatório exportado com sucesso!', 'success');
     };
 
     window.filterAdminHistory = function() {
-        const search = document.getElementById('adminSearchInput')?.value.toLowerCase() || '';
-        const type = document.getElementById('adminTypeFilter')?.value || '';
-        const user = document.getElementById('adminUserFilter')?.value || '';
+        const searchTerm = document.getElementById('adminSearchInput')?.value.toLowerCase() || '';
+        const typeFilter = document.getElementById('adminTypeFilter')?.value || '';
+        const userFilter = document.getElementById('adminUserFilter')?.value || '';
         
-        const filtered = allData.filter(item => {
-            const matchSearch = item.code.toLowerCase().includes(search) || item.description.toLowerCase().includes(search);
-            const matchType = !type || item.countingType === type;
-            const matchUser = !user || item.userName === user;
-            return matchSearch && matchType && matchUser;
+        const filteredItems = allData.filter(item => {
+            const matchesSearch = item.code.toLowerCase().includes(searchTerm) || item.description.toLowerCase().includes(searchTerm);
+            const matchesType = !typeFilter || item.countingType === typeFilter;
+            const matchesUser = !userFilter || item.userName === userFilter;
+            return matchesSearch && matchesType && matchesUser;
         });
         
         const tableBody = document.getElementById('adminHistoryTable');
         if (!tableBody) return;
         
-        if (filtered.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="10" class="text-center">Nenhum resultado</td></tr>';
+        if (filteredItems.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4">Nenhum resultado encontrado</td></tr>';
             return;
         }
         
-        tableBody.innerHTML = filtered.map(item => {
-            const diff = (item.countedQuantity || 0) - (item.systemQuantity || 0);
-            const total = (item.countedQuantity || 0) * (item.unitValue || 0);
+        tableBody.innerHTML = filteredItems.map(item => {
+            const systemQty = item.systemQuantity || 0;
+            const countedQty = item.countedQuantity || 0;
+            const diff = countedQty - systemQty;
+            const diffClass = diff === 0 ? '' : (diff > 0 ? 'positive-diff' : 'negative-diff');
+            const totalValue = countedQty * (item.unitValue || 0);
             const date = new Date(item.date).toLocaleString('pt-BR');
-            const typeColor = { 'Avaria': 'danger', 'RH': 'warning', 'Outro': 'secondary' }[item.countingType] || 'secondary';
             
-            return 
+            const typeColors = { 'Avaria': 'danger', 'RH': 'warning', 'Outro': 'secondary' };
+            const typeColor = typeColors[item.countingType] || 'secondary';
+            
+            return `
                 <tr>
-                    <td><span class="badge bg-"></span></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class=""></td>
-                    <td>R$ </td>
-                    <td>R$ </td>
-                    <td></td>
-                    <td><small></small><br><small></small></td>
+                    <td><span class="badge bg-${typeColor}">${item.countingType}</span></td>
+                    <td>${item.code}</td>
+                    <td>${item.description}</td>
+                    <td>${systemQty}</td>
+                    <td>${countedQty}</td>
+                    <td class="${diffClass}">${diff > 0 ? '+' : ''}${diff}</td>
+                    <td>R$ ${(item.unitValue || 0).toFixed(2)}</td>
+                    <td>R$ ${totalValue.toFixed(2)}</td>
+                    <td>${item.counts}</td>
+                    <td><small>${item.userName}</small><br><small class="text-muted">${date}</small></td>
                 </tr>
-            ;
+            `;
         }).join('');
     };
 
     window.loadAdminUserFilter = async function() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        
         try {
-            const { data } = await supabaseClient.from('system_users').select('full_name').order('full_name');
-            const filter = document.getElementById('adminUserFilter');
-            if (filter && data) {
-                filter.innerHTML = '<option value="">Todos</option>' + data.map(u => <option value=""></option>).join('');
+            const { data: users, error } = await supabaseClient
+                .from('system_users')
+                .select('full_name')
+                .order('full_name');
+            
+            if (error) throw error;
+            
+            const userFilter = document.getElementById('adminUserFilter');
+            if (userFilter && users) {
+                userFilter.innerHTML = '<option value="">Todos os usuários</option>' +
+                    users.map(u => `<option value="${u.full_name}">${u.full_name}</option>`).join('');
             }
-        } catch(e) {}
+        } catch (error) {
+            console.error('Erro ao carregar usuários:', error);
+        }
     };
 })();

@@ -1,118 +1,242 @@
-﻿// Scanner Module - Versão Limpa
-(function() {
-    let scanner = null;
-    let scanning = false;
-    let lastCode = null;
-    let lastTime = 0;
+﻿// =============================================
+// SCANNER MODULE - ZXing (Tecnologia Google Lens)
+// =============================================
 
-    function isMobile() {
-        let ua = navigator.userAgent;
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth <= 768;
+let scanner = null;
+let isScanning = false;
+
+function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+}
+
+function addScannerButton() {
+    const existingBtn = document.getElementById('scannerBtn');
+    if (existingBtn) existingBtn.remove();
+    
+    if (!isMobile()) return;
+    
+    const inputGroup = document.querySelector('#itemCode').parentNode;
+    if (!inputGroup) return;
+    
+    const btn = document.createElement('button');
+    btn.id = 'scannerBtn';
+    btn.type = 'button';
+    btn.className = 'btn btn-outline-primary';
+    btn.innerHTML = '<i class="fas fa-camera"></i>';
+    btn.title = 'Escanear código de barras';
+    btn.style.padding = '0.75rem 1rem';
+    btn.style.marginLeft = '5px';
+    btn.onclick = startZXingScanner;
+    
+    inputGroup.appendChild(btn);
+    console.log('✅ Botão scanner adicionado');
+}
+
+function startZXingScanner() {
+    if (isScanning) return;
+    
+    // Verificar se a biblioteca está carregada
+    if (typeof ZXing === 'undefined') {
+        console.log('Carregando ZXing...');
+        loadZXingLibrary();
+        return;
     }
+    
+    openScannerModal();
+}
 
-    function addButton() {
-        let btn = document.getElementById('scanBtn');
-        if (btn) btn.remove();
-        if (!isMobile()) return;
-        
-        let input = document.getElementById('itemCode');
-        if (!input) return;
-        
-        btn = document.createElement('button');
-        btn.id = 'scanBtn';
-        btn.type = 'button';
-        btn.className = 'btn btn-outline-primary ms-2';
-        btn.innerHTML = '<i class=\"fas fa-camera\"></i>';
-        btn.onclick = startScan;
-        input.parentNode.insertBefore(btn, input.nextSibling);
-    }
+function loadZXingLibrary() {
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/@zxing/library@0.19.1/index.min.js';
+    script.onload = function() {
+        console.log('✅ ZXing carregado');
+        openScannerModal();
+    };
+    script.onerror = function() {
+        console.error('❌ Erro ao carregar ZXing');
+        alert('Erro ao carregar scanner. Tente novamente.');
+    };
+    document.head.appendChild(script);
+}
 
-    function startScan() {
-        if (scanning) return;
-        if (typeof Html5Qrcode === 'undefined') {
-            alert('Scanner nao disponivel');
-            return;
-        }
+function openScannerModal() {
+    const modalHtml = `
+        <div class="modal fade" id="zxingModal" tabindex="-1" data-bs-backdrop="static">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white py-2">
+                        <h5 class="modal-title fs-6">
+                            <i class="fas fa-camera me-2"></i>Escanear Código
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-0 position-relative">
+                        <video id="zxing-video" autoplay playsinline style="width: 100%; height: 70vh; object-fit: cover; background: #000;"></video>
+                        <canvas id="zxing-canvas" style="display: none;"></canvas>
+                        <div id="zxing-guide" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 25%; border: 2px solid #00ff00; border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);"></div>
+                        <div id="zxing-status" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill" style="z-index: 1060; font-size: 12px;">
+                            Aguardando leitura...
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-danger btn-sm" id="zxing-stop-btn">
+                            <i class="fas fa-stop me-1"></i>Parar
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('zxingModal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    const modal = new bootstrap.Modal(document.getElementById('zxingModal'));
+    modal.show();
+    
+    const video = document.getElementById('zxing-video');
+    const statusDiv = document.getElementById('zxing-status');
+    
+    // Solicitar acesso à câmera
+    navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+    }).then(stream => {
+        video.srcObject = stream;
+        video.play();
         
-        let modalDiv = document.createElement('div');
-        modalDiv.className = 'modal fade';
-        modalDiv.id = 'scanModal';
-        modalDiv.setAttribute('tabindex', '-1');
-        modalDiv.setAttribute('data-bs-backdrop', 'static');
-        modalDiv.innerHTML = '<div class=\"modal-dialog modal-fullscreen\"><div class=\"modal-content\"><div class=\"modal-header bg-primary text-white py-2\"><h5 class=\"modal-title fs-6\"><i class=\"fas fa-camera me-2\"></i>Escanear Codigo</h5><button type=\"button\" class=\"btn-close btn-close-white\" data-bs-dismiss=\"modal\"></button></div><div class=\"modal-body p-0\"><div id=\"qrReader\" style=\"width:100%;height:70vh;background:#000;\"></div><div class=\"p-3 text-center bg-light\"><p class=\"mb-0 small\">Posicione o codigo na area de leitura</p><small>EAN-13 | EAN-8 | UPC | Code-128 | Code-39 | QR Code</small></div></div><div class=\"modal-footer py-2\"><button type=\"button\" class=\"btn btn-danger btn-sm\" id=\"stopScanBtn\">Parar</button><button type=\"button\" class=\"btn btn-secondary btn-sm\" data-bs-dismiss=\"modal\">Fechar</button></div></div></div>';
+        // Iniciar scanner
+        startVideoScanning(video, statusDiv, modal);
         
-        let existing = document.getElementById('scanModal');
-        if (existing) existing.remove();
-        document.body.appendChild(modalDiv);
-        
-        let modal = new bootstrap.Modal(document.getElementById('scanModal'));
-        modal.show();
-        
-        let status = document.createElement('div');
-        status.id = 'scanStatus';
-        status.className = 'position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill';
-        status.style.zIndex = 1060;
-        status.innerHTML = 'Aguardando leitura...';
-        document.getElementById('scanModal').querySelector('.modal-body').appendChild(status);
-        
-        setTimeout(function() {
-            scanner = new Html5Qrcode('qrReader');
-            scanning = true;
-            
-            scanner.start({ facingMode: 'environment' }, {
-                fps: 30,
-                qrbox: { width: 280, height: 140 }
-            }, function(text) {
-                let now = Date.now();
-                if (lastCode === text && now - lastTime < 2000) return;
-                lastCode = text;
-                lastTime = now;
-                
-                status.innerHTML = 'Codigo: ' + text;
-                status.classList.add('bg-success');
-                
-                let input = document.getElementById('itemCode');
-                if (input) {
-                    input.value = text;
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-                
-                setTimeout(function() {
-                    stopScan();
-                    modal.hide();
-                }, 800);
-            }, function(err) {
-                if (err && err.indexOf('No') >= 0) status.innerHTML = 'Aproxime o codigo';
-                else status.innerHTML = 'Centralize na area verde';
-            }).catch(function(err) {
-                alert('Erro ao acessar camera');
-                modal.hide();
-            });
-        }, 500);
-        
-        document.getElementById('stopScanBtn').onclick = function() {
-            stopScan();
-            modal.hide();
-        };
-        
-        document.getElementById('scanModal').addEventListener('hidden.bs.modal', function() {
-            stopScan();
-            this.remove();
-        });
-    }
-
-    function stopScan() {
-        if (scanner && scanner.isScanning) {
-            scanner.stop().catch(function() {});
-        }
-        scanning = false;
-        scanner = null;
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(addButton, 500);
-        window.addEventListener('resize', function() {
-            setTimeout(addButton, 100);
-        });
+    }).catch(err => {
+        console.error('Erro ao acessar câmera:', err);
+        statusDiv.innerHTML = '❌ Erro ao acessar câmera';
+        statusDiv.classList.add('bg-danger');
     });
-})();
+    
+    document.getElementById('zxing-stop-btn').onclick = function() {
+        stopScanning(video);
+        modal.hide();
+    };
+    
+    document.getElementById('zxingModal').addEventListener('hidden.bs.modal', function() {
+        stopScanning(video);
+        this.remove();
+    });
+}
+
+function startVideoScanning(video, statusDiv, modal) {
+    isScanning = true;
+    
+    // Criar canvas para capturar frames
+    const canvas = document.getElementById('zxing-canvas');
+    const context = canvas.getContext('2d');
+    
+    let lastCode = '';
+    let lastTime = 0;
+    
+    function scanFrame() {
+        if (!isScanning) return;
+        
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Usar o ZXing para decodificar
+            try {
+                const codeReader = new ZXing.BrowserMultiFormatReader();
+                const hints = new Map();
+                hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+                    ZXing.BarcodeFormat.EAN_13,
+                    ZXing.BarcodeFormat.EAN_8,
+                    ZXing.BarcodeFormat.UPC_A,
+                    ZXing.BarcodeFormat.UPC_E,
+                    ZXing.BarcodeFormat.CODE_128,
+                    ZXing.BarcodeFormat.CODE_39,
+                    ZXing.BarcodeFormat.QR_CODE
+                ]);
+                
+                codeReader.decodeFromImageElement(canvas, hints)
+                    .then(result => {
+                        const code = result.getText();
+                        const now = Date.now();
+                        
+                        if (lastCode !== code || (now - lastTime) > 2000) {
+                            lastCode = code;
+                            lastTime = now;
+                            
+                            console.log('📦 Código detectado:', code);
+                            statusDiv.innerHTML = `✅ Código: ${code}`;
+                            statusDiv.classList.add('bg-success');
+                            
+                            // Preencher campo
+                            const itemCodeInput = document.getElementById('itemCode');
+                            if (itemCodeInput) {
+                                itemCodeInput.value = code;
+                                itemCodeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                            
+                            // Fechar após 1 segundo
+                            setTimeout(() => {
+                                stopScanning(video);
+                                modal.hide();
+                                showNotification(`✅ Código escaneado: ${code}`, 'success');
+                            }, 1000);
+                        }
+                    })
+                    .catch(() => {});
+            } catch(e) {
+                // Erro ao decodificar
+            }
+        }
+        
+        requestAnimationFrame(scanFrame);
+    }
+    
+    // Aguardar vídeo carregar
+    video.addEventListener('loadeddata', () => {
+        requestAnimationFrame(scanFrame);
+    });
+    
+    // Timeout para evitar loop infinito
+    setTimeout(() => {
+        if (isScanning && statusDiv.innerHTML === 'Aguardando leitura...') {
+            statusDiv.innerHTML = '📷 Aproxime o código da câmera';
+        }
+    }, 3000);
+}
+
+function stopScanning(video) {
+    isScanning = false;
+    if (video && video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+    }
+}
+
+function showNotification(message, type) {
+    console.log(message);
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'info'} position-fixed top-0 start-50 translate-middle-x mt-3 shadow`;
+    alertDiv.style.zIndex = 9999;
+    alertDiv.style.minWidth = '280px';
+    alertDiv.style.textAlign = 'center';
+    alertDiv.style.fontSize = '0.9rem';
+    alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}`;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 3000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(addScannerButton, 500);
+    window.addEventListener('resize', function() {
+        setTimeout(addScannerButton, 100);
+    });
+});

@@ -1,10 +1,11 @@
 ﻿// =============================================
-// SCANNER MODULE - API Nativa do Navegador
+// SCANNER MODULE - ZXing (Tecnologia Google Lens)
 // =============================================
 
 let videoStream = null;
 let isScanning = false;
 let animationId = null;
+let codeReader = null;
 
 function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
@@ -26,47 +27,56 @@ function addScannerButton() {
     btn.innerHTML = '<i class="fas fa-camera"></i>';
     btn.title = 'Escanear código';
     btn.style.padding = '0.75rem 1rem';
-    btn.onclick = openNativeScanner;
+    btn.onclick = startZXingScanner;
     
     inputElement.parentNode.insertBefore(btn, inputElement.nextSibling);
     console.log('✅ Botão câmera adicionado');
 }
 
-async function openNativeScanner() {
+async function startZXingScanner() {
     if (isScanning) return;
     
-    // Verificar se a API BarcodeDetector está disponível
-    if ('BarcodeDetector' in window) {
-        console.log('✅ BarcodeDetector disponível');
-        startBarcodeDetector();
-    } else {
-        console.log('⚠️ BarcodeDetector não disponível, usando fallback');
-        alert('Para melhor experiência, use o Chrome no Android ou Safari no iOS');
-        startFallbackScanner();
+    // Aguardar ZXing carregar
+    if (typeof ZXing === 'undefined') {
+        console.log('Aguardando ZXing carregar...');
+        const checkInterval = setInterval(() => {
+            if (typeof ZXing !== 'undefined') {
+                clearInterval(checkInterval);
+                openScannerModal();
+            }
+        }, 500);
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            if (typeof ZXing === 'undefined') {
+                alert('Carregando scanner... Tente novamente em alguns segundos.');
+            }
+        }, 5000);
+        return;
     }
+    
+    openScannerModal();
 }
 
-async function startBarcodeDetector() {
+function openScannerModal() {
     const modalHtml = `
-        <div class="modal fade" id="nativeScannerModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal fade" id="zxingModal" tabindex="-1" data-bs-backdrop="static">
             <div class="modal-dialog modal-fullscreen">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white py-2">
                         <h5 class="modal-title fs-6">
-                            <i class="fas fa-camera me-2"></i>Escaneie o Código
+                            <i class="fas fa-camera me-2"></i>Escanear Código
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-0 position-relative">
-                        <video id="nativeVideo" autoplay playsinline style="width: 100%; height: 70vh; object-fit: cover; background: #000;"></video>
-                        <canvas id="nativeCanvas" style="display: none;"></canvas>
-                        <div id="nativeGuide" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; height: 25%; border: 2px solid #00ff00; border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); z-index: 10;"></div>
-                        <div id="nativeStatus" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill" style="z-index: 1060; font-size: 14px; white-space: nowrap;">
+                        <video id="zxingVideo" autoplay playsinline style="width: 100%; height: 70vh; object-fit: cover; background: #000;"></video>
+                        <div id="zxingGuide" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; height: 25%; border: 2px solid #00ff00; border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); z-index: 10;"></div>
+                        <div id="zxingStatus" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 px-3 py-1 bg-dark text-white rounded-pill" style="z-index: 1060; font-size: 14px;">
                             📷 Aproxime o código
                         </div>
                     </div>
                     <div class="modal-footer py-2">
-                        <button type="button" class="btn btn-danger btn-sm" id="nativeStopBtn">
+                        <button type="button" class="btn btn-danger btn-sm" id="zxingStopBtn">
                             <i class="fas fa-stop me-1"></i>Parar
                         </button>
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
@@ -78,17 +88,15 @@ async function startBarcodeDetector() {
         </div>
     `;
     
-    const existingModal = document.getElementById('nativeScannerModal');
+    const existingModal = document.getElementById('zxingModal');
     if (existingModal) existingModal.remove();
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     
-    const modal = new bootstrap.Modal(document.getElementById('nativeScannerModal'));
+    const modal = new bootstrap.Modal(document.getElementById('zxingModal'));
     modal.show();
     
-    const video = document.getElementById('nativeVideo');
-    const canvas = document.getElementById('nativeCanvas');
-    const ctx = canvas.getContext('2d');
-    const statusDiv = document.getElementById('nativeStatus');
+    const video = document.getElementById('zxingVideo');
+    const statusDiv = document.getElementById('zxingStatus');
     
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -100,12 +108,32 @@ async function startBarcodeDetector() {
         
         isScanning = true;
         
-        const barcodeDetector = new BarcodeDetector({
-            formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'qr_code']
-        });
+        // Configurar ZXing
+        const hints = new Map();
+        const formats = [
+            ZXing.BarcodeFormat.EAN_13,
+            ZXing.BarcodeFormat.EAN_8,
+            ZXing.BarcodeFormat.UPC_A,
+            ZXing.BarcodeFormat.UPC_E,
+            ZXing.BarcodeFormat.CODE_128,
+            ZXing.BarcodeFormat.CODE_39,
+            ZXing.BarcodeFormat.CODE_93,
+            ZXing.BarcodeFormat.QR_CODE,
+            ZXing.BarcodeFormat.DATA_MATRIX,
+            ZXing.BarcodeFormat.ITF,
+            ZXing.BarcodeFormat.CODABAR
+        ];
+        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+        hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+        
+        codeReader = new ZXing.MultiFormatReader();
+        codeReader.setHints(hints);
         
         let lastCode = '';
         let lastTime = 0;
+        
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
         
         async function scanFrame() {
             if (!isScanning || video.paused || video.ended) return;
@@ -116,10 +144,14 @@ async function startBarcodeDetector() {
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
                 try {
-                    const barcodes = await barcodeDetector.detect(canvas);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const luminanceSource = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
+                    const binaryBitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminanceSource));
                     
-                    if (barcodes.length > 0) {
-                        const code = barcodes[0].rawValue;
+                    const result = codeReader.decodeWithState(binaryBitmap);
+                    
+                    if (result && result.getText()) {
+                        const code = result.getText();
                         const now = Date.now();
                         
                         if (lastCode !== code || (now - lastTime) > 2000) {
@@ -127,7 +159,14 @@ async function startBarcodeDetector() {
                             lastTime = now;
                             
                             console.log('📦 Código detectado:', code);
-                            statusDiv.innerHTML = `✅ ${code}`;
+                            
+                            let format = 'Código';
+                            if (code.match(/^\d{13}$/)) format = 'EAN-13';
+                            else if (code.match(/^\d{8}$/)) format = 'EAN-8';
+                            else if (code.match(/^\d{12}$/)) format = 'UPC-A';
+                            else if (code.match(/^\d{14}$/)) format = 'ITF-14';
+                            
+                            statusDiv.innerHTML = `✅ ${format}: ${code}`;
                             statusDiv.classList.add('bg-success');
                             
                             const input = document.getElementById('itemCode');
@@ -139,7 +178,7 @@ async function startBarcodeDetector() {
                             setTimeout(() => {
                                 stopScanner();
                                 modal.hide();
-                                showNotification(`✅ Código: ${code}`, 'success');
+                                showNotification(`✅ ${code}`, 'success');
                             }, 800);
                         }
                     } else {
@@ -147,7 +186,11 @@ async function startBarcodeDetector() {
                         statusDiv.classList.remove('bg-success');
                     }
                 } catch (e) {
-                    // Erro na detecção
+                    // Nenhum código detectado
+                    if (statusDiv.innerHTML !== '📷 Aproxime o código') {
+                        statusDiv.innerHTML = '📷 Aproxime o código';
+                        statusDiv.classList.remove('bg-success');
+                    }
                 }
             }
             
@@ -161,72 +204,21 @@ async function startBarcodeDetector() {
     } catch (err) {
         console.error('Erro ao acessar câmera:', err);
         statusDiv.innerHTML = '❌ Erro na câmera';
-        alert('Não foi possível acessar a câmera. Verifique as permissões.');
+        setTimeout(() => {
+            alert('Não foi possível acessar a câmera. Verifique as permissões.');
+            modal.hide();
+        }, 500);
     }
     
-    document.getElementById('nativeStopBtn').onclick = function() {
+    document.getElementById('zxingStopBtn').onclick = function() {
         stopScanner();
         modal.hide();
     };
     
-    document.getElementById('nativeScannerModal').addEventListener('hidden.bs.modal', function() {
+    document.getElementById('zxingModal').addEventListener('hidden.bs.modal', function() {
         stopScanner();
         this.remove();
     });
-}
-
-function startFallbackScanner() {
-    // Fallback para navegadores sem BarcodeDetector
-    if (typeof Html5Qrcode === 'undefined') {
-        alert('Scanner não disponível. Use Chrome ou Safari.');
-        return;
-    }
-    
-    const modalHtml = `
-        <div class="modal fade" id="fallbackModal" tabindex="-1" data-bs-backdrop="static">
-            <div class="modal-dialog modal-fullscreen">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white py-2">
-                        <h5 class="modal-title fs-6"><i class="fas fa-camera me-2"></i>Escanear</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body p-0">
-                        <div id="qrReader" style="width:100%; height:70vh; background:#000;"></div>
-                    </div>
-                    <div class="modal-footer py-2">
-                        <button type="button" class="btn btn-danger btn-sm" id="stopFallbackBtn">Parar</button>
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    const modal = new bootstrap.Modal(document.getElementById('fallbackModal'));
-    modal.show();
-    
-    const scanner = new Html5Qrcode("qrReader");
-    scanner.start(
-        { facingMode: "environment" },
-        { fps: 20, qrbox: { width: 280, height: 140 } },
-        (text) => {
-            const input = document.getElementById('itemCode');
-            if (input) {
-                input.value = text;
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-            scanner.stop();
-            modal.hide();
-            showNotification(`✅ ${text}`, 'success');
-        },
-        () => {}
-    );
-    
-    document.getElementById('stopFallbackBtn').onclick = function() {
-        scanner.stop();
-        modal.hide();
-    };
 }
 
 function stopScanner() {
@@ -239,6 +231,7 @@ function stopScanner() {
         videoStream.getTracks().forEach(track => track.stop());
         videoStream = null;
     }
+    codeReader = null;
 }
 
 function showNotification(message, type) {

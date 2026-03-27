@@ -168,7 +168,7 @@ function exportDashboardData() {
 }
 
 // =============================================
-// GRÁFICO DE PRODUTIVIDADE - Versão separada
+// GRÁFICO DE PRODUTIVIDADE NO DASHBOARD
 // =============================================
 
 let productivityChart = null;
@@ -179,11 +179,10 @@ async function loadProductivityData() {
     try {
         const { data: items, error } = await supabaseClient
             .from('inventory_items')
-            .select('user_id, system_users(full_name), counted_quantity, created_at');
+            .select('user_id, system_users(full_name), counted_quantity');
         
         if (error) throw error;
         
-        // Agrupar por usuário
         const userStats = {};
         items.forEach(item => {
             const userName = item.system_users?.full_name || 'Desconhecido';
@@ -199,7 +198,6 @@ async function loadProductivityData() {
         const counts = users.map(u => userStats[u].count);
         
         renderProductivityChart(users, totals, counts);
-        renderRankings(users, totals, counts, userStats);
         
     } catch (error) {
         console.error('Erro ao carregar dados de produtividade:', error);
@@ -223,8 +221,7 @@ function renderProductivityChart(users, totals, counts) {
                     backgroundColor: 'rgba(100, 116, 139, 0.7)',
                     borderColor: '#64748b',
                     borderWidth: 1,
-                    yAxisID: 'y',
-                    borderRadius: 8
+                    yAxisID: 'y'
                 },
                 {
                     label: 'Número de Contagens',
@@ -232,92 +229,26 @@ function renderProductivityChart(users, totals, counts) {
                     backgroundColor: 'rgba(134, 239, 172, 0.7)',
                     borderColor: '#86efac',
                     borderWidth: 1,
-                    yAxisID: 'y1',
-                    borderRadius: 8
+                    yAxisID: 'y1'
                 }
             ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { position: 'top' },
-                tooltip: { mode: 'index', intersect: false },
-                title: { display: false }
+                title: { display: true, text: 'Produtividade por Usuário' }
             },
             scales: {
-                y: { 
-                    beginAtZero: true, 
-                    title: { display: true, text: 'Unidades', font: { weight: 'bold' } },
-                    grid: { color: 'rgba(0,0,0,0.05)' }
-                },
-                y1: { 
-                    position: 'right', 
-                    beginAtZero: true, 
-                    title: { display: true, text: 'Contagens', font: { weight: 'bold' } },
-                    grid: { drawOnChartArea: false }
-                }
+                y: { beginAtZero: true, title: { display: true, text: 'Unidades' } },
+                y1: { position: 'right', beginAtZero: true, title: { display: true, text: 'Contagens' } }
             }
         }
     });
 }
 
-function renderRankings(users, totals, counts, userStats) {
-    // Ranking por unidades
-    const rankingUnits = users
-        .map((user, i) => ({ user, total: totals[i] }))
-        .sort((a, b) => b.total - a.total)
-        .slice(0, 5);
-    
-    const rankingContainerUnits = document.getElementById('rankingByUnits');
-    if (rankingContainerUnits) {
-        rankingContainerUnits.innerHTML = rankingUnits.map((item, idx) => `
-            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
-                <div>
-                    <span class="badge bg-${idx === 0 ? 'warning' : idx === 1 ? 'secondary' : idx === 2 ? 'danger' : 'light'} me-2">
-                        ${idx + 1}º
-                    </span>
-                    <strong>${item.user}</strong>
-                </div>
-                <div class="text-success fw-bold">${item.total} unidades</div>
-            </div>
-        `).join('');
-        
-        if (rankingUnits.length === 0) {
-            rankingContainerUnits.innerHTML = '<p class="text-muted text-center">Nenhum dado disponível</p>';
-        }
-    }
-    
-    // Ranking por contagens
-    const rankingCounts = users
-        .map((user, i) => ({ user, count: counts[i] }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
-    
-    const rankingContainerCounts = document.getElementById('rankingByCounts');
-    if (rankingContainerCounts) {
-        rankingContainerCounts.innerHTML = rankingCounts.map((item, idx) => `
-            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
-                <div>
-                    <span class="badge bg-${idx === 0 ? 'warning' : idx === 1 ? 'secondary' : idx === 2 ? 'danger' : 'light'} me-2">
-                        ${idx + 1}º
-                    </span>
-                    <strong>${item.user}</strong>
-                </div>
-                <div class="text-info fw-bold">${item.count} contagens</div>
-            </div>
-        `).join('');
-        
-        if (rankingCounts.length === 0) {
-            rankingContainerCounts.innerHTML = '<p class="text-muted text-center">Nenhum dado disponível</p>';
-        }
-    }
-}
-
-// Exportar para uso global
-window.loadProductivityData = loadProductivityData;
-
-// Adicionar no updateDashboard
+// Adicionar chamada no updateDashboard
 const originalUpdateDashboard = window.updateDashboard;
 window.updateDashboard = function() {
     if (originalUpdateDashboard) originalUpdateDashboard();

@@ -1,5 +1,5 @@
 // =============================================
-// AUTHENTICATION MODULE
+// AUTHENTICATION MODULE - Versão Completa
 // =============================================
 
 // Initialize system users
@@ -36,9 +36,11 @@ async function ensureAdminExists() {
                     .update({ role: 'admin' })
                     .eq('id', admin.id);
             }
+            console.log('✅ Admin já existe no Supabase:', admin.id);
             return true;
         }
         
+        // Criar admin no Supabase se não existir
         const adminUser = {
             email: adminEmail,
             full_name: 'Administrador Master',
@@ -49,15 +51,26 @@ async function ensureAdminExists() {
             updated_at: new Date().toISOString()
         };
         
-        await supabaseClient.from('system_users').insert([adminUser]);
+        const { data: newAdmin, error: insertError } = await supabaseClient
+            .from('system_users')
+            .insert([adminUser])
+            .select();
+        
+        if (insertError) {
+            console.error('Erro ao criar admin no Supabase:', insertError);
+            return false;
+        }
+        
+        console.log('✅ Admin criado no Supabase:', newAdmin[0]?.id);
         return true;
+        
     } catch (error) {
         console.error('❌ Erro ao verificar/criar admin:', error.message);
         return false;
     }
 }
 
-// Handle login
+// Handle login - Versão corrigida com admin local
 async function handleLogin(e) {
     e.preventDefault();
     
@@ -65,14 +78,70 @@ async function handleLogin(e) {
     const password = document.getElementById('password').value;
     
     try {
+        // LOGIN ADMIN DIRETO (funciona mesmo sem internet)
+        if (matricula === 'admin' && password === 'admin123') {
+            console.log('👑 Login Admin direto');
+            
+            // Tentar buscar admin no Supabase para pegar ID real
+            let adminId = 'admin-local';
+            let adminName = 'Administrador';
+            
+            try {
+                const { data: adminData } = await supabaseClient
+                    .from('system_users')
+                    .select('id, full_name')
+                    .eq('email', 'admin@estoque.local')
+                    .single();
+                
+                if (adminData) {
+                    adminId = adminData.id;
+                    adminName = adminData.full_name;
+                    console.log('✅ Admin encontrado no Supabase:', adminId);
+                } else {
+                    console.log('⚠️ Admin não encontrado no Supabase, usando ID local');
+                }
+            } catch (err) {
+                console.log('⚠️ Erro ao buscar admin no Supabase, usando ID local');
+            }
+            
+            currentUser = {
+                id: adminId,
+                full_name: adminName,
+                email: 'admin@estoque.local',
+                role: 'admin',
+                is_active: true
+            };
+            isAdmin = true;
+            
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            localStorage.setItem('isAdmin', 'true');
+            
+            document.querySelector('.navbar-nav').classList.add('visible');
+            updateUI();
+            
+            await loadUserData();
+            if (typeof updateDashboard === 'function') updateDashboard();
+            switchView('counting');
+            
+            showNotification('✅ Login realizado como Administrador!', 'success');
+            return;
+        }
+        
+        // LOGIN DE USUÁRIOS NORMAIS (via Supabase)
         const email = `${matricula}@estoque.local`;
+        console.log('🔍 Buscando usuário:', email);
+        
         const { data: users, error } = await supabaseClient
             .from('system_users')
             .select('*')
             .eq('email', email)
             .eq('is_active', true);
             
-        if (error) throw error;
+        if (error) {
+            console.error('Erro ao buscar usuário:', error);
+            showNotification('Erro de conexão com o servidor', 'error');
+            return;
+        }
         
         if (!users || users.length === 0) {
             showNotification('Matrícula não encontrada', 'error');
@@ -86,15 +155,22 @@ async function handleLogin(e) {
             return;
         }
         
+        // Atualizar último login
         await supabaseClient
             .from('system_users')
             .update({ last_login: new Date().toISOString() })
             .eq('id', user.id);
         
-        currentUser = user;
+        currentUser = {
+            id: user.id,
+            full_name: user.full_name,
+            email: user.email,
+            role: user.role,
+            is_active: user.is_active
+        };
         isAdmin = user.role === 'admin';
         
-        localStorage.setItem('currentUser', JSON.stringify(user));
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
         localStorage.setItem('isAdmin', isAdmin.toString());
         
         document.querySelector('.navbar-nav').classList.add('visible');
@@ -167,6 +243,8 @@ async function handleRegister(e) {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Criando...';
         
         const email = `${regMatricula}@estoque.local`;
+        
+        // Verificar se email já existe
         const { data: existingUsers, error: checkError } = await supabaseClient
             .from('system_users')
             .select('id')
@@ -193,7 +271,12 @@ async function handleRegister(e) {
             updated_at: new Date().toISOString()
         };
         
-        await supabaseClient.from('system_users').insert([newUser]);
+        const { data: createdUser, error: insertError } = await supabaseClient
+            .from('system_users')
+            .insert([newUser])
+            .select();
+        
+        if (insertError) throw insertError;
         
         alertBox.innerHTML = '<strong>Sucesso!</strong> Conta criada com sucesso! Faça login agora.';
         alertBox.className = 'alert alert-success';

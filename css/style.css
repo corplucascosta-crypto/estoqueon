@@ -639,3 +639,43 @@ body {
     }
 }
 
+/* =============================================
+   TEMA ESCURO
+   ============================================= */
+body.dark-theme {
+    background: #1a1a2e;
+    color: #eee;
+}
+
+body.dark-theme .card {
+    background: #16213e;
+    border-color: #0f3460;
+}
+
+body.dark-theme .card-header {
+    background: #0f3460 !important;
+}
+
+body.dark-theme .form-control,
+body.dark-theme .form-select {
+    background: #0f3460;
+    border-color: #1a4a6f;
+    color: #eee;
+}
+
+body.dark-theme .table {
+    color: #eee;
+}
+
+body.dark-theme .table thead th {
+    background: #0f3460;
+}
+
+body.dark-theme .table tbody tr:hover {
+    background: #1a4a6f;
+}
+
+#themeToggle {
+    cursor: pointer;
+    margin-left: 10px;
+}

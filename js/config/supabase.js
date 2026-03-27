@@ -2,11 +2,17 @@
 // SUPABASE CONFIGURATION
 // =============================================
 
-const supabaseUrl = "https://uqmwegqpulqhwculfytr.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbXdlZ3FwdWxxaHdjdWxmeXRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTk4NjI4MSwiZXhwIjoyMDc1NTYyMjgxfQ.ySQeZhEekxI9UxSD7Ndqax6e7ruC8KgVoZMalSMcL68";
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+// Configuração do Supabase
+const SUPABASE_URL = "https://uqmwegqpulqhwculfytr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbXdlZ3FwdWxxaHdjdWxmeXRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTk4NjI4MSwiZXhwIjoyMDc1NTYyMjgxfQ.ySQeZhEekxI9UxSD7Ndqax6e7ruC8KgVoZMalSMcL68";
 
-// Global variables
+// Criar cliente Supabase
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// =============================================
+// VARIÁVEIS GLOBAIS DO SISTEMA
+// =============================================
+
 let inventoryItems = [];
 let itemDatabase = [];
 let systemUsers = [];
@@ -20,66 +26,68 @@ let itemCodeSearchTimeout = null;
 let currentCountingType = '';
 let countingSessionActive = false;
 
-// Chart variables
-let quantityChart, distributionChart, timelineChart;
+// Variáveis para gráficos
+let quantityChart = null;
+let distributionChart = null;
+let timelineChart = null;
 let chartsInitialized = false;
 let inventoryColumnsCache = null;
 
-// Helper: convert camelCase to snake_case
+// =============================================
+// FUNÇÕES AUXILIARES
+// =============================================
+
 function camelToSnake(str) {
     return String(str).replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
-// Build inventory payload for Supabase
 function buildInventoryPayload(item) {
-    const payload = {};
-    const map = {
-        code: 'code',
-        description: 'description',
-        systemQuantity: 'system_quantity',
-        countedQuantity: 'counted_quantity',
-        unitValue: 'unit_value',
-        counts: 'counts',
-        date: 'created_at'
+    const payload = {
+        code: item.code,
+        description: item.description,
+        system_quantity: item.systemQuantity || 0,
+        counted_quantity: item.countedQuantity || 0,
+        unit_value: item.unitValue || 0,
+        counts: item.counts || 1,
+        user_id: currentUser ? currentUser.id : null,
+        created_at: item.date || new Date().toISOString()
     };
-    
-    for (const key in map) {
-        if (Object.prototype.hasOwnProperty.call(item, key) && item[key] !== undefined) {
-            payload[map[key]] = item[key];
-        }
-    }
-    
-    if (currentUser && currentUser.id) {
-        payload.user_id = currentUser.id;
-    } else {
-        throw new Error('Usuário não autenticado');
-    }
-    
-    payload.code = payload.code || item.code;
-    payload.created_at = payload.created_at || item.date || new Date().toISOString();
     
     return payload;
 }
 
-// Test Supabase connection
 async function testSupabaseConnection() {
     try {
+        console.log('🔌 Testando conexão com Supabase...');
         const { data, error } = await supabaseClient
             .from('products_base')
             .select('*')
             .limit(1);
-            
-        if (error) throw error;
+        
+        if (error) {
+            console.error('❌ Erro na conexão:', error);
+            return false;
+        }
         
         if (data && data.length > 0) {
             inventoryColumnsCache = Object.keys(data[0]).map(k => k.toLowerCase());
+            console.log('✅ Conexão Supabase OK. Colunas detectadas:', inventoryColumnsCache.length);
         } else {
             inventoryColumnsCache = [];
+            console.log('✅ Conexão Supabase OK. Tabela vazia.');
         }
-        
         return true;
     } catch (error) {
-        console.error('❌ Erro na conexão:', error);
+        console.error('❌ Erro ao conectar:', error);
         return false;
     }
 }
+
+// Expor variáveis para o escopo global
+window.inventoryItems = inventoryItems;
+window.currentUser = currentUser;
+window.isAdmin = isAdmin;
+window.supabaseClient = supabaseClient;
+window.testSupabaseConnection = testSupabaseConnection;
+
+console.log('✅ Supabase configurado. Variáveis globais prontas.');

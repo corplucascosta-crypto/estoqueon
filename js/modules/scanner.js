@@ -1,13 +1,13 @@
 ﻿// =============================================
-// SCANNER MODULE - BarcodeDetector API Nativa
+// SCANNER MODULE - Compatível com iOS e Android
 // =============================================
-
-let videoStream = null;
-let isScanning = false;
-let animationId = null;
 
 function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+}
+
+function isIOS() {
+    return /iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 function addScannerButton() {
@@ -32,12 +32,104 @@ function addScannerButton() {
     console.log('✅ Botão câmera adicionado');
 }
 
-async function startScanner() {
-    if (isScanning) return;
+function startScanner() {
+    if (isIOS()) {
+        startIOSScanner();
+    } else {
+        startAndroidScanner();
+    }
+}
+
+function startIOSScanner() {
+    // Criar input para câmera no iOS
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.capture = 'environment';
+    fileInput.style.display = 'none';
     
-    // Verificar suporte
+    fileInput.onchange = async function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Mostrar modal de processamento
+            const modalHtml = `
+                <div class="modal fade" id="processingModal" tabindex="-1" data-bs-backdrop="static">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-body text-center py-4">
+                                <div class="spinner-border text-primary mb-2" role="status"></div>
+                                <p class="mb-0">Processando imagem...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+            processingModal.show();
+            
+            try {
+                const imageUrl = URL.createObjectURL(file);
+                const img = new Image();
+                
+                img.onload = async function() {
+                    // Criar canvas para processar imagem
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // Tentar ler código de barras com BarcodeDetector
+                    if ('BarcodeDetector' in window) {
+                        const barcodeDetector = new BarcodeDetector({
+                            formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'qr_code']
+                        });
+                        
+                        const barcodes = await barcodeDetector.detect(canvas);
+                        if (barcodes.length > 0) {
+                            const code = barcodes[0].rawValue;
+                            const input = document.getElementById('itemCode');
+                            if (input) {
+                                input.value = code;
+                                input.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                            processingModal.hide();
+                            document.getElementById('processingModal')?.remove();
+                            showNotification('✅ Código: ' + code, 'success');
+                        } else {
+                            processingModal.hide();
+                            document.getElementById('processingModal')?.remove();
+                            alert('Nenhum código identificado na imagem.\n\nTire uma foto mais nítida e centralizada.');
+                        }
+                    } else {
+                        processingModal.hide();
+                        document.getElementById('processingModal')?.remove();
+                        alert('Para ler códigos no iOS, use um app como "QR Code Reader" e cole o código manualmente.');
+                    }
+                    
+                    URL.revokeObjectURL(imageUrl);
+                };
+                
+                img.src = imageUrl;
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                processingModal.hide();
+                document.getElementById('processingModal')?.remove();
+                alert('Erro ao processar imagem.');
+            }
+        }
+    };
+    
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    fileInput.remove();
+}
+
+function startAndroidScanner() {
     if (!('BarcodeDetector' in window)) {
-        alert('Seu navegador não suporta leitura de código de barras.\n\nUse Chrome no Android ou Safari no iOS.');
+        alert('Seu navegador não suporta leitura de código de barras.\nUse Chrome no Android.');
         return;
     }
     
@@ -78,18 +170,18 @@ async function startScanner() {
     const modal = new bootstrap.Modal(document.getElementById('scannerModal'));
     modal.show();
     
+    let videoStream = null;
+    let isScanning = true;
+    
     const video = document.getElementById('scannerVideo');
     const statusDiv = document.getElementById('scannerStatus');
     
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'environment' }
-        });
+    navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+    }).then(async function(stream) {
         video.srcObject = stream;
         videoStream = stream;
         await video.play();
-        
-        isScanning = true;
         
         const barcodeDetector = new BarcodeDetector({
             formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'qr_code']
@@ -121,13 +213,10 @@ async function startScanner() {
                             lastCode = code;
                             lastTime = now;
                             
-                            console.log('📦 Código detectado:', code);
-                            
                             let format = 'Código';
                             if (/^\d{13}$/.test(code)) format = 'EAN-13';
                             else if (/^\d{8}$/.test(code)) format = 'EAN-8';
                             else if (/^\d{12}$/.test(code)) format = 'UPC-A';
-                            else if (/^\d{14}$/.test(code)) format = 'ITF-14';
                             
                             statusDiv.innerHTML = '✅ ' + format + ': ' + code;
                             statusDiv.classList.add('bg-success');
@@ -139,16 +228,17 @@ async function startScanner() {
                             }
                             
                             setTimeout(() => {
-                                stopScanner();
+                                isScanning = false;
+                                if (videoStream) {
+                                    videoStream.getTracks().forEach(track => track.stop());
+                                }
                                 modal.hide();
-                                showNotification('✅ ' + format + ': ' + code, 'success');
+                                showNotification('✅ ' + code, 'success');
                             }, 800);
                         }
                     } else {
-                        if (statusDiv.innerHTML !== '🔍 Centralize o código') {
-                            statusDiv.innerHTML = '🔍 Centralize o código';
-                            statusDiv.classList.remove('bg-success');
-                        }
+                        statusDiv.innerHTML = '🔍 Centralize o código';
+                        statusDiv.classList.remove('bg-success');
                     }
                 }).catch(() => {});
             }
@@ -160,40 +250,30 @@ async function startScanner() {
         
         scanFrame();
         
-    } catch (err) {
-        console.error('Erro ao acessar câmera:', err);
+    }).catch(function(err) {
+        console.error('Erro:', err);
         statusDiv.innerHTML = '❌ Erro na câmera';
-        setTimeout(() => {
-            alert('Não foi possível acessar a câmera.\nVerifique as permissões e tente novamente.');
-            modal.hide();
-        }, 500);
-    }
+        setTimeout(() => modal.hide(), 1000);
+    });
     
     document.getElementById('stopScannerBtn').onclick = function() {
-        stopScanner();
+        isScanning = false;
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
         modal.hide();
     };
     
     document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function() {
-        stopScanner();
+        isScanning = false;
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
         this.remove();
     });
 }
 
-function stopScanner() {
-    isScanning = false;
-    if (animationId) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-    }
-    if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        videoStream = null;
-    }
-}
-
 function showNotification(message, type) {
-    console.log(message);
     const alertDiv = document.createElement('div');
     alertDiv.className = 'alert alert-' + (type === 'success' ? 'success' : 'info') + ' position-fixed top-0 start-50 translate-middle-x mt-3 shadow';
     alertDiv.style.zIndex = 9999;

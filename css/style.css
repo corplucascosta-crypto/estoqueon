@@ -807,3 +807,134 @@ img[src*="postimg.cc"] {
         height: calc(100vh - 110px) !important;
     }
 }
+
+/* Admin History - Estilo Melhorado */
+#adminHistoryView .section-title {
+    border-bottom: none;
+    margin-bottom: 0;
+    font-size: 1.5rem;
+}
+
+#adminHistoryView .card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#adminHistoryView .card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+#adminHistoryView .table-responsive::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+#adminHistoryView .table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#adminHistoryView .table-responsive::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+#adminHistoryView .table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+#adminHistoryView .table thead th {
+    position: sticky;
+    top: 0;
+    background: #2c3e50;
+    color: white;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 12px 8px;
+    white-space: nowrap;
+}
+
+#adminHistoryView .table tbody td {
+    padding: 10px 8px;
+    vertical-align: middle;
+    font-size: 0.85rem;
+}
+
+#adminHistoryView .table tbody tr:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+#adminHistoryView .badge {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    font-weight: 500;
+}
+
+#adminHistoryView .positive-diff {
+    color: #28a745;
+    font-weight: 600;
+}
+
+#adminHistoryView .negative-diff {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    #adminHistoryView .section-title {
+        font-size: 1.2rem;
+    }
+    
+    #adminHistoryView .table thead th,
+    #adminHistoryView .table tbody td {
+        font-size: 0.75rem;
+        padding: 8px 6px;
+    }
+    
+    #adminHistoryView .table thead th {
+        white-space: nowrap;
+    }
+    
+    #adminHistoryView .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+    
+    #adminHistoryView .form-control-sm,
+    #adminHistoryView .form-select-sm {
+        font-size: 0.75rem;
+    }
+}
+
+/* Cards do Histórico Geral */
+#adminHistoryView .card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 12px;
+    cursor: default;
+}
+
+#adminHistoryView .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+#adminHistoryView .card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    #adminHistoryView .card h3 {
+        font-size: 1.5rem;
+    }
+    
+    #adminHistoryView .card h6 {
+        font-size: 0.8rem;
+    }
+    
+    #adminHistoryView .card i {
+        font-size: 1.5rem;
+    }
+}

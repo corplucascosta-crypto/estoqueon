@@ -1,5 +1,5 @@
 // =============================================
-// AUTHENTICATION MODULE - Versão Estável Otimizada
+// AUTHENTICATION MODULE - Versão Completa
 // =============================================
 
 // Initialize system users
@@ -40,6 +40,7 @@ async function ensureAdminExists() {
             return true;
         }
         
+        // Criar admin no Supabase se não existir
         const adminUser = {
             email: adminEmail,
             full_name: 'Administrador Master',
@@ -69,7 +70,7 @@ async function ensureAdminExists() {
     }
 }
 
-// Handle login - Versão Estável
+// Handle login - Versão corrigida com admin local
 async function handleLogin(e) {
     e.preventDefault();
     
@@ -77,13 +78,35 @@ async function handleLogin(e) {
     const password = document.getElementById('password').value;
     
     try {
-        // LOGIN ADMIN DIRETO (rápido e sem depender da internet)
+        // LOGIN ADMIN DIRETO (funciona mesmo sem internet)
         if (matricula === 'admin' && password === 'admin123') {
             console.log('👑 Login Admin direto');
             
+            // Tentar buscar admin no Supabase para pegar ID real
+            let adminId = 'admin-local';
+            let adminName = 'Administrador';
+            
+            try {
+                const { data: adminData } = await supabaseClient
+                    .from('system_users')
+                    .select('id, full_name')
+                    .eq('email', 'admin@estoque.local')
+                    .single();
+                
+                if (adminData) {
+                    adminId = adminData.id;
+                    adminName = adminData.full_name;
+                    console.log('✅ Admin encontrado no Supabase:', adminId);
+                } else {
+                    console.log('⚠️ Admin não encontrado no Supabase, usando ID local');
+                }
+            } catch (err) {
+                console.log('⚠️ Erro ao buscar admin no Supabase, usando ID local');
+            }
+            
             currentUser = {
-                id: 'admin-local',
-                full_name: 'Administrador',
+                id: adminId,
+                full_name: adminName,
                 email: 'admin@estoque.local',
                 role: 'admin',
                 is_active: true
@@ -96,18 +119,15 @@ async function handleLogin(e) {
             document.querySelector('.navbar-nav').classList.add('visible');
             updateUI();
             
-            // Carregar dados em segundo plano para não travar a UI
-            setTimeout(async () => {
-                await loadUserData();
-                if (typeof updateDashboard === 'function') updateDashboard();
-            }, 100);
-            
+            await loadUserData();
+            if (typeof updateDashboard === 'function') updateDashboard();
             switchView('counting');
+            
             showNotification('✅ Login realizado como Administrador!', 'success');
             return;
         }
         
-        // LOGIN DE USUÁRIOS NORMAIS
+        // LOGIN DE USUÁRIOS NORMAIS (via Supabase)
         const email = `${matricula}@estoque.local`;
         console.log('🔍 Buscando usuário:', email);
         
@@ -135,12 +155,11 @@ async function handleLogin(e) {
             return;
         }
         
-        // Atualizar último login em background
-        supabaseClient
+        // Atualizar último login
+        await supabaseClient
             .from('system_users')
             .update({ last_login: new Date().toISOString() })
-            .eq('id', user.id)
-            .catch(err => console.warn('Erro ao atualizar login:', err));
+            .eq('id', user.id);
         
         currentUser = {
             id: user.id,
@@ -156,13 +175,9 @@ async function handleLogin(e) {
         
         document.querySelector('.navbar-nav').classList.add('visible');
         
-        // Carregar dados em segundo plano
-        setTimeout(async () => {
-            await loadUserData();
-            if (typeof updateDashboard === 'function') updateDashboard();
-        }, 100);
-        
+        await loadUserData();
         updateUI();
+        
         setTimeout(() => checkAdminStatus(), 200);
         switchView('counting');
         
@@ -229,6 +244,7 @@ async function handleRegister(e) {
         
         const email = `${regMatricula}@estoque.local`;
         
+        // Verificar se email já existe
         const { data: existingUsers, error: checkError } = await supabaseClient
             .from('system_users')
             .select('id')

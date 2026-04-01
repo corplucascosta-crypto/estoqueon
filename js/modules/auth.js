@@ -1,5 +1,5 @@
 // =============================================
-// AUTHENTICATION MODULE - Versão Completa
+// AUTHENTICATION MODULE - Versão Otimizada
 // =============================================
 
 // Initialize system users
@@ -40,7 +40,6 @@ async function ensureAdminExists() {
             return true;
         }
         
-        // Criar admin no Supabase se não existir
         const adminUser = {
             email: adminEmail,
             full_name: 'Administrador Master',
@@ -70,43 +69,27 @@ async function ensureAdminExists() {
     }
 }
 
-// Handle login - Versão corrigida com admin local
+// Handle login - VERSÃO OTIMIZADA
 async function handleLogin(e) {
     e.preventDefault();
     
     const matricula = document.getElementById('matricula').value.trim();
     const password = document.getElementById('password').value;
+    const loginBtn = e.target.querySelector('button[type="submit"]');
+    const originalBtnText = loginBtn.innerHTML;
+    
+    // Desabilitar botão durante login
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Entrando...';
     
     try {
-        // LOGIN ADMIN DIRETO (funciona mesmo sem internet)
+        // LOGIN ADMIN DIRETO (mais rápido - sem esperar Supabase)
         if (matricula === 'admin' && password === 'admin123') {
             console.log('👑 Login Admin direto');
             
-            // Tentar buscar admin no Supabase para pegar ID real
-            let adminId = 'admin-local';
-            let adminName = 'Administrador';
-            
-            try {
-                const { data: adminData } = await supabaseClient
-                    .from('system_users')
-                    .select('id, full_name')
-                    .eq('email', 'admin@estoque.local')
-                    .single();
-                
-                if (adminData) {
-                    adminId = adminData.id;
-                    adminName = adminData.full_name;
-                    console.log('✅ Admin encontrado no Supabase:', adminId);
-                } else {
-                    console.log('⚠️ Admin não encontrado no Supabase, usando ID local');
-                }
-            } catch (err) {
-                console.log('⚠️ Erro ao buscar admin no Supabase, usando ID local');
-            }
-            
             currentUser = {
-                id: adminId,
-                full_name: adminName,
+                id: 'admin-local',
+                full_name: 'Administrador',
                 email: 'admin@estoque.local',
                 role: 'admin',
                 is_active: true
@@ -119,47 +102,65 @@ async function handleLogin(e) {
             document.querySelector('.navbar-nav').classList.add('visible');
             updateUI();
             
-            await loadUserData();
-            if (typeof updateDashboard === 'function') updateDashboard();
-            switchView('counting');
+            // Carregar dados em segundo plano (não bloqueia a tela)
+            setTimeout(async () => {
+                try {
+                    await loadUserData();
+                    if (typeof updateDashboard === 'function') updateDashboard();
+                    console.log('✅ Dados carregados em background');
+                } catch (err) {
+                    console.warn('Erro ao carregar dados:', err);
+                }
+            }, 100);
             
+            switchView('counting');
             showNotification('✅ Login realizado como Administrador!', 'success');
+            
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = originalBtnText;
             return;
         }
         
-        // LOGIN DE USUÁRIOS NORMAIS (via Supabase)
+        // LOGIN DE USUÁRIOS NORMAIS - otimizado
         const email = `${matricula}@estoque.local`;
-        console.log('🔍 Buscando usuário:', email);
         
-        const { data: users, error } = await supabaseClient
+        // Usar maybeSingle() para resposta mais rápida
+        const { data: user, error } = await supabaseClient
             .from('system_users')
-            .select('*')
+            .select('id, full_name, email, role, is_active, password_hash')
             .eq('email', email)
-            .eq('is_active', true);
+            .eq('is_active', true)
+            .maybeSingle();
             
         if (error) {
             console.error('Erro ao buscar usuário:', error);
             showNotification('Erro de conexão com o servidor', 'error');
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = originalBtnText;
             return;
         }
         
-        if (!users || users.length === 0) {
+        if (!user) {
             showNotification('Matrícula não encontrada', 'error');
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = originalBtnText;
             return;
         }
-        
-        const user = users[0];
         
         if (user.password_hash !== btoa(password)) {
             showNotification('Senha incorreta', 'error');
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = originalBtnText;
             return;
         }
         
-        // Atualizar último login
-        await supabaseClient
+        // Atualizar último login em background (não bloqueia)
+        supabaseClient
             .from('system_users')
             .update({ last_login: new Date().toISOString() })
-            .eq('id', user.id);
+            .eq('id', user.id)
+            .then(() => console.log('Login registrado'))
+            .catch(err => console.warn('Erro ao registrar login:', err));
         
         currentUser = {
             id: user.id,
@@ -175,17 +176,29 @@ async function handleLogin(e) {
         
         document.querySelector('.navbar-nav').classList.add('visible');
         
-        await loadUserData();
-        updateUI();
+        // Carregar dados em segundo plano
+        setTimeout(async () => {
+            try {
+                await loadUserData();
+                if (typeof updateDashboard === 'function') updateDashboard();
+                console.log('✅ Dados carregados em background');
+            } catch (err) {
+                console.warn('Erro ao carregar dados:', err);
+            }
+        }, 100);
         
-        setTimeout(() => checkAdminStatus(), 200);
+        updateUI();
+        setTimeout(() => checkAdminStatus(), 100);
         switchView('counting');
         
-        showNotification(`✅ Login realizado! Bem-vindo, ${user.full_name}`, 'success');
+        showNotification(`✅ Bem-vindo, ${user.full_name}!`, 'success');
         
     } catch (error) {
         console.error('Erro no login:', error);
         showNotification('Erro ao fazer login', 'error');
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = originalBtnText;
     }
 }
 
@@ -216,6 +229,7 @@ async function handleRegister(e) {
     const regConfirmSenha = document.getElementById('regConfirmSenha').value;
     const alertBox = document.getElementById('registerAlertBox');
     const submitBtn = document.getElementById('submitRegisterBtn');
+    const originalBtnText = submitBtn.innerHTML;
     
     if (!regMatricula || !regNome || !regSenha || !regConfirmSenha) {
         alertBox.innerHTML = '<strong>Erro:</strong> Todos os campos são obrigatórios';
@@ -238,26 +252,27 @@ async function handleRegister(e) {
         return;
     }
     
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Criando...';
+    
     try {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Criando...';
-        
         const email = `${regMatricula}@estoque.local`;
         
         // Verificar se email já existe
-        const { data: existingUsers, error: checkError } = await supabaseClient
+        const { data: existingUser, error: checkError } = await supabaseClient
             .from('system_users')
             .select('id')
-            .eq('email', email);
+            .eq('email', email)
+            .maybeSingle();
         
         if (checkError) throw checkError;
         
-        if (existingUsers && existingUsers.length > 0) {
+        if (existingUser) {
             alertBox.innerHTML = '<strong>Erro:</strong> Esta matrícula já está cadastrada';
             alertBox.className = 'alert alert-danger';
             alertBox.classList.remove('d-none');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Criar Conta';
+            submitBtn.innerHTML = originalBtnText;
             return;
         }
         
@@ -285,10 +300,11 @@ async function handleRegister(e) {
         document.getElementById('registerForm').reset();
         
         setTimeout(() => {
-            bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+            if (modal) modal.hide();
             alertBox.classList.add('d-none');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Criar Conta';
+            submitBtn.innerHTML = originalBtnText;
         }, 2000);
         
     } catch (error) {
@@ -297,6 +313,6 @@ async function handleRegister(e) {
         alertBox.className = 'alert alert-danger';
         alertBox.classList.remove('d-none');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Criar Conta';
+        submitBtn.innerHTML = originalBtnText;
     }
 }

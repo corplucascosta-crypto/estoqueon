@@ -1,5 +1,5 @@
 // =============================================
-// AUTHENTICATION MODULE - Versão Otimizada
+// AUTHENTICATION MODULE - Versão Estável Otimizada
 // =============================================
 
 // Initialize system users
@@ -69,21 +69,15 @@ async function ensureAdminExists() {
     }
 }
 
-// Handle login - VERSÃO OTIMIZADA
+// Handle login - Versão Estável
 async function handleLogin(e) {
     e.preventDefault();
     
     const matricula = document.getElementById('matricula').value.trim();
     const password = document.getElementById('password').value;
-    const loginBtn = e.target.querySelector('button[type="submit"]');
-    const originalBtnText = loginBtn.innerHTML;
-    
-    // Desabilitar botão durante login
-    loginBtn.disabled = true;
-    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Entrando...';
     
     try {
-        // LOGIN ADMIN DIRETO (mais rápido - sem esperar Supabase)
+        // LOGIN ADMIN DIRETO (rápido e sem depender da internet)
         if (matricula === 'admin' && password === 'admin123') {
             console.log('👑 Login Admin direto');
             
@@ -102,65 +96,51 @@ async function handleLogin(e) {
             document.querySelector('.navbar-nav').classList.add('visible');
             updateUI();
             
-            // Carregar dados em segundo plano (não bloqueia a tela)
+            // Carregar dados em segundo plano para não travar a UI
             setTimeout(async () => {
-                try {
-                    await loadUserData();
-                    if (typeof updateDashboard === 'function') updateDashboard();
-                    console.log('✅ Dados carregados em background');
-                } catch (err) {
-                    console.warn('Erro ao carregar dados:', err);
-                }
+                await loadUserData();
+                if (typeof updateDashboard === 'function') updateDashboard();
             }, 100);
             
             switchView('counting');
             showNotification('✅ Login realizado como Administrador!', 'success');
-            
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = originalBtnText;
             return;
         }
         
-        // LOGIN DE USUÁRIOS NORMAIS - otimizado
+        // LOGIN DE USUÁRIOS NORMAIS
         const email = `${matricula}@estoque.local`;
+        console.log('🔍 Buscando usuário:', email);
         
-        // Usar maybeSingle() para resposta mais rápida
-        const { data: user, error } = await supabaseClient
+        const { data: users, error } = await supabaseClient
             .from('system_users')
-            .select('id, full_name, email, role, is_active, password_hash')
+            .select('*')
             .eq('email', email)
-            .eq('is_active', true)
-            .maybeSingle();
+            .eq('is_active', true);
             
         if (error) {
             console.error('Erro ao buscar usuário:', error);
             showNotification('Erro de conexão com o servidor', 'error');
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = originalBtnText;
             return;
         }
         
-        if (!user) {
+        if (!users || users.length === 0) {
             showNotification('Matrícula não encontrada', 'error');
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = originalBtnText;
             return;
         }
+        
+        const user = users[0];
         
         if (user.password_hash !== btoa(password)) {
             showNotification('Senha incorreta', 'error');
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = originalBtnText;
             return;
         }
         
-        // Atualizar último login em background (não bloqueia)
+        // Atualizar último login em background
         supabaseClient
             .from('system_users')
             .update({ last_login: new Date().toISOString() })
             .eq('id', user.id)
-            .then(() => console.log('Login registrado'))
-            .catch(err => console.warn('Erro ao registrar login:', err));
+            .catch(err => console.warn('Erro ao atualizar login:', err));
         
         currentUser = {
             id: user.id,
@@ -178,27 +158,19 @@ async function handleLogin(e) {
         
         // Carregar dados em segundo plano
         setTimeout(async () => {
-            try {
-                await loadUserData();
-                if (typeof updateDashboard === 'function') updateDashboard();
-                console.log('✅ Dados carregados em background');
-            } catch (err) {
-                console.warn('Erro ao carregar dados:', err);
-            }
+            await loadUserData();
+            if (typeof updateDashboard === 'function') updateDashboard();
         }, 100);
         
         updateUI();
-        setTimeout(() => checkAdminStatus(), 100);
+        setTimeout(() => checkAdminStatus(), 200);
         switchView('counting');
         
-        showNotification(`✅ Bem-vindo, ${user.full_name}!`, 'success');
+        showNotification(`✅ Login realizado! Bem-vindo, ${user.full_name}`, 'success');
         
     } catch (error) {
         console.error('Erro no login:', error);
         showNotification('Erro ao fazer login', 'error');
-    } finally {
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = originalBtnText;
     }
 }
 
@@ -229,7 +201,6 @@ async function handleRegister(e) {
     const regConfirmSenha = document.getElementById('regConfirmSenha').value;
     const alertBox = document.getElementById('registerAlertBox');
     const submitBtn = document.getElementById('submitRegisterBtn');
-    const originalBtnText = submitBtn.innerHTML;
     
     if (!regMatricula || !regNome || !regSenha || !regConfirmSenha) {
         alertBox.innerHTML = '<strong>Erro:</strong> Todos os campos são obrigatórios';
@@ -252,27 +223,25 @@ async function handleRegister(e) {
         return;
     }
     
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Criando...';
-    
     try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Criando...';
+        
         const email = `${regMatricula}@estoque.local`;
         
-        // Verificar se email já existe
-        const { data: existingUser, error: checkError } = await supabaseClient
+        const { data: existingUsers, error: checkError } = await supabaseClient
             .from('system_users')
             .select('id')
-            .eq('email', email)
-            .maybeSingle();
+            .eq('email', email);
         
         if (checkError) throw checkError;
         
-        if (existingUser) {
+        if (existingUsers && existingUsers.length > 0) {
             alertBox.innerHTML = '<strong>Erro:</strong> Esta matrícula já está cadastrada';
             alertBox.className = 'alert alert-danger';
             alertBox.classList.remove('d-none');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnText;
+            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Criar Conta';
             return;
         }
         
@@ -300,11 +269,10 @@ async function handleRegister(e) {
         document.getElementById('registerForm').reset();
         
         setTimeout(() => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
-            if (modal) modal.hide();
+            bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
             alertBox.classList.add('d-none');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnText;
+            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Criar Conta';
         }, 2000);
         
     } catch (error) {
@@ -313,6 +281,6 @@ async function handleRegister(e) {
         alertBox.className = 'alert alert-danger';
         alertBox.classList.remove('d-none');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
+        submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Criar Conta';
     }
 }

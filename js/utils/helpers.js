@@ -2,44 +2,21 @@
 // UTILITY FUNCTIONS - Helpers
 // =============================================
 
-// Notificações discretas - não bloqueiam a visualização
+// Notificações DESATIVADAS em tela - apenas console
 function showNotification(message, type = 'info') {
-    console.log(`[${type.toUpperCase()}] ${message}`);
-    
-    // Criar notificação discreta no canto superior direito
-    const toast = document.createElement('div');
-    toast.className = 'position-fixed top-0 end-0 m-3 p-2 rounded shadow-sm';
-    toast.style.zIndex = 9999;
-    toast.style.backgroundColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6';
-    toast.style.color = 'white';
-    toast.style.fontSize = '0.7rem';
-    toast.style.maxWidth = '250px';
-    toast.style.opacity = '0.85';
-    toast.style.borderRadius = '6px';
-    toast.style.padding = '5px 10px';
-    toast.style.pointerEvents = 'none';
-    toast.style.fontWeight = '500';
-    
-    // Ícone conforme o tipo
-    let icon = '';
-    if (type === 'success') icon = '✓';
-    else if (type === 'error') icon = '✗';
-    else if (type === 'warning') icon = '!';
-    else icon = 'ℹ';
-    
-    toast.innerHTML = `${icon} ${message}`;
-    
-    document.body.appendChild(toast);
-    
-    // Remover após 2 segundos
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 2000);
+    // Apenas log no console - sem elementos visuais na tela
+    if (type === 'error') {
+        console.error(`[ERRO] ${message}`);
+    } else if (type === 'warning') {
+        console.warn(`[AVISO] ${message}`);
+    } else if (type === 'success') {
+        console.log(`[SUCESSO] ${message}`);
+    } else {
+        console.log(`[INFO] ${message}`);
+    }
 }
 
-// Role badge classes
+// Role badge classes (mantido)
 function getRoleBadgeClass(role) {
     const classes = {
         'admin': 'bg-danger',
@@ -49,7 +26,7 @@ function getRoleBadgeClass(role) {
     return classes[role] || 'bg-secondary';
 }
 
-// Role color classes
+// Role color classes (mantido)
 function getRoleColorClass(role) {
     const classes = {
         'admin': 'text-danger',
@@ -59,7 +36,7 @@ function getRoleColorClass(role) {
     return classes[role] || 'text-secondary';
 }
 
-// Role icons
+// Role icons (mantido)
 function getRoleIcon(role) {
     const icons = {
         'admin': 'fa-shield-alt',
@@ -69,7 +46,7 @@ function getRoleIcon(role) {
     return icons[role] || 'fa-user';
 }
 
-// Role display names
+// Role display names (mantido)
 function getRoleDisplayName(role) {
     const names = {
         'admin': 'Administrador',
@@ -79,13 +56,13 @@ function getRoleDisplayName(role) {
     return names[role] || role;
 }
 
-// Update UI based on user role
+// Update UI based on user role (mantido)
 function updateUI() {
     checkAdminStatus();
     updateUserStatus();
 }
 
-// Check admin status and show/hide elements
+// Check admin status and show/hide elements (mantido)
 function checkAdminStatus() {
     const adminOnlyElements = document.querySelectorAll('.admin-only');
     const managerOnlyElements = document.querySelectorAll('.manager-only');
@@ -124,7 +101,7 @@ function checkAdminStatus() {
     }
 }
 
-// Update user status display
+// Update user status display (mantido)
 function updateUserStatus() {
     const userStatus = document.getElementById('userStatus');
     const userName = document.getElementById('userName');
@@ -140,7 +117,7 @@ function updateUserStatus() {
     }
 }
 
-// Switch between views
+// Switch between views (mantido)
 async function switchView(viewName) {
     document.querySelectorAll('.view-container').forEach(view => {
         view.classList.remove('active');
@@ -201,31 +178,13 @@ async function switchView(viewName) {
     }
 }
 
-// Handle view switch event
+// Handle view switch event (mantido)
 function handleViewSwitch(e) {
     e.preventDefault();
     const targetView = this.getAttribute('data-view');
     if (targetView) {
         switchView(targetView);
     }
-}
-
-// Função para criar alerta visual
-function createAlert(message, type) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
-    alertDiv.style.zIndex = 9999;
-    alertDiv.style.minWidth = '300px';
-    alertDiv.style.textAlign = 'center';
-    alertDiv.style.fontSize = '0.8rem';
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 2000);
 }
 
 // Exportar funções globais
@@ -239,6 +198,5 @@ window.checkAdminStatus = checkAdminStatus;
 window.updateUserStatus = updateUserStatus;
 window.switchView = switchView;
 window.handleViewSwitch = handleViewSwitch;
-window.createAlert = createAlert;
 
 console.log('✅ helpers.js carregado');

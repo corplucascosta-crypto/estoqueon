@@ -2,18 +2,9 @@
 // UTILITY FUNCTIONS - Helpers
 // =============================================
 
-// Notificações discretas - não bloqueiam a visualização
+// Notificações APENAS no console - sem elementos visuais
 function showNotification(message, type = 'info') {
-    // Apenas log no console - sem elementos visuais na tela
-    if (type === 'error') {
-        console.error(`[ERRO] ${message}`);
-    } else if (type === 'warning') {
-        console.warn(`[AVISO] ${message}`);
-    } else if (type === 'success') {
-        console.log(`[SUCESSO] ${message}`);
-    } else {
-        console.log(`[INFO] ${message}`);
-    }
+    console.log(`[${type.toUpperCase()}] ${message}`);
 }
 
 // Role badge classes
@@ -170,20 +161,13 @@ async function switchView(viewName) {
                     await loadAdminUserFilter();
                 }
                 break;
-            case 'productivity':
-                console.log('📈 Carregando gráfico de produtividade...');
-                if (typeof loadProductivityData === 'function') {
-                    await loadProductivityData();
-                }
-                break;
             default:
                 console.log('View carregada:', viewName);
         }
-
     } else {
         console.warn('View não encontrada:', viewName + 'View');
     }
-}}
+}
 
 // Handle view switch event
 function handleViewSwitch(e) {
@@ -192,24 +176,6 @@ function handleViewSwitch(e) {
     if (targetView) {
         switchView(targetView);
     }
-}
-
-// Função para criar alerta visual
-function createAlert(message, type) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
-    alertDiv.style.zIndex = 9999;
-    alertDiv.style.minWidth = '300px';
-    alertDiv.style.textAlign = 'center';
-    alertDiv.style.fontSize = '0.8rem';
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 2000);
 }
 
 // Exportar funções globais

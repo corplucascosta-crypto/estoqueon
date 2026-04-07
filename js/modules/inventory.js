@@ -1,5 +1,5 @@
 // =============================================
-// INVENTORY MODULE - Versão Estável Corrigida
+// INVENTORY MODULE - Versão Estável
 // =============================================
 
 // Load user data from Supabase
@@ -10,6 +10,22 @@ async function loadUserData() {
             return;
         }
         
+        // IMPORTANTE: Admin local NÃO existe no Supabase
+        if (currentUser.id === 'admin-local') {
+            console.log('👑 Admin local - carregando dados do localStorage apenas');
+            const localData = localStorage.getItem(`inventoryItems_admin-local`);
+            if (localData) {
+                inventoryItems = JSON.parse(localData);
+                console.log(`📦 ${inventoryItems.length} itens carregados do localStorage`);
+            } else {
+                inventoryItems = [];
+                console.log('📦 Nenhum item encontrado no localStorage');
+            }
+            return;
+        }
+        
+        // Para usuários normais, buscar do Supabase
+        console.log('🔄 Buscando dados do Supabase para usuário:', currentUser.id);
         const { data: inventoryData, error: inventoryError } = await supabaseClient
             .from('inventory_items')
             .select('*')
@@ -17,7 +33,6 @@ async function loadUserData() {
         
         if (inventoryError) throw inventoryError;
         
-        // Garantir que todos os itens tenham valores padrão
         inventoryItems = (inventoryData || []).map(item => ({
             code: item.code || '',
             description: item.description || 'Sem descrição',
@@ -30,35 +45,41 @@ async function loadUserData() {
             history: item.history || []
         }));
         
-        const localData = localStorage.getItem(`inventoryItems_${currentUser.id}`);
-        if (!inventoryItems.length && localData) {
-            inventoryItems = JSON.parse(localData);
-        }
+        console.log(`📦 ${inventoryItems.length} itens carregados do Supabase`);
         
     } catch (error) {
         console.error('Erro carregar dados:', error);
-        showNotification('Erro ao carregar dados', 'error');
+        // Fallback para localStorage
+        const localData = localStorage.getItem(`inventoryItems_${currentUser.id}`);
+        if (localData) {
+            inventoryItems = JSON.parse(localData);
+            console.log(`📦 Fallback: ${inventoryItems.length} itens do localStorage`);
+        }
     }
 }
 
-// Save inventory data to Supabase - Versão corrigida
+// Save inventory data
 async function saveInventoryData() {
     try {
-        // Primeiro, salvar no localStorage como backup
-        if (currentUser?.id) {
-            localStorage.setItem(`inventoryItems_${currentUser.id}`, JSON.stringify(inventoryItems));
-            console.log('💾 Dados salvos no localStorage para usuário:', currentUser.id);
+        // Admin local: salva apenas no localStorage
+        if (currentUser?.id === 'admin-local') {
+            localStorage.setItem(`inventoryItems_admin-local`, JSON.stringify(inventoryItems));
+            console.log('💾 Admin local - dados salvos no localStorage');
+            return;
         }
         
-        // Se estiver online e usuário logado, salvar no Supabase
+        // Usuários normais: salva no localStorage + Supabase
+        if (currentUser?.id) {
+            localStorage.setItem(`inventoryItems_${currentUser.id}`, JSON.stringify(inventoryItems));
+        }
+        
         if (navigator.onLine && currentUser && currentUser.id) {
-            console.log('☁️ Sincronizando com Supabase...', inventoryItems.length, 'itens');
-            
+            console.log('☁️ Sincronizando com Supabase...');
             for (const item of inventoryItems) {
                 try {
                     const payload = {
                         code: item.code,
-                        description: item.description || 'Sem descrição',
+                        description: item.description,
                         system_quantity: item.systemQuantity || 0,
                         counted_quantity: item.countedQuantity || 0,
                         unit_value: item.unitValue || 0,
@@ -68,9 +89,6 @@ async function saveInventoryData() {
                         created_at: item.date || new Date().toISOString()
                     };
                     
-                    console.log('📤 Salvando item:', payload.code, 'para usuário:', payload.user_id);
-                    
-                    // Verificar se o item já existe para este usuário
                     const { data: existing, error: checkError } = await supabaseClient
                         .from('inventory_items')
                         .select('id')
@@ -78,42 +96,16 @@ async function saveInventoryData() {
                         .eq('code', payload.code)
                         .maybeSingle();
                     
-                    if (checkError) {
-                        console.warn('Erro ao verificar existência:', checkError);
-                    }
-                    
                     if (existing && existing.id) {
-                        // Atualizar item existente
-                        const { error: updateError } = await supabaseClient
-                            .from('inventory_items')
-                            .update(payload)
-                            .eq('id', existing.id);
-                        
-                        if (updateError) {
-                            console.error('Erro ao atualizar:', updateError);
-                        } else {
-                            console.log('✅ Item atualizado:', payload.code);
-                        }
+                        await supabaseClient.from('inventory_items').update(payload).eq('id', existing.id);
                     } else {
-                        // Inserir novo item
-                        const { error: insertError } = await supabaseClient
-                            .from('inventory_items')
-                            .insert(payload);
-                        
-                        if (insertError) {
-                            console.error('Erro ao inserir:', insertError);
-                        } else {
-                            console.log('✅ Item inserido:', payload.code);
-                        }
+                        await supabaseClient.from('inventory_items').insert(payload);
                     }
                 } catch (itemError) {
-                    console.error('⚠️ Erro ao sincronizar item:', item.code, itemError);
+                    console.warn('⚠️ Erro ao sincronizar item:', item.code);
                 }
             }
-            
             console.log('✅ Sincronização concluída');
-        } else {
-            console.log('📴 Offline ou sem usuário - dados salvos apenas localmente');
         }
     } catch (error) {
         console.error('Erro ao salvar dados:', error);
@@ -175,24 +167,7 @@ function handleItemCodeInput() {
     
     if (itemCodeSearchTimeout) clearTimeout(itemCodeSearchTimeout);
     
-    if (code.length >= 8) {
-        codeLoading.style.display = 'inline-block';
-        itemCodeSearchTimeout = setTimeout(async () => {
-            try {
-                const item = await findItemByCode(code);
-                if (item) {
-                    displayItemInfo(item);
-                    moveFocusToQuantity();
-                } else {
-                    displayItemNotFound(code);
-                }
-            } catch (error) {
-                displayItemNotFound(code);
-            }
-            codeLoading.style.display = 'none';
-            itemCodeSearchTimeout = null;
-        }, 300);
-    } else if (code.length > 0 && code.length < 8) {
+    if (code.length >= 3) {
         codeLoading.style.display = 'inline-block';
         itemCodeSearchTimeout = setTimeout(async () => {
             try {
@@ -305,13 +280,13 @@ function handleCountingTypeChange() {
         sessionTypeDisplay.textContent = `📋 Contagem: ${countingType}`;
         sessionStatus.className = 'badge bg-success ms-3';
         document.getElementById('itemCode').focus();
-        showNotification(`✏️ Sessão de contagem iniciada: ${countingType}`, 'info');
+        showNotification(`Sessão iniciada: ${countingType}`, 'info');
     } else {
         currentCountingType = '';
         countingSessionActive = false;
         finalizeBtn.style.display = 'none';
         sessionStatus.style.display = 'none';
-        showNotification('⚠️ Selecione um tipo de contagem', 'warning');
+        showNotification('Selecione um tipo de contagem', 'warning');
     }
 }
 
@@ -332,7 +307,7 @@ async function processInventoryItem() {
     }
     
     if (countedQuantity > 999999) {
-        showNotification('Quantidade muito alta! Verifique o valor.', 'warning');
+        showNotification('Quantidade muito alta!', 'warning');
         return;
     }
     
@@ -380,7 +355,7 @@ async function addNewCount() {
     renderInventoryTable();
     updateSummary();
     if (typeof updateDashboard === 'function') updateDashboard();
-    showNotification('Nova contagem adicionada com sucesso! Total: ' + totalCounted + ' unidades', 'success');
+    showNotification('Nova contagem adicionada!', 'success');
 }
 
 // Replace existing count
@@ -401,20 +376,18 @@ async function replaceExistingCount() {
     renderInventoryTable();
     updateSummary();
     if (typeof updateDashboard === 'function') updateDashboard();
-    showNotification('Contagem substituída com sucesso!', 'success');
+    showNotification('Contagem substituída!', 'success');
 }
 
-// Add new inventory item - Versão corrigida
+// Add new inventory item
 async function addNewInventoryItem(countedQuantity) {
-    console.log('📝 addNewInventoryItem chamada com:', countedQuantity);
-    
     if (!currentItemCode) {
         showNotification('Código do item não foi validado', 'error');
         return;
     }
     
     if (!currentCountingType) {
-        showNotification('⚠️ Selecione um tipo de contagem', 'warning');
+        showNotification('Selecione um tipo de contagem', 'warning');
         document.getElementById('countingType').focus();
         return;
     }
@@ -440,7 +413,6 @@ async function addNewInventoryItem(countedQuantity) {
     try {
         const item = await findItemByCode(currentItemCode);
         if (item && item.valor) unitValue = parseFloat(item.valor) || 0;
-        if (item && item.VALOR) unitValue = parseFloat(item.VALOR) || 0;
     } catch (error) {}
     
     const newItem = {
@@ -455,26 +427,26 @@ async function addNewInventoryItem(countedQuantity) {
         history: [{ date: new Date().toISOString(), quantity: parseInt(countedQuantity) || 0, type: currentCountingType }]
     };
     
-    inventoryItems.push(newItem);
-    console.log('✅ Item adicionado ao array:', inventoryItems.length);
+    // Verificar se item já existe
+    const existingIndex = inventoryItems.findIndex(i => i.code === currentItemCode);
+    if (existingIndex !== -1) {
+        inventoryItems[existingIndex].countedQuantity += newItem.countedQuantity;
+        inventoryItems[existingIndex].counts += 1;
+        inventoryItems[existingIndex].history.push(newItem.history[0]);
+        showNotification(`+${countedQuantity} ${itemDescription}`, 'success');
+    } else {
+        inventoryItems.push(newItem);
+        showNotification(`✅ ${itemDescription}: ${countedQuantity} un`, 'success');
+    }
     
     await saveInventoryData();
     resetFormAfterSubmission();
     renderInventoryTable();
     updateSummary();
     if (typeof updateDashboard === 'function') updateDashboard();
-    
-    showNotification(`✅ "${itemDescription}" registrado com sucesso!`, 'success');
 }
 
 // Reset form after submission
-function resetFormAfterSubmission() {
-    const itemCodeInput = document.getElementById('itemCode');
-    itemCodeInput.value = '';
-    resetItemForm();
-    setTimeout(() => itemCodeInput.focus(), 100);
-}
-
 function resetFormAfterSubmission() {
     const itemCodeInput = document.getElementById('itemCode');
     const countedQuantityInput = document.getElementById('countedQuantity');
@@ -483,61 +455,47 @@ function resetFormAfterSubmission() {
     countedQuantityInput.value = '';
     resetItemForm();
     
-    // Foco automático no campo de código
     setTimeout(() => {
         itemCodeInput.focus();
-        itemCodeInput.select();
     }, 100);
 }
 
 // Handle finalize counting session
 async function handleFinalizeCountingSession() {
     if (!countingSessionActive || inventoryItems.length === 0) {
-        showNotification('⚠️ Nenhum item contado nesta sessão', 'warning');
+        showNotification('Nenhum item contado nesta sessão', 'warning');
         return;
     }
     
     const countingType = currentCountingType;
     const itemCount = inventoryItems.filter(item => item.countingType === countingType).length;
     
-    if (confirm(`Tem certeza que deseja finalizar esta contagem?\n\nTipo: ${countingType}\nItens: ${itemCount}`)) {
+    if (confirm(`Finalizar contagem ${countingType}?\n${itemCount} itens`)) {
         try {
             await saveInventoryData();
-            const sessionLog = {
-                type: countingType,
-                itemsCount: itemCount,
-                finalizedAt: new Date().toISOString(),
-                userId: currentUser?.id
-            };
-            let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory') || '[]');
-            sessionHistory.push(sessionLog);
-            localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
-            
             document.getElementById('countingType').value = '';
             currentCountingType = '';
             countingSessionActive = false;
             document.getElementById('finalizeCountingBtn').style.display = 'none';
             document.getElementById('sessionStatus').style.display = 'none';
-            
-            showNotification(`✅ Contagem "${countingType}" finalizada com sucesso! (${itemCount} itens)`, 'success');
+            showNotification(`Contagem ${countingType} finalizada!`, 'success');
         } catch (error) {
-            console.error('Erro ao finalizar contagem:', error);
-            showNotification('Erro ao finalizar contagem', 'error');
+            console.error('Erro:', error);
+            showNotification('Erro ao finalizar', 'error');
         }
     }
 }
 
-// Render inventory table - Versão corrigida com tratamento de undefined
+// Render inventory table
 function renderInventoryTable() {
     const inventoryTable = document.getElementById('inventoryTable');
     
     if (!inventoryItems || inventoryItems.length === 0) {
-        inventoryTable.innerHTML = `一线<td colspan="10" class="text-center text-muted py-4"><i class="fas fa-box-open fa-2x mb-2 d-block"></i>Nenhum item contado ainda</td></tr>`;
+        inventoryTable.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4"><i class="fas fa-box-open fa-2x mb-2 d-block"></i>Nenhum item contado ainda</td></tr>`;
         return;
     }
     
     inventoryTable.innerHTML = inventoryItems.map((item, index) => {
-        // Garantir que todos os valores existem
         const systemQty = item.systemQuantity !== undefined ? item.systemQuantity : 0;
         const countedQty = item.countedQuantity !== undefined ? item.countedQuantity : 0;
         const unitVal = item.unitValue !== undefined ? item.unitValue : 0;
@@ -558,17 +516,17 @@ function renderInventoryTable() {
                 <td><span class="badge bg-${typeColor}">${codeType}</span></td>
                 <td>${code}</td>
                 <td>${description}</td>
-                <td>${systemQty}</td>
-                <td>${countedQty}</td>
-                <td class="${differenceClass}">${difference > 0 ? '+' : ''}${difference}</td>
-                <td>R$ ${unitVal.toFixed(2)}</td>
-                <td>R$ ${totalValue.toFixed(2)}</td>
-                <td>${counts}</td>
+                <td class="text-center">${systemQty}</td>
+                <td class="text-center fw-bold">${countedQty}</td>
+                <td class="text-center ${differenceClass}">${difference > 0 ? '+' : ''}${difference}</td>
+                <td class="text-end">R$ ${unitVal.toFixed(2)}</td>
+                <td class="text-end">R$ ${totalValue.toFixed(2)}</td>
+                <td class="text-center">${counts}</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary view-history" data-index="${index}" title="Ver histórico"><i class="fas fa-history"></i></button>
                     ${isAdmin ? `<button class="btn btn-sm btn-outline-danger delete-item" data-index="${index}" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}
-                </td>
-             </tr>
+                 </td>
+            </tr>
         `;
     }).join('');
     
@@ -580,7 +538,7 @@ function renderInventoryTable() {
     
     document.querySelectorAll('.delete-item').forEach(btn => {
         btn.addEventListener('click', async function() {
-            if (confirm('Tem certeza que deseja excluir este item?')) {
+            if (confirm('Excluir este item?')) {
                 inventoryItems.splice(parseInt(this.getAttribute('data-index')), 1);
                 await saveInventoryData();
                 renderInventoryTable();
@@ -596,7 +554,6 @@ function viewItemHistory(index) {
     if (!item) return;
     
     let historyHTML = '';
-    
     if (item.history && item.history.length > 0) {
         historyHTML = '<ul class="list-unstyled">';
         item.history.forEach(record => {
@@ -608,7 +565,7 @@ function viewItemHistory(index) {
         historyHTML = '<p class="text-muted">Nenhum histórico disponível.</p>';
     }
     
-    alert(`Histórico de contagens para ${item.description} (${item.code}):\n\nQuantidade no sistema: ${item.systemQuantity || 0}\nQuantidade contada: ${item.countedQuantity || 0}\nDiferença: ${(item.countedQuantity || 0) - (item.systemQuantity || 0)}\n\nHistórico de contagens:\n${historyHTML.replace(/<[^>]*>/g, '')}`);
+    alert(`Histórico: ${item.description}\n\nSistema: ${item.systemQuantity || 0}\nContado: ${item.countedQuantity || 0}\nDiferença: ${(item.countedQuantity || 0) - (item.systemQuantity || 0)}\n\n${historyHTML.replace(/<[^>]*>/g, '')}`);
 }
 
 // Filter inventory table
@@ -644,21 +601,29 @@ function updateSummary() {
     
     const totalDifferenceValue = totalCountedValue - totalSystemValue;
     
-    document.getElementById('totalItems').textContent = totalItems;
-    document.getElementById('matchingItems').textContent = matchingItems;
-    document.getElementById('positiveDiffItems').textContent = positiveDiffItems;
-    document.getElementById('negativeDiffItems').textContent = negativeDiffItems;
-    document.getElementById('totalSystemValue').textContent = `R$ ${totalSystemValue.toFixed(2)}`;
-    document.getElementById('totalCountedValue').textContent = `R$ ${totalCountedValue.toFixed(2)}`;
+    const totalItemsEl = document.getElementById('totalItems');
+    const matchingItemsEl = document.getElementById('matchingItems');
+    const positiveDiffItemsEl = document.getElementById('positiveDiffItems');
+    const negativeDiffItemsEl = document.getElementById('negativeDiffItems');
+    const totalSystemValueEl = document.getElementById('totalSystemValue');
+    const totalCountedValueEl = document.getElementById('totalCountedValue');
+    const totalDifferenceValueEl = document.getElementById('totalDifferenceValue');
+    
+    if (totalItemsEl) totalItemsEl.textContent = totalItems;
+    if (matchingItemsEl) matchingItemsEl.textContent = matchingItems;
+    if (positiveDiffItemsEl) positiveDiffItemsEl.textContent = positiveDiffItems;
+    if (negativeDiffItemsEl) negativeDiffItemsEl.textContent = negativeDiffItems;
+    if (totalSystemValueEl) totalSystemValueEl.textContent = `R$ ${totalSystemValue.toFixed(2)}`;
+    if (totalCountedValueEl) totalCountedValueEl.textContent = `R$ ${totalCountedValue.toFixed(2)}`;
     
     const differenceClass = totalDifferenceValue === 0 ? '' : (totalDifferenceValue > 0 ? 'positive-diff' : 'negative-diff');
-    document.getElementById('totalDifferenceValue').innerHTML = `<span class="${differenceClass}">R$ ${totalDifferenceValue.toFixed(2)}</span>`;
+    if (totalDifferenceValueEl) totalDifferenceValueEl.innerHTML = `<span class="${differenceClass}">R$ ${totalDifferenceValue.toFixed(2)}</span>`;
 }
 
 // Export to Excel
 function exportToExcel() {
     if (inventoryItems.length === 0) {
-        showNotification('Não há dados para exportar.', 'warning');
+        showNotification('Não há dados para exportar', 'warning');
         return;
     }
     
@@ -678,17 +643,19 @@ function exportToExcel() {
     XLSX.utils.book_append_sheet(wb, ws, 'Inventário');
     XLSX.writeFile(wb, 'inventario.xlsx');
     
-    showNotification('Relatório exportado com sucesso!', 'success');
+    showNotification('Relatório exportado!', 'success');
 }
 
 // Clear all data
 async function clearAllData() {
-    if (currentUser && currentUser.id !== 'local-admin') {
+    if (!confirm('Limpar todos os dados? Esta ação não pode ser desfeita.')) return;
+    
+    if (currentUser && currentUser.id !== 'admin-local') {
         try {
             await supabaseClient.from('inventory_items').delete().eq('user_id', currentUser.id);
         } catch (error) {
-            console.error('Erro limpar dados online:', error);
-            showNotification('Erro ao limpar dados online', 'error');
+            console.error('Erro ao limpar dados online:', error);
+            showNotification('Erro ao limpar dados', 'error');
             return;
         }
     }
@@ -699,107 +666,5 @@ async function clearAllData() {
     updateSummary();
     const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
     if (modal) modal.hide();
-    showNotification('Todos os dados foram limpos!', 'success');
-}
-
-// =============================================
-// MODO RÁPIDO - Contagem por Lote
-// =============================================
-
-let quickModeActive = false;
-let quickModeBuffer = [];
-
-function toggleQuickMode() {
-    quickModeActive = !quickModeActive;
-    const btn = document.getElementById('quickModeBtn');
-    const status = document.getElementById('quickModeStatus');
-    
-    if (quickModeActive) {
-        btn?.classList.add('btn-warning');
-        btn?.classList.remove('btn-outline-secondary');
-        if (status) {
-            status.innerHTML = '<span class="badge bg-warning text-dark">⚡ Modo Rápido ATIVO</span>';
-            status.style.display = 'inline-block';
-        }
-        showNotification('Modo Rápido ativado! Escaneie vários itens do mesmo produto.', 'success');
-    } else {
-        btn?.classList.remove('btn-warning');
-        btn?.classList.add('btn-outline-secondary');
-        if (status) status.style.display = 'none';
-        showNotification('Modo Rápido desativado.', 'info');
-    }
-}
-
-async function addBatchItem(countedQuantity) {
-    if (!quickModeActive) return false;
-    
-    if (!currentItemCode) {
-        showNotification('Código do item não foi validado', 'error');
-        return false;
-    }
-    
-    quickModeBuffer.push({
-        code: currentItemCode,
-        quantity: countedQuantity,
-        timestamp: new Date().toISOString()
-    });
-    
-    showNotification(`📦 +${countedQuantity} adicionado ao lote (${quickModeBuffer.length} itens no lote)`, 'success');
-    
-    // Limpar e focar para próximo
-    document.getElementById('itemCode').value = '';
-    document.getElementById('countedQuantity').value = '';
-    document.getElementById('itemCode').focus();
-    
-    return true;
-}
-
-async function commitBatch() {
-    if (quickModeBuffer.length === 0) {
-        showNotification('Nenhum item no lote para salvar', 'warning');
-        return;
-    }
-    
-    showNotification(`💾 Salvando ${quickModeBuffer.length} itens...`, 'info');
-    
-    for (const batchItem of quickModeBuffer) {
-        // Buscar descrição do item
-        let description = 'Item não identificado';
-        let unitValue = 0;
-        try {
-            const item = await findItemByCode(batchItem.code);
-            if (item) {
-                description = item.descricao || item.DESCRICAO || 'Item não identificado';
-                unitValue = item.valor || item.VALOR || 0;
-            }
-        } catch(e) {}
-        
-        // Adicionar item
-        const newItem = {
-            code: batchItem.code,
-            description: description,
-            systemQuantity: 0,
-            countedQuantity: batchItem.quantity,
-            unitValue: unitValue,
-            counts: 1,
-            countingType: currentCountingType,
-            date: new Date().toISOString(),
-            history: [{ date: new Date().toISOString(), quantity: batchItem.quantity, type: currentCountingType }]
-        };
-        
-        const existingIndex = inventoryItems.findIndex(i => i.code === batchItem.code);
-        if (existingIndex !== -1) {
-            inventoryItems[existingIndex].countedQuantity += batchItem.quantity;
-            inventoryItems[existingIndex].counts += 1;
-        } else {
-            inventoryItems.push(newItem);
-        }
-    }
-    
-    await saveInventoryData();
-    renderInventoryTable();
-    updateSummary();
-    
-    showNotification(`✅ Lote salvo! ${quickModeBuffer.length} itens adicionados.`, 'success');
-    quickModeBuffer = [];
+    showNotification('Dados limpos!', 'success');
 }

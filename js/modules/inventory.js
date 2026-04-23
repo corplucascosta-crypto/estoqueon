@@ -145,7 +145,7 @@ async function findItemByCode(code) {
             inventoryColumnsCache = availableCols;
         }
         
-        const candidateCols = ['code', 'codigo', 'cod', 'dun', 'ean', 'gtin'];
+        const candidateCols = ['codigo', 'code', 'dun', 'ean', 'gtin'];
         const colsToQuery = candidateCols.filter(c => availableCols.includes(c));
         
         if (colsToQuery.length === 0) return null;

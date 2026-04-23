@@ -88,90 +88,90 @@ async function migrateToPermanentBase() {
         showNotification('Não há dados para migrar.', 'warning');
         return;
     }
-    
+
     if (!navigator.onLine) {
         showNotification('Sem conexão com a internet.', 'error');
         return;
     }
-    
+
     const button = document.getElementById('migrateBaseBtn');
     const originalText = button.innerHTML;
-    
+
     try {
         button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Migrando...';
         button.disabled = true;
-        
-        const { data: tableStructure, error: structureError } = await supabaseClient
-            .from('products_base')
-            .select('*')
-            .limit(1);
-        
-        let availableColumns = [];
-        if (structureError) {
-            throw new Error(`Tabela inacessível: ${structureError.message}`);
-        } else if (tableStructure && tableStructure.length > 0) {
-            availableColumns = Object.keys(tableStructure[0]);
-        } else {
-            availableColumns = ['code', 'descricao', 'quantidade', 'valor', 'dun', 'ean', 'embalagem'];
-        }
-        
-        const conflictColumn = availableColumns.includes('CODE') ? 'CODE' : 
-                              availableColumns.includes('code') ? 'code' : 'code';
-        
+
+        showNotification('Iniciando migração...', 'info');
+
+        // Mapear os dados para as colunas do Supabase
         const itemsToUpsert = [];
-        const codeCounter = new Map();
         
-        itemDatabase.forEach((item, index) => {
-            const codeBase = (item.CODE || item.CODIGO)?.toString().trim();
-            if (!codeBase) return;
-            
-            const count = (codeCounter.get(codeBase) || 0) + 1;
-            codeCounter.set(codeBase, count);
-            const codeUnico = count > 1 ? `${codeBase}_DUP${count}` : codeBase;
-            
+        for (const item of itemDatabase) {
             const mappedItem = {};
-            availableColumns.forEach(col => {
-                const upperCol = col.toUpperCase();
-                if (upperCol === 'CODE' || upperCol === 'CODIGO') {
-                    mappedItem[col] = codeUnico;
-                } else if (upperCol === 'DESCRICAO' || upperCol === 'DESCRIPTION') {
-                    const descricaoBase = item.DESCRICAO?.toString().trim() || item.DESCRIPTION?.toString().trim() || '';
-                    mappedItem[col] = count > 1 ? `${descricaoBase} [DUPLICATA ${count}]` : descricaoBase;
-                } else if (upperCol === 'QUANTIDADE' || upperCol === 'QUANTITY' || upperCol === 'SYSTEM_QUANTITY') {
-                    mappedItem[col] = Number(item.QUANTIDADE || item.QUANTITY || item.SYSTEM_QUANTITY) || 0;
-                } else if (upperCol === 'VALOR' || upperCol === 'VALUE' || upperCol === 'UNIT_VALUE') {
-                    mappedItem[col] = Number(item.VALOR || item.VALUE || item.UNIT_VALUE) || 0;
-                } else if (upperCol === 'DUN') {
-                    mappedItem[col] = item.DUN?.toString().trim() || null;
-                } else if (upperCol === 'EAN') {
-                    mappedItem[col] = item.EAN?.toString().trim() || null;
-                } else if (upperCol === 'EMBALAGEM' || upperCol === 'PACKAGING') {
-                    mappedItem[col] = item.EMBALAGEM?.toString().trim() || item.PACKAGING?.toString().trim() || null;
-                }
-            });
+            
+            // Mapear para "codigo" (sem acento)
+            if (item.CODE) mappedItem.codigo = item.CODE.toString().trim();
+            else if (item.CODIGO) mappedItem.codigo = item.CODIGO.toString().trim();
+            else if (item.codigo) mappedItem.codigo = item.codigo.toString().trim();
+            
+            if (!mappedItem.codigo) continue;
+            
+            // Descrição
+            if (item.DESCRICAO) mappedItem.descricao = item.DESCRICAO.toString().trim();
+            else if (item.descricao) mappedItem.descricao = item.descricao.toString().trim();
+            
+            // Quantidade
+            if (item.QUANTIDADE) mappedItem.quantidade = Number(item.QUANTIDADE) || 0;
+            else if (item.quantidade) mappedItem.quantidade = Number(item.quantidade) || 0;
+            
+            // Valor
+            if (item.VALOR) mappedItem.valor = Number(item.VALOR) || 0;
+            else if (item.valor) mappedItem.valor = Number(item.valor) || 0;
+            
+            // DUN
+            if (item.DUN) mappedItem.dun = item.DUN.toString().trim();
+            else if (item.dun) mappedItem.dun = item.dun.toString().trim();
+            
+            // EAN
+            if (item.EAN) mappedItem.ean = item.EAN.toString().trim();
+            else if (item.ean) mappedItem.ean = item.ean.toString().trim();
+            
+            // Embalagem
+            if (item.EMBALAGEM) mappedItem.embalagem = item.EMBALAGEM.toString().trim();
+            else if (item.embalagem) mappedItem.embalagem = item.embalagem.toString().trim();
+            
             itemsToUpsert.push(mappedItem);
-        });
-        
+        }
+
         if (itemsToUpsert.length === 0) {
             showNotification('Nenhum item válido para migrar.', 'error');
             return;
         }
+
+        console.log('Primeiros itens para migrar:', itemsToUpsert.slice(0, 2));
         
-        const BATCH_SIZE = 100;
+        // Migrar em lotes
+        const BATCH_SIZE = 50;
         let successfulMigrations = 0;
-        
+
         for (let i = 0; i < itemsToUpsert.length; i += BATCH_SIZE) {
             const batch = itemsToUpsert.slice(i, i + BATCH_SIZE);
-            const { data, error } = await supabaseClient
-                .from('products_base')
-                .upsert(batch, { onConflict: conflictColumn });
             
-            if (error) throw new Error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}: ${error.message}`);
+            const { error } = await supabaseClient
+                .from('products_base')
+                .upsert(batch, { onConflict: 'codigo' });
+
+            if (error) {
+                console.error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}:`, error);
+                throw new Error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}: ${error.message}`);
+            }
+
             successfulMigrations += batch.length;
+            console.log(`${successfulMigrations}/${itemsToUpsert.length} itens migrados`);
         }
-        
+
         showNotification(`Migração concluída! ${successfulMigrations} produtos migrados.`, 'success');
-        
+
     } catch (error) {
         console.error('Erro na migração:', error);
         showNotification('Erro na migração: ' + error.message, 'error');

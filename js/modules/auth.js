@@ -77,34 +77,67 @@ async function handleLogin(e) {
     const password = document.getElementById('password').value;
     
     try {
-        // LOGIN ADMIN DIRETO
-        if (matricula === 'admin' && password === 'admin123') {
-            console.log('👑 Login Admin direto');
-            
-            currentUser = {
-                id: 'admin-local',
-                full_name: 'Administrador',
-                email: 'admin@estoque.local',
-                role: 'admin',
-                is_active: true
-            };
-            isAdmin = true;
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            localStorage.setItem('isAdmin', 'true');
-            
-            document.querySelector('.navbar-nav').classList.add('visible');
-            updateUI();
-            
-            setTimeout(async () => {
-                await loadUserData();
-                if (typeof updateDashboard === 'function') updateDashboard();
-            }, 100);
-            
-            switchView('counting');
-            showNotification('Login realizado', 'success');
-            return;
-        }
+        // LOGIN ADMIN - primeiro tenta no Supabase
+if (matricula === 'admin' && password === 'admin123') {
+    console.log('👑 Tentando login como Admin...');
+    
+    // Tentar buscar admin real no Supabase
+    const { data: adminData, error: adminError } = await supabaseClient
+        .from('system_users')
+        .select('*')
+        .eq('email', 'admin@estoque.local')
+        .eq('is_active', true)
+        .maybeSingle();
+    
+    if (adminData && !adminError) {
+        // Admin real encontrado no Supabase
+        console.log('✅ Admin real encontrado no Supabase');
+        currentUser = {
+            id: adminData.id,
+            full_name: adminData.full_name,
+            email: adminData.email,
+            role: adminData.role,
+            is_active: adminData.is_active
+        };
+        isAdmin = true;
+        
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('isAdmin', 'true');
+        
+        document.querySelector('.navbar-nav').classList.add('visible');
+        updateUI();
+        
+        setTimeout(async () => {
+            await loadUserData();
+            if (typeof updateDashboard === 'function') updateDashboard();
+        }, 100);
+        
+        switchView('counting');
+        showNotification('Login Admin realizado!', 'success');
+        return;
+    } else {
+        // Fallback para admin-local
+        console.log('⚠️ Admin não encontrado no Supabase, usando admin-local');
+        currentUser = {
+            id: 'admin-local',
+            full_name: 'Administrador Local',
+            email: 'admin@estoque.local',
+            role: 'admin',
+            is_active: true
+        };
+        isAdmin = true;
+        
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('isAdmin', 'true');
+        
+        document.querySelector('.navbar-nav').classList.add('visible');
+        updateUI();
+        
+        switchView('counting');
+        showNotification('Login Admin Local!', 'success');
+        return;
+    }
+}
         
         // LOGIN DE USUÁRIOS NORMAIS
         const email = `${matricula}@estoque.local`;

@@ -69,7 +69,7 @@ async function ensureAdminExists() {
     }
 }
 
-// Handle login - Versão Estável
+// Handle login - Versão Corrigida
 async function handleLogin(e) {
     e.preventDefault();
     
@@ -77,7 +77,7 @@ async function handleLogin(e) {
     const password = document.getElementById('password').value;
     
     try {
-        // LOGIN ADMIN DIRETO (rápido e sem depender da internet)
+        // LOGIN ADMIN DIRETO
         if (matricula === 'admin' && password === 'admin123') {
             console.log('👑 Login Admin direto');
             
@@ -96,14 +96,12 @@ async function handleLogin(e) {
             document.querySelector('.navbar-nav').classList.add('visible');
             updateUI();
             
-            // Carregar dados em segundo plano para não travar a UI
             setTimeout(async () => {
                 await loadUserData();
                 if (typeof updateDashboard === 'function') updateDashboard();
             }, 100);
             
             switchView('counting');
-            // Notificação discreta
             showNotification('Login realizado', 'success');
             return;
         }
@@ -136,12 +134,13 @@ async function handleLogin(e) {
             return;
         }
         
-        // Atualizar último login em background
+        // Atualizar último login em background (CORRIGIDO)
         supabaseClient
             .from('system_users')
             .update({ last_login: new Date().toISOString() })
             .eq('id', user.id)
-            .catch(err => console.warn('Erro ao atualizar login:', err));
+            .then(() => console.log('✅ Login registrado para:', user.full_name))
+            .catch(err => console.warn('⚠️ Erro ao registrar login:', err));
         
         currentUser = {
             id: user.id,
@@ -157,7 +156,6 @@ async function handleLogin(e) {
         
         document.querySelector('.navbar-nav').classList.add('visible');
         
-        // Carregar dados em segundo plano
         setTimeout(async () => {
             await loadUserData();
             if (typeof updateDashboard === 'function') updateDashboard();

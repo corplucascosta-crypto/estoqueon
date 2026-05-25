@@ -1,5 +1,5 @@
 // =============================================
-// DATABASE IMPORT/EXPORT MODULE
+// DATABASE MODULE - Import/Export
 // =============================================
 
 // Preview Excel file
@@ -82,7 +82,7 @@ async function importExcelData() {
     reader.readAsArrayBuffer(file);
 }
 
-// Migrate to permanent base
+// Migrate to permanent base - Versão corrigida para permitir duplicatas
 async function migrateToPermanentBase() {
     if (!itemDatabase || itemDatabase.length === 0) {
         showNotification('Não há dados para migrar.', 'warning');
@@ -103,74 +103,106 @@ async function migrateToPermanentBase() {
 
         showNotification('Iniciando migração...', 'info');
 
-        // Mapear os dados para as colunas do Supabase
-        const itemsToUpsert = [];
+        // Criar chave única combinando código + DUN + EAN
+        const itemsToInsert = [];
+        const itemsUpdate = [];
         
         for (const item of itemDatabase) {
-            const mappedItem = {};
+            let codigo = null;
             
-            // Mapear para "codigo" (sem acento)
-            if (item.CODE) mappedItem.codigo = item.CODE.toString().trim();
-            else if (item.CODIGO) mappedItem.codigo = item.CODIGO.toString().trim();
-            else if (item.codigo) mappedItem.codigo = item.codigo.toString().trim();
+            if (item.CODE) codigo = item.CODE.toString().trim();
+            else if (item.CODIGO) codigo = item.CODIGO.toString().trim();
+            else if (item.codigo) codigo = item.codigo.toString().trim();
             
-            if (!mappedItem.codigo) continue;
+            if (!codigo) continue;
             
-            // Descrição
-            if (item.DESCRICAO) mappedItem.descricao = item.DESCRICAO.toString().trim();
-            else if (item.descricao) mappedItem.descricao = item.descricao.toString().trim();
+            const dun = (item.DUN || item.dun || '').toString().trim() || null;
+            const ean = (item.EAN || item.ean || '').toString().trim() || null;
             
-            // Quantidade
-            if (item.QUANTIDADE) mappedItem.quantidade = Number(item.QUANTIDADE) || 0;
-            else if (item.quantidade) mappedItem.quantidade = Number(item.quantidade) || 0;
+            // Criar chave única para identificar duplicatas
+            const uniqueKey = dun ? `${codigo}_DUN_${dun}` : (ean ? `${codigo}_EAN_${ean}` : codigo);
             
-            // Valor
-            if (item.VALOR) mappedItem.valor = Number(item.VALOR) || 0;
-            else if (item.valor) mappedItem.valor = Number(item.valor) || 0;
+            const mappedItem = {
+                codigo: codigo,
+                descricao: (item.DESCRICAO || item.descricao || '').toString().trim(),
+                quantidade: Number(item.QUANTIDADE || item.quantidade || 0),
+                valor: Number(item.VALOR || item.valor || 0),
+                dun: dun,
+                ean: ean,
+                embalagem: (item.EMBALAGEM || item.embalagem || '').toString().trim() || null
+            };
             
-            // DUN
-            if (item.DUN) mappedItem.dun = item.DUN.toString().trim();
-            else if (item.dun) mappedItem.dun = item.dun.toString().trim();
-            
-            // EAN
-            if (item.EAN) mappedItem.ean = item.EAN.toString().trim();
-            else if (item.ean) mappedItem.ean = item.ean.toString().trim();
-            
-            // Embalagem
-            if (item.EMBALAGEM) mappedItem.embalagem = item.EMBALAGEM.toString().trim();
-            else if (item.embalagem) mappedItem.embalagem = item.embalagem.toString().trim();
-            
-            itemsToUpsert.push(mappedItem);
-        }
-
-        if (itemsToUpsert.length === 0) {
-            showNotification('Nenhum item válido para migrar.', 'error');
-            return;
-        }
-
-        console.log('Primeiros itens para migrar:', itemsToUpsert.slice(0, 2));
-        
-        // Migrar em lotes
-        const BATCH_SIZE = 50;
-        let successfulMigrations = 0;
-
-        for (let i = 0; i < itemsToUpsert.length; i += BATCH_SIZE) {
-            const batch = itemsToUpsert.slice(i, i + BATCH_SIZE);
-            
-            const { error } = await supabaseClient
+            // Verificar se já existe no banco
+            let query = supabaseClient
                 .from('products_base')
-                .upsert(batch, { onConflict: 'codigo' });
-
-            if (error) {
-                console.error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}:`, error);
-                throw new Error(`Erro no lote ${Math.floor(i/BATCH_SIZE) + 1}: ${error.message}`);
+                .select('codigo')
+                .eq('codigo', codigo);
+            
+            if (dun) {
+                query = query.eq('dun', dun);
+            } else if (ean) {
+                query = query.eq('ean', ean);
             }
-
-            successfulMigrations += batch.length;
-            console.log(`${successfulMigrations}/${itemsToUpsert.length} itens migrados`);
+            
+            const { data: existing } = await query.maybeSingle();
+            
+            if (existing) {
+                itemsUpdate.push(mappedItem);
+            } else {
+                itemsToInsert.push(mappedItem);
+            }
         }
 
-        showNotification(`Migração concluída! ${successfulMigrations} produtos migrados.`, 'success');
+        console.log(`📦 ${itemsToInsert.length} novos itens para inserir`);
+        console.log(`📦 ${itemsUpdate.length} itens para atualizar`);
+
+        // Inserir novos itens
+        let insertedCount = 0;
+        let updatedCount = 0;
+
+        for (const item of itemsToInsert) {
+            try {
+                const { error } = await supabaseClient
+                    .from('products_base')
+                    .insert(item);
+                
+                if (!error) insertedCount++;
+                else console.warn(`Erro ao inserir ${item.codigo}:`, error);
+            } catch (err) {
+                console.warn(`Erro no item ${item.codigo}:`, err);
+            }
+        }
+
+        // Atualizar itens existentes
+        for (const item of itemsUpdate) {
+            try {
+                let query = supabaseClient
+                    .from('products_base')
+                    .update({
+                        descricao: item.descricao,
+                        quantidade: item.quantidade,
+                        valor: item.valor,
+                        embalagem: item.embalagem,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('codigo', item.codigo);
+                
+                if (item.dun) {
+                    query = query.eq('dun', item.dun);
+                } else if (item.ean) {
+                    query = query.eq('ean', item.ean);
+                }
+                
+                const { error } = await query;
+                
+                if (!error) updatedCount++;
+                else console.warn(`Erro ao atualizar ${item.codigo}:`, error);
+            } catch (err) {
+                console.warn(`Erro no item ${item.codigo}:`, err);
+            }
+        }
+
+        showNotification(`Migração concluída! ${insertedCount} inseridos, ${updatedCount} atualizados.`, 'success');
 
     } catch (error) {
         console.error('Erro na migração:', error);
